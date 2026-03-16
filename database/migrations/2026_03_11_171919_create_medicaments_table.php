@@ -21,6 +21,18 @@ return new class extends Migration
             $table->string('medicament_picture')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('medicament_substituts', function (Blueprint $table) {
+            $table->id('id_subtitut')->primary();
+
+            $table->unsignedBigInteger('substitut_id');
+            $table->foreign('substitut_id')->references('id_medicament')->on('medicaments');
+
+            $table->unsignedBigInteger('medicament_id');
+            $table->foreign('medicament_id')->references('id_medicament')->on('medicaments')->onDelete('cascade');
+
+            $table->timestamps();
+        });
     }
 
     /**
@@ -29,5 +41,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('medicaments');
+        Schema::dropIfExists('medicament_substituts');
+        Schema::table('medicament_substituts', function (Blueprint $table) {
+            $table->dropForeign(['substitut_id', 'medicament_id']);
+            $table->dropColumn('substitut_id');
+            $table->dropColumn('medicament_id');
+        });
     }
 };
