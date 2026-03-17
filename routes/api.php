@@ -3,26 +3,23 @@
 use App\Http\Controllers\Api\ApiAssuranceController;
 use App\Http\Controllers\Api\ApiCommuneController;
 use App\Http\Controllers\Api\ApiMedicamentController;
-use App\Http\Controllers\Api\ApiModuleController;
-use App\Http\Controllers\Api\ApiOperationController;
 use App\Http\Controllers\Api\ApiParametreGenerauxController;
 use App\Http\Controllers\Api\ApiPharmacyController;
 use App\Http\Controllers\Api\ApiPharmacyRequestController;
 use App\Http\Controllers\Api\ApiPubliciteController;
+use App\Http\Controllers\Api\ApiPushNotifController;
 use App\Http\Controllers\Api\ApiReservationMedicamentController;
 use App\Http\Controllers\Api\ApiReviewController;
 use App\Http\Controllers\Api\ApiSubscriptionController;
 use App\Http\Controllers\Api\ApiTransfertController;
 use App\Http\Controllers\Api\ApiUsersPharmaController;
 use App\Http\Controllers\Api\ApiWavePaymentController;
-use App\Http\Controllers\ApiNotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
 
 Route::prefix('internal/v1')->group(function () {
 
@@ -42,6 +39,7 @@ Route::prefix('internal/v1')->group(function () {
         Route::post('otp/validate', [ApiUsersPharmaController::class, 'validateOtp']);
         Route::post('otp/generate', [ApiUsersPharmaController::class, 'generateOtp']);
         Route::post('reinitialiser/password', [ApiUsersPharmaController::class, 'resetPassword']);
+        Route::delete('delete/{username}', [ApiUsersPharmaController::class, 'deleteAccount']);
         Route::put('update', [ApiUsersPharmaController::class, 'update']);
         Route::put('updateProfilePicture', [ApiUsersPharmaController::class, 'updatePicture']);
         Route::post('changePassword', [ApiUsersPharmaController::class, 'changePassword']);
@@ -53,7 +51,7 @@ Route::prefix('internal/v1')->group(function () {
     // -----------------------
     Route::prefix('pharma')->group(function () {
         Route::get('communes/search', [ApiCommuneController::class, 'getCommunes']);
-        Route::get('pharmacies/gardeIntervalByCommune', [ApiPharmacyController::class, 'getByCommune']); // query param: communeId
+        Route::get('pharmacies/gardeIntervalByCommune', [ApiPharmacyController::class, 'getByCommune']);
         Route::get('pharmacies/{id}/pharmacies', [ApiPharmacyController::class, 'getById']);
         Route::get('assurances/getAll', [ApiAssuranceController::class, 'getAssurance']);
     });
@@ -91,7 +89,7 @@ Route::prefix('internal/v1')->group(function () {
     // NOTIFICATIONS
     // -----------------------
     Route::prefix('notifications')->group(function () {
-        Route::post('register', [ApiNotificationController::class, 'register']);
+        Route::post('register', [ApiPushNotifController::class, 'register']);
     });
 
     // -----------------------
@@ -105,7 +103,7 @@ Route::prefix('internal/v1')->group(function () {
     // TRANSACTIONS
     // -----------------------
     Route::prefix('pharma/operations')->group(function () {
-        Route::get('byUsername/{username}', [ApiOperationController::class, 'getByUsername']);
+        Route::get('byUsername/{username}', [ApiTransfertController::class, 'getTransactionsByUser']);
     });
 
     Route::prefix('pharma/transfers')->group(function () {
@@ -116,7 +114,7 @@ Route::prefix('internal/v1')->group(function () {
     // MOBILE MONEY / PAYMENTS
     // -----------------------
     Route::prefix('pharma/cinetpay')->group(function () {
-        Route::post('payment', [ApiWavePaymentController::class, 'initPayment']);
+        Route::post('payment', [ApiWavePaymentController::class, 'initiatePayment']);
     });
 
     Route::prefix('pharma/wallet')->group(function () {
@@ -152,5 +150,4 @@ Route::prefix('internal/v1')->group(function () {
     Route::prefix('periodes-garde')->group(function () {
         Route::get('/', [ApiPharmacyController::class, 'getPeriodeGarde']);
     });
-
 });

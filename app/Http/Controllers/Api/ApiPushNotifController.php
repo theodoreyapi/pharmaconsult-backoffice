@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\FcmToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ApiNotificationController extends Controller
+class ApiPushNotifController extends Controller
 {
     public function register(Request $request)
     {

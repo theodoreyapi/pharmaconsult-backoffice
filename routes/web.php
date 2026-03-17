@@ -12,6 +12,7 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MentionController;
 use App\Http\Controllers\MoyenPaieController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentWaveController;
 use App\Http\Controllers\PharmacieController;
 use App\Http\Controllers\PharmacienController;
 use App\Http\Controllers\PolicyController;
@@ -30,6 +31,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('index', [CustomAuthController::class, 'dashboard'])->middleware('auth');;
 Route::post('custom-login', [CustomAuthController::class, 'customLogin']);
 Route::get('logout', [CustomAuthController::class, 'signOut'])->name('logout');
+
+Route::get('/payment/wave/success/{id}', [PaymentWaveController::class, 'success'])
+    ->name('wave.success');
+Route::get('/payment/wave/error/{id}', [PaymentWaveController::class, 'error'])
+    ->name('wave.error');
 
 Route::get('/', function () {
     if (session('api_token')) {

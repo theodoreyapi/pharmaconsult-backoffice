@@ -13,21 +13,17 @@ return new class extends Migration
     {
         Schema::create('rechargements', function (Blueprint $table) {
             $table->id('id_rechargement')->primary();
-            $table->string('channels')->nullable();
-            $table->string('client_transaction_id')->nullable();
-            $table->string('code')->nullable();
-            $table->string('currency')->nullable();
-            $table->string('description')->nullable();
-            $table->string('id_transaction')->nullable();
-            $table->string('message')->nullable();
-            $table->double('montant')->nullable();
-            $table->string('notify_url')->nullable();
-            $table->string('payment_method')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('prefix')->nullable();
-            $table->string('status')->nullable();
-            $table->string('treatment_status')->nullable();
-            $table->string('username')->nullable();
+
+            $table->string('transaction_id')->nullable();
+            $table->string('checkout_session_id')->nullable();
+
+            $table->string('currency');
+            $table->double('montant')->default(0);
+            $table->string('payment_method'); // wave, orange, moov, mtn
+            $table->string('status')->default('pending')->comment('pending', 'success', 'failed');
+
+            $table->string('username');
+
             $table->timestamps();
         });
     }

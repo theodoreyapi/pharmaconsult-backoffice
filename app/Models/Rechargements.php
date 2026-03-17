@@ -9,20 +9,12 @@ class Rechargements extends Model
     protected $table = 'rechargements';
 
     protected $fillable = [
-        'channels',
-        'client_transaction_id',
-        'code',
+        'transaction_id',
+        'checkout_session_id',
         'currency',
-        'description',
-        'id_transaction',
-        'message',
         'montant',
-        'notify_url',
         'payment_method',
-        'phone',
-        'prefix',
         'status',
-        'treatment_status',
         'username',
     ];
 

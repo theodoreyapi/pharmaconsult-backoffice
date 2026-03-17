@@ -10,6 +10,7 @@ class Subscriptions extends Model
 
     protected $fillable = [
         'description',
+        'type_service',
         'duree',
         'status',
         'username',

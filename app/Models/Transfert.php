@@ -10,6 +10,7 @@ class Transfert extends Model
 
     protected $fillable = [
         'amount',
+        'raison',
         'receiver_username',
         'sender_username',
         'execute_by',

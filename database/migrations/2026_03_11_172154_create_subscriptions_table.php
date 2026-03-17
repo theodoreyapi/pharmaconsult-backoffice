@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id('id_subscription')->primary();
             $table->string('description')->nullable();
+            $table->string('type_service')->nullable();
             $table->integer('duree')->nullable();
             $table->string('status')->nullable();
             $table->string('username')->nullable();

@@ -230,6 +230,7 @@ class ApiSubscriptionController extends Controller
                 'status'      => 'active',
                 'valid_until' => $validUntil,
                 'description' => $desc ?? "Souscription pour {$service->duration} jour(s) du module : {$service->module_libelle}",
+                'type_service' => "Souscription pour {$service->duration} jour(s) du module : {$service->module_libelle}",
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ]);
