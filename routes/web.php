@@ -25,6 +25,7 @@ use App\Http\Controllers\RequetesController;
 use App\Http\Controllers\ReservationsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,7 @@ Route::get('/payment/wave/error/{id}', [PaymentWaveController::class, 'error'])
     ->name('wave.error');
 
 Route::get('/', function () {
-    if (session('api_token')) {
+    if (Auth::check()) {
         return redirect()->intended('index');
     }
     return view('auth.sign-in');
@@ -66,12 +67,8 @@ Route::get('forgot', function () {
 // tableau de bord
 Route::get('index', function () {
 
-    if (!session('api_token')) {
+    if (!Auth::check()) {
         return redirect()->intended('logout');
-    }
-
-    if (session('user_data')['role'] != 'ADMIN' && session('user_data')['role'] != 'SUPERADMIN') {
-        return back()->withErrors(["Vous n'êtes pas autorisé à accéder à cette page."]);
     }
 
     $responsestates = Http::withOptions([
@@ -99,7 +96,7 @@ Route::get('index', function () {
 });
 Route::get('pharma-index', function () {
 
-    if (!session('api_token')) {
+    if (!Auth::check()) {
         return redirect()->intended('logout');
     }
 
@@ -190,7 +187,7 @@ Route::get('add-pharmacy', function () {
         return back()->withErrors(["Impossible de charger les communes. Veuillez réessayer!!"]);
     }
 });
-Route::get('view-pharmacy', [PharmacieController::class, 'showAllGet'])->name('pharmacy.showAllGet');
+Route::get('view-pharmacy/{id}', [PharmacieController::class, 'showAllGet'])->name('pharmacy.showAllGet');
 Route::get('view-medicament', [PriceFicheController::class, 'showAllGet'])->name('medicament.showAllGet');
 
 Route::get('add-medicament', function () {

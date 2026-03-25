@@ -1,3 +1,4 @@
+<!--
  <script type="module">
      import {
          initializeApp
@@ -44,7 +45,7 @@
                          "X-CSRF-TOKEN": "{{ csrf_token() }}"
                      },
                      body: JSON.stringify({
-                         userName: "{{ session('user_data')['email'] }}",
+                         userName: "{{ Auth::user()->email }}",
                          token: token
                      })
                  });
@@ -77,7 +78,7 @@
              .catch((err) => console.error('Erreur service worker:', err));
      }
  </script>
-
+-->
 
  <!-- jQuery library js -->
  <script src="{{ URL::asset('') }}assets/js/lib/jquery-3.7.1.min.js"></script>

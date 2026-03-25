@@ -111,7 +111,7 @@ class ApiReviewController extends Controller
         $noticesList = $reviews->map(fn($r) => [
             'id'          => $r->id,
             'note'        => $r->note,
-            'userName'    => $r->first_name . '' . $r->last_name,
+            'userName'    => $r->first_name . ' ' . $r->last_name,
             'userPicture' => $r->userPicture ?? '',
             'dateNotice'  => $r->dateNotice,
             'details'     => $r->details,

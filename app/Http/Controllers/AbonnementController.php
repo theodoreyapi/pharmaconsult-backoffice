@@ -12,7 +12,7 @@ class AbonnementController extends Controller
      */
     public function index()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([
@@ -54,7 +54,7 @@ class AbonnementController extends Controller
      */
     public function show(string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([
@@ -88,7 +88,7 @@ class AbonnementController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $roles = [

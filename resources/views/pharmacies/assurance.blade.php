@@ -99,21 +99,21 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <img height="50" width="50"
-                                                src="{{ $item['assurancePicture'] ?? URL::asset('assets/images/user-list/user-list1.png') }}"
+                                                src="{{ $item->assurance_picture ?? URL::asset('assets/images/user-list/user-list1.png') }}"
                                                 alt="" class="flex-shrink-0 me-12 radius-8">
                                             <strong style="font-size: 13px">
-                                                {!! wordwrap($item['name'], 20, '<br>') !!}
+                                                {!! wordwrap($item->name, 20, '<br>') !!}
                                             </strong>
                                         </div>
                                     </td>
-                                    <td style="font-size: 13px">{!! wordwrap($item['description'], 20, '<br>') !!}</td>
+                                    <td style="font-size: 13px">{!! wordwrap($item->description, 20, '<br>') !!}</td>
                                     <td>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item->id_assurance }}">
                                             <iconify-icon icon="lucide:edit"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="edit{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="edit{{ $item->id_assurance }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -126,7 +126,7 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('assurance.update', $item['id']) }}"
+                                                        <form action="{{ route('assurance.update', $item->id_assurance) }}"
                                                             method="post" role="form" enctype="multipart/form-data">
                                                             @csrf
                                                             @method('PATCH')
@@ -142,7 +142,7 @@
                                                                     <label for="name"
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">Libelle</label>
                                                                     <input type="text" name="libelle" required
-                                                                        value="{{ $item['name'] }}"
+                                                                        value="{{ $item->name }}"
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Saisir le libelle">
                                                                 </div>
@@ -151,7 +151,7 @@
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">Description</label>
                                                                     <input type="text" name="description" required
                                                                         class="form-control radius-8" id="name"
-                                                                        value="{{ $item['description'] }}"
+                                                                        value="{{ $item->description }}"
                                                                         placeholder="Saisir une petite description">
                                                                 </div>
                                                                 <div
@@ -174,10 +174,10 @@
                                         </div>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_assurance }}">
                                             <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="delete{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="delete{{ $item->id_assurance }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -190,7 +190,8 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('assurance.destroy', $item['id']) }}"
+                                                        <form
+                                                            action="{{ route('assurance.destroy', $item->id_assurance) }}"
                                                             method="post" role="form">
                                                             @csrf
                                                             @method('DELETE')

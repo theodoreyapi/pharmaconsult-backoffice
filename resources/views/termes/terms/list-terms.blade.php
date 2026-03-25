@@ -69,11 +69,11 @@
             </div>
         @else
             <div class="card basic-data-table radius-12 overflow-hidden">
-                <form action="{{ route('terms-aide.update', $abouts['id']) }}" method="post">
+                <form action="{{ route('terms-aide.update', $abouts->id_politique) }}" method="post">
                     @csrf
                     @method('PATCH')
                     <textarea required class="summernote" name="contenu">
-                {{ $abouts['contenu'] }}
+                {{ $abouts->contenu }}
                 </textarea>
 
                     <div class="card-footer p-24 bg-base border border-bottom-0 border-end-0 border-start-0">

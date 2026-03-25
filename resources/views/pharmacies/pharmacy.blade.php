@@ -54,50 +54,42 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <img height="50" width="50"
-                                                src="{{ $item['facadeImage'] ?? URL::asset('assets/images/user-list/user-list1.png') }}"
+                                                src="{{ $item->facade_image ?? URL::asset('assets/images/user-list/user-list1.png') }}"
                                                 alt="" class="flex-shrink-0 me-12 radius-8">
                                             <strong style="font-size: 13px">
-                                                {!! wordwrap($item['name'], 20, '<br>') !!}
+                                                {!! wordwrap($item->name, 20, '<br>') !!}
                                                 <br>
-                                                Téléphone : {{ $item['phoneNumber'] }}
+                                                <span style="color: blue">Téléphone : {{ $item->phone_number }}</span>
                                                 <br>
-                                                Whatsapp : {{ $item['whatsAppPhoneNumber'] }}
+                                                <span style="color: green">Whatsapp : {{ $item->whats_app_phone_number }}</span>
                                             </strong>
                                         </div>
                                     </td>
                                     <td style="font-size: 13px">
-                                        {!! wordwrap($item['commune']['name'], 20, '<br>') !!}
+                                        {!! wordwrap($item->commune, 20, '<br>') !!}
                                     </td>
                                     <td style="font-size: 13px">
-                                        {!! wordwrap($item['ownerName'], 20, '<br>') !!}
+                                        {!! wordwrap($item->owner_name, 20, '<br>') !!}
                                     </td>
                                     <td style="font-size: 13px">
                                         du
-                                        {!! wordwrap(
-                                            \Carbon\Carbon::createFromTimestamp($item['startGardeDate'] / 1000)->locale('fr')->translatedFormat('l j F'),
-                                            20,
-                                            '<br>',
-                                        ) !!}
+                                        {{ \Carbon\Carbon::parse($item->start_garde_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
                                         <br> au
-                                        {!! wordwrap(
-                                            \Carbon\Carbon::createFromTimestamp($item['endGardeDate'] / 1000)->locale('fr')->translatedFormat('l j F Y'),
-                                            20,
-                                            '<br>',
-                                        ) !!}
+                                        {{ \Carbon\Carbon::parse($item->end_garde_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
                                     </td>
                                     <td>
-                                        <a href="{{ route('pharmacy.showAllGet', ['data' => urlencode(json_encode($item))]) }}"
+                                        <a href="{{ route('pharmacy.showAllGet', $item->id_pharmacy) }}"
                                             class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
                                             <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
                                         </a>
-                                        @if (session('user_data')['role'] == 'SUPERADMIN')
+                                        @if (Auth::user()->role == 'SUPERADMIN')
                                             <a href="javascript:void(0)"
                                                 class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                data-bs-toggle="modal" data-bs-target="#delete{{ $item['id'] }}">
+                                                data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_pharmacy }}">
                                                 <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                             </a>
                                         @endif
-                                        <div class="modal fade" id="delete{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="delete{{ $item->id_pharmacy }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -110,7 +102,7 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('pharmacy.destroy', $item['id']) }}"
+                                                        <form action="{{ route('pharmacy.destroy', $item->id_pharmacy) }}"
                                                             method="post" role="form">
                                                             @csrf
                                                             @method('DELETE')

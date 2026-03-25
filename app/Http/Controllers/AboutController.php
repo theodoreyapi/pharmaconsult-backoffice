@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ParametresGeneraux;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class AboutController extends Controller
@@ -13,26 +15,13 @@ class AboutController extends Controller
     public function index()
     {
 
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/parametres-generaux/getbyType/APROPOS');
+        $abouts = ParametresGeneraux::where('type', '=', 'APROPOS')->first();
 
-        if ($response->status() == 200) {
-            $abouts = $response->json();
-
-            return view('termes.about.list-about', compact('abouts'));
-        } else {
-            // Gérer l'erreur
-            return abort(500, 'Erreur lors du chargement des données.');
-        }
+        return view('termes.about.list-about', compact('abouts'));
     }
 
     /**
@@ -48,7 +37,7 @@ class AboutController extends Controller
      */
     public function store(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
@@ -102,7 +91,7 @@ class AboutController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 

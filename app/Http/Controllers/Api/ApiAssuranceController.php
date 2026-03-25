@@ -37,8 +37,9 @@ class ApiAssuranceController extends Controller
             ])
             ->values();
 
-        return response()->json([
+        return response()->json(
             $assurances,
-        ], 200);
+            200
+        );
     }
 }

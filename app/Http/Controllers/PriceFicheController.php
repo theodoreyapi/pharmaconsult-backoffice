@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Medicamants;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -13,38 +15,24 @@ class PriceFicheController extends Controller
      */
     public function index(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
         $page = $request->get('page', 0);
         $size = 20;
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . "/pharma/medicaments/search?page=$page&size=$size");
+        $medicaments = Medicamants::all();
+        $totalItems = count($medicaments);
+        $currentPage = $page;
+        $lastPage = ceil($totalItems / $size);
 
-        if ($response->successful()) {
-            $data = $response->json();
-
-            $medicaments = $data['content'] ?? []; // ou selon la structure de ton JSON
-            $totalItems = $data['totalElements'] ?? count($medicaments);
-            $currentPage = $page;
-            $lastPage = ceil($totalItems / $size);
-
-            return view('pharmacies.medicament', compact('medicaments', 'currentPage', 'lastPage'));
-        } else {
-            return abort(500, 'Erreur lors du chargement des données.');
-        }
+        return view('pharmacies.medicament', compact('medicaments', 'currentPage', 'lastPage'));
     }
 
     public function search(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
@@ -90,7 +78,7 @@ class PriceFicheController extends Controller
      */
     public function store(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $roles = [
@@ -181,7 +169,7 @@ class PriceFicheController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $roles = [
@@ -254,7 +242,7 @@ class PriceFicheController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([
@@ -274,7 +262,7 @@ class PriceFicheController extends Controller
 
     public function showAllGet(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $data = $request->query('data');

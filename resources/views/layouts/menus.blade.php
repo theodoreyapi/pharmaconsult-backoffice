@@ -11,16 +11,16 @@
     </div>
     <div class="sidebar-menu-area">
         <ul class="sidebar-menu" id="sidebar-menu">
-            @if (session('user_data')['role'] == 'ADMIN' ||
-                    session('user_data')['role'] == 'SUPERADMIN' ||
-                    session('user_data')['role'] == 'PHARMACIEN')
+            @if (Auth::user()->role == 'ADMIN' ||
+                    Auth::user()->role == 'SUPERADMIN' ||
+                    Auth::user()->role == 'PHARMACIEN')
                 <li
                     class="dropdown {{ Route::is('index') ? 'open' : '' }}{{ Route::is('pharma-index') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
                         <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
                         <span>Tableau de bord</span>
                     </a>
-                    @if (session('user_data')['role'] == 'ADMIN' || session('user_data')['role'] == 'SUPERADMIN')
+                    @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                         <ul class="sidebar-submenu {{ Route::is('index') ? 'show' : '' }}">
                             <li class="{{ Route::is('index') ? 'active-page' : '' }}">
                                 <a href="{{ url('index') }}" class="{{ Route::is('index') ? 'active-page' : '' }}"><i
@@ -29,7 +29,7 @@
                             </li>
                         </ul>
                     @endif
-                    @if (session('user_data')['role'] == 'PHARMACIEN')
+                    @if (Auth::user()->role == 'PHARMACIEN')
                         <ul class="sidebar-submenu {{ Route::is('pharma-index') ? 'show' : '' }}">
                             <li class="{{ Route::is('index') ? 'active-page' : '' }}">
                                 <a href="{{ url('pharma-index') }}"
@@ -42,7 +42,7 @@
                 </li>
             @endif
             <li class="sidebar-menu-group-title">Menus</li>
-            @if (session('user_data')['role'] == 'ADMIN' || session('user_data')['role'] == 'SUPERADMIN')
+            @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                 <li class="dropdown {{ Route::is('users', 'user-add', 'view-profile') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
                         <iconify-icon icon="flowbite:users-group-outline" class="menu-icon"></iconify-icon>
@@ -68,7 +68,7 @@
                 </a>
                 <ul
                     class="sidebar-submenu {{ Route::is('assurance', 'pharmacy', 'garde', 'commune', 'medicament', 'requete', 'reponse', 'reservation', 'view-pharmacy', 'add-pharmacy', 'paiement') ? 'show' : '' }}">
-                    @if (session('user_data')['role'] == 'ADMIN' || session('user_data')['role'] == 'SUPERADMIN')
+                    @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                         <li
                             class="{{ Route::is('pharmacy') ? 'active-page' : '' }}
                     {{ Route::is('view-pharmacy') ? 'active-page' : '' }}
@@ -111,8 +111,8 @@
                                 Médicaments</a>
                         </li>
                     @endif
-                    @if (session('user_data')['role'] != 'ADMIN' || session('user_data')['role'] != 'SUPERADMIN')
-                        @if (session('user_data')['role'] == 'PHARMACIEN' || session('user_data')['role'] == 'GESTIONNAIRE')
+                    @if (Auth::user()->role != 'ADMIN' || Auth::user()->role != 'SUPERADMIN')
+                        @if (Auth::user()->role == 'PHARMACIEN' || Auth::user()->role == 'GESTIONNAIRE')
                             <li class="{{ Route::is('requete') ? 'active-page' : '' }}">
                                 <a href="{{ url('requete') }}"
                                     class="{{ Route::is('requete') ? 'active-page' : '' }}"><i
@@ -126,7 +126,7 @@
                                     Reponses</a>
                             </li>
                         @endif
-                        @if (session('user_data')['role'] == 'PHARMACIEN' || session('user_data')['role'] == 'GESTIONNAIRE')
+                        @if (Auth::user()->role == 'PHARMACIEN' || Auth::user()->role == 'GESTIONNAIRE')
                             <li class="{{ Route::is('reservation') ? 'active-page' : '' }}">
                                 <a href="{{ url('reservation') }}"
                                     class="{{ Route::is('reservation') ? 'active-page' : '' }}"><i
@@ -134,7 +134,7 @@
                                     Réservations</a>
                             </li>
                         @endif
-                        @if (session('user_data')['role'] == 'PHARMACIEN')
+                        @if (Auth::user()->role == 'PHARMACIEN')
                             <li class="{{ Route::is('rechargement') ? 'active-page' : '' }}">
                                 <a href="{{ url('rechargement') }}"
                                     class="{{ Route::is('rechargement') ? 'active-page' : '' }}"><i
@@ -142,7 +142,7 @@
                                     Rechargements</a>
                             </li>
                         @endif
-                        @if (session('user_data')['role'] == 'PHARMACIEN' || session('user_data')['role'] == 'CAISSIERE')
+                        @if (Auth::user()->role == 'PHARMACIEN' || Auth::user()->role == 'CAISSIERE')
                             <li class="{{ Route::is('transactions') ? 'active-page' : '' }}">
                                 <a href="{{ url('transactions') }}"
                                     class="{{ Route::is('transactions') ? 'active-page' : '' }}"><i
@@ -153,7 +153,7 @@
                     @endif
                 </ul>
             </li>
-            @if (session('user_data')['role'] == 'SUPERADMIN')
+            @if (Auth::user()->role == 'SUPERADMIN')
                 <li class="dropdown {{ Route::is('publicites') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
                         <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
@@ -202,7 +202,7 @@
                     </ul>
                 </li> --}}
             @endif
-            @if (session('user_data')['role'] == 'ADMIN' || session('user_data')['role'] == 'SUPERADMIN')
+            @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                 <li class="sidebar-menu-group-title">Paramètres</li>
                 <li class="{{ Route::is('qrcode') ? 'active-page' : '' }}">
                     <a href="{{ url('qrcode') }}" class="{{ Route::is('qrcode') ? 'active-page' : '' }}">
@@ -283,8 +283,8 @@
                     </a>
                 </li>
             @endif
-            @if (session('user_data')['role'] == 'SUPERADMIN' ||
-                    session('user_data')['role'] == 'PHARMACIEN')
+            @if (Auth::user()->role == 'SUPERADMIN' ||
+                    Auth::user()->role == 'PHARMACIEN')
                 <li
                     class="dropdown {{ Route::is('company', 'pharmacien', 'notification', 'notification-alert', 'payment-gateway') ? 'show' : '' }}">
                     <a href="javascript:void(0)">
@@ -293,14 +293,14 @@
                     </a>
                     <ul
                         class="sidebar-submenu {{ Route::is('company', 'notification', 'notification-alert', 'payment-gateway') ? 'show' : '' }}">
-                        @if (session('user_data')['role'] == 'SUPERADMIN')
+                        @if (Auth::user()->role == 'SUPERADMIN')
                             <li class="{{ Route::is('company') ? 'active-page' : '' }}">
                                 <a href="company" class="{{ Route::is('company') ? 'active-page' : '' }}"><i
                                         class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
                                     Utilisateurs Admin</a>
                             </li>
                         @endif
-                        @if (session('user_data')['role'] == 'PHARMACIEN')
+                        @if (Auth::user()->role == 'PHARMACIEN')
                             <li class="{{ Route::is('pharmacien') ? 'active-page' : '' }}">
                                 <a href="{{ url('pharmacien') }}"
                                     class="{{ Route::is('pharmacien') ? 'active-page' : '' }}"><i

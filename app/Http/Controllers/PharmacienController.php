@@ -12,7 +12,7 @@ class PharmacienController extends Controller
      */
     public function index()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([
@@ -48,7 +48,7 @@ class PharmacienController extends Controller
      */
     public function store(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
@@ -110,7 +110,7 @@ class PharmacienController extends Controller
 
     public function profile(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
@@ -151,7 +151,7 @@ class PharmacienController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $roles = [
@@ -195,7 +195,7 @@ class PharmacienController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([

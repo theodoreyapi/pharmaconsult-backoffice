@@ -12,7 +12,7 @@ class ReservationsController extends Controller
      */
     public function index()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([
@@ -48,7 +48,7 @@ class ReservationsController extends Controller
      */
     public function store(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 

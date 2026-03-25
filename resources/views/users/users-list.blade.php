@@ -42,6 +42,8 @@
                             <tr>
                                 <th scope="col" style="font-size: 13px">Nom</th>
                                 <th scope="col" style="font-size: 13px">Contact</th>
+                                <th scope="col" style="font-size: 13px">Solde</th>
+                                <th scope="col" style="font-size: 13px">Solde avant</th>
                                 <th scope="col" style="font-size: 13px">Statut</th>
                                 <th scope="col" style="font-size: 13px">Action</th>
                             </tr>
@@ -52,17 +54,23 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <strong style="font-size: 13px">
-                                                {{ $item['firstName'] }} {!! wordwrap($item['lastName'], 20, '<br>') !!}
+                                                {{ $item->first_name }} {!! wordwrap($item->last_name, 20, '<br>') !!}
                                             </strong>
                                         </div>
                                     </td>
                                     <td style="font-size: 13px">
-                                        {{ $item['email'] }}
+                                        {{ $item->email }}
                                         <br>
-                                        {{ $item['phoneNumber'] }}
+                                        {{ $item->phone_number }}
+                                    </td>
+                                    <td style="font-size: 13px">
+                                        {{ $item->amount }}
+                                    </td>
+                                    <td style="font-size: 13px">
+                                        {{ $item->last_amount }}
                                     </td>
                                     <td>
-                                        @if ($item['active'] == 'ACTIVE')
+                                        @if ($item->active == 'ACTIVE')
                                             <span
                                                 class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
                                         @else
@@ -71,7 +79,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('users.showUserGet', ['data' => urlencode(json_encode($item))]) }}"
+                                        <a href="{{ route('users.show', $item->id_user) }}"
                                             class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
                                             <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
                                         </a>

@@ -55,18 +55,18 @@
                     <img src="{{ URL::asset('assets/images/PC.png') }}" alt="" class="w-100 object-fit-cover">
                     <div class="pb-24 ms-16 mb-24 me-16  mt--100">
                         <div class="text-center border border-top-0 border-start-0 border-end-0">
-                            <img src="{{ $users['userDetails']['profilePicture'] ?? URL::asset('assets/images/user-grid/user-grid-img14.png') }}"
+                            <img src="{{ $users->profile_picture ?? URL::asset('assets/images/user-grid/user-grid-img14.png') }}"
                                 alt=""
                                 class="border br-white border-width-2-px w-200-px h-200-px rounded-circle object-fit-cover">
-                            <h6 class="mb-0 mt-16">{{ $users['firstName'] }} {{ $users['lastName'] }}</h6>
-                            <span class="text-secondary-light mb-16">{{ $users['email'] }}</span>
+                            <h6 class="mb-0 mt-16">{{ $users->first_name }} {{ $users->last_name }}</h6>
+                            <span class="text-secondary-light mb-16">{{ $users->email }}</span>
                         </div>
                         <div class="mt-24">
                             <h6 class="text-xl mb-16">Info personnelle</h6>
                             <ul>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light">Telephone</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: {{ $users['phoneNumber'] }}</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $users->phone_number }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -124,7 +124,7 @@
                                                     class="form-label fw-semibold text-primary-light text-sm mb-8">Nom <span
                                                         class="text-danger-600">*</span></label>
                                                 <input type="text" class="form-control radius-8" id="name"
-                                                    placeholder="Enter Full Name" value="{{ $users['firstName'] }}">
+                                                    placeholder="Enter Full Name" value="{{ $users->first_name }}">
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
@@ -133,7 +133,7 @@
                                                     class="form-label fw-semibold text-primary-light text-sm mb-8">Prenom
                                                     <span class="text-danger-600">*</span></label>
                                                 <input type="text" class="form-control radius-8" id="name"
-                                                    placeholder="Enter Full Name" value="{{ $users['lastName'] }}">
+                                                    placeholder="Enter Full Name" value="{{ $users->last_name }}">
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
@@ -142,7 +142,7 @@
                                                     class="form-label fw-semibold text-primary-light text-sm mb-8">Email
                                                     <span class="text-danger-600">*</span></label>
                                                 <input type="email" class="form-control radius-8" id="email"
-                                                    placeholder="Enter email address" value="{{ $users['email'] }}">
+                                                    placeholder="Enter email address" value="{{ $users->email }}">
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
@@ -151,7 +151,7 @@
                                                     class="form-label fw-semibold text-primary-light text-sm mb-8">Telephone</label>
                                                 <input disabled type="email" class="form-control radius-8"
                                                     id="number" placeholder="Enter phone number"
-                                                    value="{{ $users['phoneNumber'] }}">
+                                                    value="{{ $users->phone_number }}">
                                             </div>
                                         </div>
                                     </div>

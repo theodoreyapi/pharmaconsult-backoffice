@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PeriodeGarde;
+use App\Models\Pharmacy;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class GardeController extends Controller
@@ -13,37 +17,21 @@ class GardeController extends Controller
      */
     public function index()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/pharmacies/communeGardePharmacyNumber');
 
-        if ($response->status() == 200) {
-            $gardes = $response->json();
+        // Vérifier qu'il existe une période de garde globale active maintenant
+        $premier = PeriodeGarde::first();
 
-            $dateUpdate = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])->get(env('API_BASE_URL_PHARMA') . '/periodes-garde');
-
-            $periodes = $dateUpdate->json();
-
-            $premier = $periodes[0] ?? null;
+        $gardes = Pharmacy::join('commune', 'pharmacy.commune_id', '=', 'commune.id_commune')
+            ->where('pharmacy.start_garde_date', '=', $premier->date_debut)
+            ->where('pharmacy.end_garde_date', '=', $premier->date_fin)
+            ->select('commune.name as communeName', DB::raw('COUNT(pharmacy.id_pharmacy) as nombreDePharmacie'))
+            ->groupBy('commune.id_commune', 'commune.name')
+            ->get();
 
             return view('pharmacies.garde', compact('gardes', 'premier'));
-        } else {
-            // Gérer l'erreur
-            return abort(500, 'Erreur lors du chargement des données.');
-        }
     }
 
     /**
@@ -59,7 +47,7 @@ class GardeController extends Controller
      */
     public function store(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $roles = [
@@ -133,7 +121,7 @@ class GardeController extends Controller
 
     public function getCommune()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $response = Http::withOptions([
@@ -156,7 +144,7 @@ class GardeController extends Controller
 
     public function storeGarde(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
         $roles = [

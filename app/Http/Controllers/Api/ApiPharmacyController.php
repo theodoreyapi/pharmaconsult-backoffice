@@ -195,8 +195,9 @@ class ApiPharmacyController extends Controller
                 ->select(
                     'review.id_review as id',
                     'review.evaluation as note',
-                    'review.username as userName',
                     'users_pharma.profile_picture as userPicture',
+                    'users_pharma.first_name',
+                    'users_pharma.last_name',
                     'review.created_at as dateNotice',
                     'review.commentaire as details',
                     'review.pharmacy_id as pharmacyId'
@@ -256,7 +257,7 @@ class ApiPharmacyController extends Controller
                         return [
                             'id'         => $r->id,
                             'note'       => $r->note,
-                            'userName'   => $r->userName,
+                            'userName'   => $r->first_name . ' ' . $r->last_name,
                             'userPicture' => $r->userPicture ?? '',
                             'dateNotice' => $r->dateNotice,
                             'details'    => $r->details,

@@ -58,9 +58,9 @@
                                     role="alert">
                                     <div class="d-flex align-items-center gap-2">
                                         Dernière mise à jour : Du
-                                        {{ \Carbon\Carbon::parse($premier['dateDebut'])->locale('fr')->translatedFormat('l j F') }}
+                                        {{ \Carbon\Carbon::parse($premier['date_debut'])->locale('fr')->translatedFormat('l j F') }}
                                         au
-                                        {{ \Carbon\Carbon::parse($premier['dateFin'])->locale('fr')->translatedFormat('l j F Y') }}
+                                        {{ \Carbon\Carbon::parse($premier['date_fin'])->locale('fr')->translatedFormat('l j F Y') }}
                                     </div>
                                 </div>
                                 <br>

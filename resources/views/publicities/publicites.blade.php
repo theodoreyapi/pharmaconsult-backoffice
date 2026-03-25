@@ -116,6 +116,7 @@
                             <tr>
                                 <th scope="col" style="font-size: 13px"></th>
                                 <th scope="col" style="font-size: 13px">Libelle</th>
+                                <th scope="col" style="font-size: 13px">Coût</th>
                                 <th scope="col" style="font-size: 13px">Debut</th>
                                 <th scope="col" style="font-size: 13px">Fin</th>
                                 <th scope="col" style="font-size: 13px">Statut</th>
@@ -127,22 +128,27 @@
                                 <tr>
                                     <td>
                                         <img height="200" width="200"
-                                            src="{{ $item['image'] ?? URL::asset('assets/images/user-list/user-list1.png') }}"
+                                            src="{{ $item->image ?? URL::asset('assets/images/user-list/user-list1.png') }}"
                                             alt="" class="radius-8">
                                     </td>
                                     <td>
                                         <strong style="font-size: 13px">
-                                            <a href="{{ $item['lien'] }}" target="_blank">{{ $item['name'] }}</a>
+                                            <a href="{{ $item->lien }}" target="_blank">{{ $item->name }}</a>
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <strong style="font-size: 13px">
+                                            {{ $item->price }}
                                         </strong>
                                     </td>
                                     <td style="font-size: 13px">
-                                        {{ \Carbon\Carbon::parse($item['startDate'])->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                                        {{ \Carbon\Carbon::parse($item->start_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
                                     </td>
                                     <td style="font-size: 13px">
-                                        {{ \Carbon\Carbon::parse($item['endDate'])->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                                        {{ \Carbon\Carbon::parse($item->end_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
                                     </td>
                                     <td>
-                                        @if ($item['status'] == 'ACTIVE')
+                                        @if ($item->status == 'ACTIVE')
                                             <span
                                                 class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
                                         @else
@@ -153,10 +159,10 @@
                                     <td>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item->id_publicite }}">
                                             <iconify-icon icon="lucide:edit"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="edit{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="edit{{ $item->id_publicite }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -169,7 +175,8 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('publicites.update', $item['id']) }}"
+                                                        <form
+                                                            action="{{ route('publicites.update', $item->id_publicite) }}"
                                                             method="post" role="form" enctype="multipart/form-data">
                                                             @csrf
                                                             @method('PATCH')
@@ -177,10 +184,10 @@
                                                             @php
 
                                                                 $dateDebut = \Carbon\Carbon::parse(
-                                                                    $item['startDate'],
+                                                                    $item->start_date,
                                                                 )->format('Y-m-d');
                                                                 $dateFin = \Carbon\Carbon::parse(
-                                                                    $item['endDate'],
+                                                                    $item->end_date,
                                                                 )->format('Y-m-d');
                                                             @endphp
                                                             <strong>
@@ -205,7 +212,7 @@
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                                         Libelle
                                                                     </label>
-                                                                    <input value="{{ $item['name'] }}" type="text"
+                                                                    <input value="{{ $item->name }}" type="text"
                                                                         name="libelle" required
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Saisir un libellé">
@@ -215,7 +222,7 @@
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                                         Lien
                                                                     </label>
-                                                                    <input value="{{ $item['lien'] }}" type="text"
+                                                                    <input value="{{ $item->lien }}" type="text"
                                                                         name="lien" required
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Entrer le lien">
@@ -245,7 +252,7 @@
                                                                     <select required name="statut"
                                                                         class="form-control radius-8 form-select"
                                                                         id="country">
-                                                                        <option value="{{ $item['status'] }}">Sélectionne
+                                                                        <option value="{{ $item->status }}">Sélectionne
                                                                         </option>
                                                                         <option value="ACTIVE">ACTIVE</option>
                                                                         <option value="INACTIVE">INACTIVE</option>
@@ -270,10 +277,10 @@
                                         </div>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_publicite }}">
                                             <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="delete{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="delete{{ $item->id_publicite }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -286,7 +293,8 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('publicites.destroy', $item['id']) }}"
+                                                        <form
+                                                            action="{{ route('publicites.destroy', $item->id_publicite) }}"
                                                             method="post">
                                                             @csrf
                                                             @method('DELETE')

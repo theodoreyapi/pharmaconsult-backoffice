@@ -12,7 +12,7 @@ class RequetesController extends Controller
      */
     public function index()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
@@ -73,7 +73,7 @@ class RequetesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 

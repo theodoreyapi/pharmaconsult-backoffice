@@ -13,7 +13,7 @@ class RechargementController extends Controller
      */
     public function index()
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
@@ -47,7 +47,7 @@ class RechargementController extends Controller
 
     public function init(Request $request)
     {
-        if (!session('api_token')) {
+        if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 

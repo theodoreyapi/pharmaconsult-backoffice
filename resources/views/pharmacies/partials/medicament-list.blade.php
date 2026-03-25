@@ -14,10 +14,10 @@
         </div>
         <a href="javascript:void(0)"
             class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-            data-bs-toggle="modal" data-bs-target="#delete{{ $item['id'] }}">
+            data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_medicament }}">
             <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
         </a>
-        <div class="modal fade" id="delete{{ $item['id'] }}" tabindex="-1" aria-labelledby="exampleModalLabel"
+        <div class="modal fade" id="delete{{ $item->id_medicament }}" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                 <div class="modal-content radius-16 bg-base">
@@ -28,7 +28,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-24">
-                        <form action="{{ route('medicament.destroy', $item['id']) }}" method="post" role="form">
+                        <form action="{{ route('medicament.destroy', $item->id_medicament) }}" method="post" role="form">
                             @csrf
                             @method('DELETE')
                             <div class="row">

@@ -54,12 +54,12 @@
 
             </div>
             <div class="d-flex align-items-center flex-wrap gap-3">
-                <a href="{{ route('pharmacy.show', $pharmacys['id']) }}"
+                <a href="{{ route('pharmacy.show', $pharmacys->id_pharmacy) }}"
                     class="btn btn-info text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
                     <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
                     Associé assurance
                 </a>
-                <a href="{{ route('pharmacy.edit', $pharmacys['id']) }}"
+                <a href="{{ route('pharmacy.edit', $pharmacys->id_pharmacy) }}"
                     class="btn btn-success text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
                     <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
                     Associé moyen de paiement
@@ -73,52 +73,54 @@
         <div class="row gy-4">
             <div class="col-lg-5">
                 <div class="user-grid-card position-relative border radius-16 overflow-hidden bg-base h-100">
-                    <img src="{{ $pharmacys['facadeImage'] ?? URL::asset('assets/images/pharmacy.jpg') }}" alt=""
+                    <img src="{{ $pharmacys->facade_image ?? URL::asset('assets/images/pharmacy.jpg') }}" alt=""
                         class="w-100 object-fit-cover">
                     <div class="pb-24 ms-16 mb-24 me-16  mt--100">
                         <div class="text-center border border-top-0 border-start-0 border-end-0">
-                            <img src="{{ $pharmacys['facadeImage'] ?? URL::asset('assets/images/pharmacy.jpg') }}"
+                            <img src="{{ $pharmacys->facade_image ?? URL::asset('assets/images/pharmacy.jpg') }}"
                                 alt=""
                                 class="border br-white border-width-2-px w-200-px h-200-px rounded-circle object-fit-cover">
-                            <h6 class="mb-0 mt-16">{{ $pharmacys['name'] }}</h6>
-                            <span class="text-secondary-light mb-16">{{ $pharmacys['address'] }}</span>
+                            <h6 class="mb-0 mt-16">{{ $pharmacys->name }}</h6>
+                            <span class="text-secondary-light mb-16">{{ $pharmacys->address }}</span>
                         </div>
                         <div class="mt-24">
                             <h6 class="text-xl mb-16">Infos pharmacie</h6>
                             <ul>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light">Pharmacien</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: {{ $pharmacys['ownerName'] }}</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $pharmacys->owner_name }}</span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light"> Téléphone</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ $pharmacys['phoneNumber'] }}</span>
+                                        {{ $pharmacys->phone_number }}</span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light"> WhatsApp</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ $pharmacys['whatsAppPhoneNumber'] }}</span>
+                                        {{ $pharmacys->whats_app_phone_number }}</span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light"> Commune</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ $pharmacys['commune']['name'] }}</span>
+                                        {{ $pharmacys->commune_name }}</span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light"> Heure ouverture</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ $pharmacys['openingHours'] }}</span>
+                                        {{ $pharmacys->opening_hours }}</span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light"> Garde début</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ \Carbon\Carbon::createFromTimestamp($pharmacys['startGardeDate'] / 1000)->locale('fr')->translatedFormat('l j F Y') }}</span>
+                                        {{ \Carbon\Carbon::parse($pharmacys->start_garde_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                                    </span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light"> Garde fin</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ \Carbon\Carbon::createFromTimestamp($pharmacys['endGardeDate'] / 1000)->locale('fr')->translatedFormat('l j F Y') }}</span>
+                                        {{ \Carbon\Carbon::parse($pharmacys->end_garde_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                                    </span>
                                 </li>
                             </ul>
                         </div>
@@ -151,14 +153,14 @@
                                 <h6 class="text-md text-primary-light mb-16">METHODE DE PAIEMENT</h6>
                                 <div class="mb-24 mt-16">
                                     <div class="row col-sm-12">
-                                        @foreach ($pharmacys['paymentMethods'] as $methodes)
+                                        @foreach ($paymentMethods as $methodes)
                                             <div class="col-sm-4">
                                                 <li class="d-flex align-items-center gap-1 mb-12">
                                                     <img class="w-30"
-                                                        src="{{ str_replace(' ', '%20', $methodes['paymentMethodPicture'] ?? URL::asset('assets/images/user-list/user-list1.png')) }}"
+                                                        src="{{ str_replace(' ', '%20', $methodes->paymentMethodPicture ?? URL::asset('assets/images/user-list/user-list1.png')) }}"
                                                         alt="" class="flex-shrink-0 me-12 radius-8">
                                                     <span class="w-70 text-secondary-light fw-medium">
-                                                        {{ $methodes['name'] }}</span>
+                                                        {{ $methodes->name }}</span>
                                                 </li>
                                             </div>
                                         @endforeach
@@ -169,14 +171,14 @@
                                 <h6 class="text-md text-primary-light mb-16">ASSURANCES</h6>
                                 <div class="mb-24 mt-16">
                                     <div class="row col-sm-12">
-                                        @foreach ($pharmacys['assurances'] as $assurance)
+                                        @foreach ($assurances as $assurance)
                                             <div class="col-sm-4">
                                                 <li class="d-flex align-items-center gap-1 mb-12">
                                                     <img class="w-30"
-                                                        src="{{ $assurance['assurancePicture'] ?? URL::asset('assets/images/user-list/user-list1.png') }}"
+                                                        src="{{ $assurance->assurancePicture ?? URL::asset('assets/images/user-list/user-list1.png') }}"
                                                         alt="" class="flex-shrink-0 me-12 radius-8">
                                                     <span class="w-70 text-secondary-light fw-medium">
-                                                        {{ $assurance['name'] }}</span>
+                                                        {{ $assurance->name }}</span>
                                                 </li>
                                             </div>
                                         @endforeach
@@ -287,7 +289,7 @@
                                             <div class="col-md-4 d-flex flex-column justify-content-center">
                                                 <div class="rating-box justify-content-center">
                                                     <h3 class="pt-4 text-white">
-                                                        {{ $pharmacys['notices']['ratingSummary']['average'] ?? 0 }}</h3>
+                                                        {{ $average ?? 0 }}</h3>
                                                     <p class="text-center">sur 5</p>
                                                 </div>
                                                 <div class="justify-content-center">
@@ -319,7 +321,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-right">
-                                                                {{ $pharmacys['notices']['ratingSummary']['counterFiveStars'] ?? 0 }}
+                                                                {{ $counterFive ?? 0 }}
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -330,7 +332,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-right">
-                                                                {{ $pharmacys['notices']['ratingSummary']['counterFourStars'] ?? 0 }}
+                                                                {{ $counterFour ?? 0 }}
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -341,7 +343,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-right">
-                                                                {{ $pharmacys['notices']['ratingSummary']['counterThreeStars'] ?? 0 }}
+                                                                {{ $counterThree ?? 0 }}
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -352,7 +354,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-right">
-                                                                {{ $pharmacys['notices']['ratingSummary']['counterTwoStars'] ?? 0 }}
+                                                                {{ $counterTwo ?? 0 }}
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -363,7 +365,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-right">
-                                                                {{ $pharmacys['notices']['ratingSummary']['counterOneStars'] ?? 0 }}
+                                                                {{ $counterOne ?? 0 }}
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -371,14 +373,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @foreach ($pharmacys['notices']['notices'] ?? [] as $notices)
+                                    @foreach ($reviews ?? [] as $notices)
                                         <div class="card">
                                             <div class="row d-flex">
                                                 <div class="d-flex flex-column">
-                                                    <h6 class="mt-2 mb-0">{{ $notices['userName'] }}</h6>
+                                                    <h6 class="mt-2 mb-0">{{ $notices->userName }}</h6>
                                                     <div>
                                                         <p class="text-left">
-                                                            <span class="text-muted">{{ $notices['note'] }}</span>
+                                                            <span class="text-muted">{{ $notices->note }}</span>
                                                             <span class="fa fa-star star-active ml-3">
                                                                 <iconify-icon icon="iconamoon:star"></iconify-icon>
                                                             </span>
@@ -398,12 +400,12 @@
                                                     </div>
                                                 </div>
                                                 <div class="ml-auto">
-                                                    <p class="text-muted pt-5 pt-sm-3">{{ $notices['dateNotice'] }}</p>
+                                                    <p class="text-muted pt-5 pt-sm-3">{{ $notices->dateNotice }}</p>
                                                 </div>
                                             </div>
                                             <div class="row text-left">
                                                 <p class="content">
-                                                    {{ $notices['details'] }}
+                                                    {{ $notices->details }}
                                                 </p>
                                             </div>
                                         </div>
@@ -424,7 +426,7 @@
                                 <div class="card-body">
                                     <h6 class="text-md text-primary-light mb-16">Photo</h6>
 
-                                    <form action="{{ route('pharmacy.update', $pharmacys['id']) }}" method="post"
+                                    <form action="{{ route('pharmacy.update', $pharmacys->id_pharmacy) }}" method="post"
                                         enctype="multipart/form-data">
                                         @csrf
                                         @method('PATCH')
@@ -443,7 +445,7 @@
                                                         Libelle
                                                         <span class="text-danger-600">*</span></label>
                                                     <input required name="name" type="text"
-                                                        class="form-control radius-8" id="name" value="{{ $pharmacys['name'] }}"
+                                                        class="form-control radius-8" id="name" value="{{ $pharmacys->name }}"
                                                         placeholder="Entrez le nom de la pharmacie">
                                                 </div>
                                                 <div class="mb-20 col-md-6">
@@ -452,7 +454,7 @@
                                                         Adresse
                                                         <span class="text-danger-600">*</span></label>
                                                     <input required name="adresse" type="text"
-                                                        class="form-control radius-8" id="name" value="{{ $pharmacys['address'] }}"
+                                                        class="form-control radius-8" id="name" value="{{ $pharmacys->address }}"
                                                         placeholder="Entrez l'adresse de la pharmacie">
                                                 </div>
                                             </div>
@@ -462,7 +464,7 @@
                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">Responsable
                                                         <span class="text-danger-600">*</span></label>
                                                     <input required name="responsable" type="text"
-                                                        class="form-control radius-8" id="email" value="{{ $pharmacys['ownerName'] }}"
+                                                        class="form-control radius-8" id="email" value="{{ $pharmacys->owner_name }}"
                                                         placeholder="Entrez le nom du responsable">
                                                 </div>
                                                 <div class="mb-20 col-md-6">
@@ -470,10 +472,10 @@
                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">Commune </label>
                                                     <select name="commune" required
                                                         class="form-control radius-8 form-select" id="depart">
-                                                        <option value="{{ $pharmacys['commune']['id'] }}">{{ $pharmacys['commune']['name'] }}
+                                                        <option value="{{ $pharmacys->id_commune }}">{{ $pharmacys->commune_name }}
                                                         </option>
-                                                        @foreach ($communes['content'] as $item)
-                                                            <option value="{{ $item['id'] }}">{{ $item['name'] }}
+                                                        @foreach ($communes as $item)
+                                                            <option value="{{ $item->id_commune }}">{{ $item->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -483,13 +485,13 @@
                                                 <div class="mb-20 col-md-6">
                                                     <label for="number"
                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">Téléphone</label>
-                                                    <input name="phone" type="tel" class="form-control radius-8" value="{{ $pharmacys['phoneNumber'] }}"
+                                                    <input name="phone" type="tel" class="form-control radius-8" value="{{ $pharmacys->phone_number }}"
                                                         id="number" placeholder="Entrez le numéro de téléphone">
                                                 </div>
                                                 <div class="mb-20 col-md-6">
                                                     <label for="number"
                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">WhatsApp</label>
-                                                    <input name="whatsapp" type="tel" class="form-control radius-8" value="{{ $pharmacys['whatsAppPhoneNumber'] }}"
+                                                    <input name="whatsapp" type="tel" class="form-control radius-8" value="{{ $pharmacys->whats_app_phone_number }}"
                                                         id="number" placeholder="Entrez le numéro whatsapp">
                                                 </div>
                                             </div>
@@ -498,7 +500,7 @@
                                             <div class="mb-20 col-md-12">
                                                 <label for="number"
                                                     class="form-label fw-semibold text-primary-light text-sm mb-8">GPS</label>
-                                                <input name="longitude" type="text" class="form-control radius-8" value="{{ $pharmacys['gpsCoordinates'] }}"
+                                                <input name="longitude" type="text" class="form-control radius-8" value="{{ $pharmacys->gps_coordinates }}"
                                                     id="number" placeholder="Lien">
                                             </div>
                                         </div>

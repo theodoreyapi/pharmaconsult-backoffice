@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Auth\ApiUser;
+use App\Models\User;
+use App\Models\UsersPharma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -23,13 +25,23 @@ class CustomAuthController extends Controller
             'password' => 'required',
         ];
         $customMessages = [
-            'email.required' => "Veuillez saisir son adresse email.",
-            'password.required' => "Veuillez saisir son mot de passe.",
+            'email.required' => "Veuillez saisir votre adresse email.",
+            'password.required' => "Veuillez saisir votre mot de passe.",
         ];
 
         $request->validate($roles, $customMessages);
 
-        $response = Http::withOptions([
+        $credentials = $request->only('email', 'password');
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && password_verify($credentials['password'], $user->password)) {
+            Auth::login($user);
+            return redirect()->intended('index');
+        } else {
+            return back()->withErrors(['E-mail ou mot de passe incorrect.']);
+        }
+
+       /* $response = Http::withOptions([
             'verify' => false
         ])->post(env('API_BASE_URL') . '/auth/login', [
             'email' => $request->email,
@@ -70,12 +82,12 @@ class CustomAuthController extends Controller
             }
         } else {
             return back()->withErrors(['Erreur lors de l\'authentification.']);
-        }
+        }*/
     }
 
     public function dashboard()
     {
-        if (session('api_token')) {
+        if (Auth::check()) {
             return view('home.index');
         } else {
             return view('auth.sign-in');
