@@ -24,6 +24,16 @@
 
         @include('layouts.statuts')
 
+        <div class="alert alert-info bg-info-100 text-info-600 border-info-100 px-24 py-11 mb-0 fw-semibold text-lg radius-8 d-flex align-items-center justify-content-between"
+            role="alert">
+            <div class="d-flex align-items-center gap-2">
+                Dernière mise à jour : Du
+                {{ \Carbon\Carbon::parse($premier['date_debut'])->locale('fr')->translatedFormat('l j F') }}
+                au
+                {{ \Carbon\Carbon::parse($premier['date_fin'])->locale('fr')->translatedFormat('l j F Y') }}
+            </div>
+        </div>
+
         <div class="card h-100 p-0 radius-12">
             <div
                 class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">

@@ -1,5 +1,9 @@
 @extends('layouts.master', ['title' => 'Ajouter un medicament'])
 
+@push('csss')
+    <link href = "https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel = "stylesheet" />
+@endpush
+
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
 
@@ -8,6 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -16,19 +21,31 @@
     </script>
 
     <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#imagePreview').css('background-image', 'url(' + e.target.result + ')');
-                    $('#imagePreview').hide();
-                    $('#imagePreview').fadeIn(650);
+        $(document).ready(function() {
+            $('#substituts').select2({
+                placeholder: "Rechercher un médicament",
+                minimumInputLength: 2, // tape au moins 2 lettres
+                ajax: {
+                    url: "{{ route('medicament.search') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            search: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map(function(item) {
+                                return {
+                                    id: item.id_medicament,
+                                    text: item.name
+                                };
+                            })
+                        };
+                    }
                 }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-        $("#imageUpload").change(function() {
-            readURL(this);
+            });
         });
     </script>
 @endpush
@@ -39,7 +56,7 @@
             <h6 class="fw-semibold mb-0">Ajouter medicament</h6>
             <ul class="d-flex align-items-center gap-2">
                 <li class="fw-medium">
-                    <a href="index" class="d-flex align-items-center gap-1 hover-text-primary">
+                    <a href="{{ url('/') }}" class="d-flex align-items-center gap-1 hover-text-primary">
                         <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
                         Tabeau de bord
                     </a>
@@ -62,21 +79,9 @@
                                     enctype="multipart/form-data">
                                     @csrf
                                     <!-- Upload Image Start -->
-                                    <div class="mb-24 mt-16">
-                                        <div class="avatar-upload">
-                                            <div
-                                                class="avatar-edit position-absolute bottom-0 end-0 me-24 mt-16 z-1 cursor-pointer">
-                                                <input name="photo" type='file' id="imageUpload"
-                                                    accept=".png, .jpg, .jpeg" hidden>
-                                                <label for="imageUpload"
-                                                    class="w-32-px h-32-px d-flex justify-content-center align-items-center bg-primary-50 text-primary-600 border border-primary-600 bg-hover-primary-100 text-lg rounded-circle">
-                                                    <iconify-icon icon="solar:camera-outline" class="icon"></iconify-icon>
-                                                </label>
-                                            </div>
-                                            <div class="avatar-preview">
-                                                <div id="imagePreview"> </div>
-                                            </div>
-                                        </div>
+                                    <div class="mb-20">
+                                        <input class="form-control radius-8" name="photo" type="file"
+                                            accept=".png, .jpg, .jpeg">
                                     </div>
                                     <!-- Upload Image End -->
                                     <div class="row">
@@ -99,19 +104,37 @@
                                                     id="email" placeholder="Entrez le prix du médicament">
                                             </div>
                                         </div>
-                                        <div class="mb-20">
-                                            <label for="name"
-                                                class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                Principe actif
-                                                <span class="text-danger-600">*</span></label>
-                                            <input required name="principe" type="text" class="form-control radius-8"
-                                                id="name" placeholder="Entrez le principe actif">
+                                        <div class="col-md-6">
+                                            <div class="mb-20">
+                                                <label for="name"
+                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                                    Principe actif
+                                                    <span class="text-danger-600">*</span></label>
+                                                <input required name="principe" type="text" class="form-control radius-8"
+                                                    id="name" placeholder="Entrez le principe actif">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-20">
+                                                <label for="name"
+                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                                    Notice
+                                                    <span class="text-danger-600"></span></label>
+                                                <input name="notice" type="file" class="form-control radius-8"
+                                                    id="name" placeholder="">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-20">
+                                                <label for="substituts"
+                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                                    Substituts
+                                                    <span class="text-danger-600"></span></label>
+                                                <select id="substituts" name="substituts[]" class="form-control"
+                                                    multiple></select>
+                                            </div>
                                         </div>
                                     </div>
-                                    <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                        Notice
-                                        <span class="text-danger-600"></span></label>
-                                    <textarea class="summernote" name="notice"></textarea>
                                     <br>
                                     <div class="d-flex align-items-center justify-content-center gap-3">
                                         <button type="button"

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Modules;
+use App\Models\Services;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class AbonnementController extends Controller
@@ -15,22 +18,10 @@ class AbonnementController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/modules/all');
 
-        if ($response->status() == 200) {
-            $publicites = $response->json();
+        $publicites = Modules::all();
 
-            return view('pricing.pricing', compact('publicites'));
-        } else {
-            // Gérer l'erreur
-            return abort(500, 'Erreur lors du chargement des données.');
-        }
+        return view('pricing.pricing', compact('publicites'));
     }
 
     /**
@@ -46,7 +37,28 @@ class AbonnementController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (!Auth::check()) {
+            return redirect()->intended('logout');
+        }
+        $roles = [
+            'description' => 'required',
+            'libelle' => 'required',
+        ];
+        $customMessages = [
+            'description.required' => "Veuillez saisir la description.",
+            'libelle.required' => "Veuillez saisir le libelle.",
+        ];
+
+        $request->validate($roles, $customMessages);
+
+        $module = new Modules();
+        $module->description = $request->description;
+        $module->libelle = $request->libelle;
+        if ($module->save()) {
+            return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
+        } else {
+            return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
+        }
     }
 
     /**
@@ -57,22 +69,11 @@ class AbonnementController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/forfaits/byModuleName/' . $id);
 
-        if ($response->status() == 200) {
-            $publicites = $response->json();
+        $publicites = Services::where('module_id', '=', $id)->get();
+        $libelle = Modules::where('id_module', '=', $id)->first('libelle');
 
-            return view('pricing.view-pricing', compact('publicites', 'id'));
-        } else {
-            // Gérer l'erreur
-            return abort(500, 'Erreur lors du chargement des données.');
-        }
+        return view('pricing.view-pricing', compact('publicites', 'libelle', 'id'));
     }
 
     /**
@@ -81,6 +82,73 @@ class AbonnementController extends Controller
     public function edit(string $id)
     {
         //
+    }
+
+    /**
+     * Add forfait the specified resource in storage.
+     */
+    public function updateModule(Request $request, string $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->intended('logout');
+        }
+        $roles = [
+            'description' => 'required',
+            'libelle' => 'required',
+        ];
+        $customMessages = [
+            'description.required' => "Veuillez saisir la description.",
+            'libelle.required' => "Veuillez saisir le libelle.",
+        ];
+
+        $request->validate($roles, $customMessages);
+
+        $module = Modules::findOrFail($id);
+
+        // Update champs
+        $module->description = $request->description;
+        $module->libelle = $request->libelle;
+        if ($module->save()) {
+            return back()->with('succes',  "Modification éffectuée");
+        } else {
+            return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
+        }
+    }
+
+    /**
+     * Add forfait the specified resource in storage.
+     */
+    public function addForfait(Request $request, string $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->intended('logout');
+        }
+        $roles = [
+            'description' => 'required',
+            'libelle' => 'required',
+            'prix' => 'required',
+            'duration' => 'required',
+        ];
+        $customMessages = [
+            'description.required' => "Veuillez saisir la description.",
+            'libelle.required' => "Veuillez saisir le libelle.",
+            'prix.required' => "Veuillez saisir le prix.",
+            'duration.required' => "Veuillez saisir la duree.",
+        ];
+
+        $request->validate($roles, $customMessages);
+
+        $services = new Services();
+        $services->description = $request->description;
+        $services->duration = $request->duration;
+        $services->libelle = $request->libelle;
+        $services->price = $request->prix;
+        $services->module_id = $id;
+        if ($services->save()) {
+            return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
+        } else {
+            return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
+        }
     }
 
     /**
@@ -106,21 +174,15 @@ class AbonnementController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->put(env('API_BASE_URL') . '/forfait/update/' . $id, [
-            'libelle' => $request->libelle,
-            'description' => $request->description,
-            'price' => $request->prix,
-            'duration' => $request->duration,
-            'moduleId' => $id,
-        ]);
+        $services = Services::findOrFail($id);
 
-        if ($response->status() == 200 || $response->status() == 201) {
+        // Update champs
+        $services->description = $request->description;
+        $services->duration = $request->duration;
+        $services->libelle = $request->libelle;
+        $services->price = $request->prix;
+
+        if ($services->save()) {
             return back()->with('succes',  "Modification éffectuée ");
         } else {
             return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);

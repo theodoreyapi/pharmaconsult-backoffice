@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('pharmacy', function (Blueprint $table) {
             $table->id('id_pharmacy')->primary();
             $table->string('address')->nullable();
-            $table->dateTime('end_garde_date')->default(0);
+            $table->dateTime('end_garde_date')->nullable();
             $table->string('facade_image')->nullable();
             $table->string('gps_coordinates')->nullable();
             $table->string('name')->nullable();
             $table->string('opening_hours')->nullable();
             $table->string('owner_name')->nullable();
             $table->string('phone_number')->nullable();
-            $table->dateTime('start_garde_date')->default(0);
+            $table->dateTime('start_garde_date')->nullable();
 
             $table->unsignedBigInteger('commune_id');
             $table->foreign('commune_id')->references('id_commune')->on('commune');

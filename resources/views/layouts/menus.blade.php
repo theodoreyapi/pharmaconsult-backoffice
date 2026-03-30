@@ -299,6 +299,11 @@
                                         class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
                                     Utilisateurs Admin</a>
                             </li>
+                            <li class="{{ Route::is('user-pharma') ? 'active-page' : '' }}">
+                                <a href="user-pharma" class="{{ Route::is('user-pharma') ? 'active-page' : '' }}"><i
+                                        class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
+                                    Utilisateurs Pharmacien</a>
+                            </li>
                         @endif
                         @if (Auth::user()->role == 'PHARMACIEN')
                             <li class="{{ Route::is('pharmacien') ? 'active-page' : '' }}">

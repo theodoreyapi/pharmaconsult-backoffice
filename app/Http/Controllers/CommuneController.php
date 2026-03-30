@@ -50,18 +50,10 @@ class CommuneController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(env('API_BASE_URL') . '/commune/add', [
-            'name' => $request->libelle,
-            'description' => $request->description,
-        ]);
-
-        if ($response->status() == 201) {
+        $assurance = new Commune();
+        $assurance->description = $request->description;
+        $assurance->name = $request->libelle;
+        if ($assurance->save()) {
             return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
         } else {
             return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
@@ -103,18 +95,13 @@ class CommuneController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->put(env('API_BASE_URL') . '/commune/update/' . $id, [
-            'name' => $request->libelle,
-            'description' => $request->description,
-        ]);
+        $assurance = Commune::findOrFail($id);
 
-        if ($response->status() == 200) {
+        // Update champs
+        $assurance->description = $request->description;
+        $assurance->name = $request->libelle;
+
+        if ($assurance->save()) {
             return back()->with('succes',  "Modification éffectuée ");
         } else {
             return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
@@ -129,18 +116,9 @@ class CommuneController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->delete(env('API_BASE_URL') . '/commune/delete/' . $id);
 
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Suppression éffectuée ");
-        } else {
-            return back()->withErrors(["Impossible de supprimer. Veuillez réessayer!!"]);
-        }
+        Commune::findOrFail($id)->delete();
+
+        return back()->with('succes',  "Suppression éffectuée ");
     }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.master', ['title' => 'Publicites'])
+@extends('layouts.master', ['title' => 'Utilisateur Pharmacien'])
 
 @push('scripts')
     <script>
@@ -9,7 +9,7 @@
 @section('content')
     <div class="dashboard-main-body">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-            <h6 class="fw-semibold mb-0">Publicites</h6>
+            <h6 class="fw-semibold mb-0">Utilisateurs</h6>
             <ul class="d-flex align-items-center gap-2">
                 <li class="fw-medium">
                     <a href="{{ url('index') }}" class="d-flex align-items-center gap-1 hover-text-primary">
@@ -18,7 +18,7 @@
                     </a>
                 </li>
                 <li>-</li>
-                <li class="fw-medium">Liste des publicites</li>
+                <li class="fw-medium">Liste utilisateur</li>
             </ul>
         </div>
 
@@ -29,11 +29,11 @@
                 class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                 </div>
-                <a href="#"
+                <a href="{{ url('add-admin') }}"
                     class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-                    data-bs-toggle="modal" data-bs-target="#addExampleModal">
+                    >
                     <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-                    Ajouter une publicite
+                    Ajouter utilisateur
                 </a>
             </div>
             <div class="modal fade" id="addExampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -43,63 +43,60 @@
                         <div
                             class="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0 bg-success text-white">
                             <h1 class="modal-title fs-5 text-white" id="exampleModalLabel">
-                                Ajout d'une nouvelle publicite
+                                Ajout d'un nouveau utilisateur
                             </h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                                 style="color: white"></button>
                         </div>
                         <div class="modal-body p-24">
-                            <form action="{{ route('publicites.store') }}" method="post" role="form"
-                                enctype="multipart/form-data">
+                            <form action="{{ route('company.store') }}" method="post" role="form">
                                 @csrf
                                 <div class="row">
-                                    <div class="col-12 mb-20">
+                                    <div class="col-6 mb-20">
                                         <label for="name"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Image
+                                            Nom
                                         </label>
-                                        <input type="file" name="image" required class="form-control radius-8"
-                                            id="name">
+                                        <input type="text" name="firstname" required class="form-control radius-8"
+                                            id="name" placeholder="Entrer son nom">
                                     </div>
                                     <div class="col-6 mb-20">
                                         <label for="name"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Libelle
+                                            Prénom
                                         </label>
-                                        <input type="text" name="libelle" required class="form-control radius-8"
-                                            id="name" placeholder="Saisir un libellé">
+                                        <input type="text" name="lastname" required class="form-control radius-8"
+                                            id="name" placeholder="Entrer son prénom">
                                     </div>
                                     <div class="col-6 mb-20">
                                         <label for="name"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Lien
+                                            E-mail
                                         </label>
-                                        <input type="text" name="lien" required class="form-control radius-8"
-                                            id="name" placeholder="Entrer le lien">
+                                        <input type="email" name="email" required class="form-control radius-8"
+                                            id="name" placeholder="Entrer son e-mail">
                                     </div>
                                     <div class="col-6 mb-20">
                                         <label for="name"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Coût
+                                            Téléphone
                                         </label>
-                                        <input type="number" name="price" required class="form-control radius-8"
-                                            id="name" placeholder="Entrer le coût">
+                                        <input type="text" name="phone" class="form-control radius-8" id="name"
+                                            placeholder="Entrer son numéro de Téléphone">
                                     </div>
                                     <div class="col-6 mb-20">
-                                        <label for="name"
-                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Date debut
+                                        <label for="country"
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">Profil
                                         </label>
-                                        <input type="date" name="debut" required class="form-control radius-8"
-                                            id="name">
-                                    </div>
-                                    <div class="col-6 mb-20">
-                                        <label for="name"
-                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Date fin
-                                        </label>
-                                        <input type="date" name="fin" required class="form-control radius-8"
-                                            id="name">
+                                        <select name="profil" required class="form-control radius-8 form-select"
+                                            id="country">
+                                            <option value="">Sélectionne</option>
+                                            <option value="SUPERADMIN">SUPERADMIN</option>
+                                            <option value="ADMIN">ADMIN</option>
+                                            <option value="PHARMACIEN">PHARMACIEN</option>
+                                            <option value="GESTIONNAIRE">GESTIONNAIRE</option>
+                                            <option value="CAISSIERE">CAISSIERE</option>
+                                        </select>
                                     </div>
                                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
                                         <button type="reset" data-bs-dismiss="modal" aria-label="Close"
@@ -122,41 +119,44 @@
                     <table class="table bordered-table mb-0" id="dataTable" data-page-length='10'>
                         <thead>
                             <tr>
-                                <th scope="col" style="font-size: 13px"></th>
-                                <th scope="col" style="font-size: 13px">Libelle</th>
-                                <th scope="col" style="font-size: 13px">Coût</th>
-                                <th scope="col" style="font-size: 13px">Debut</th>
-                                <th scope="col" style="font-size: 13px">Fin</th>
+                                <th scope="col" style="font-size: 13px">Nom</th>
+                                <th scope="col" style="font-size: 13px">Contact</th>
+                                <th scope="col" style="font-size: 13px">Profil</th>
                                 <th scope="col" style="font-size: 13px">Statut</th>
-                                <th scope="col" style="font-size: 13px"></th>
+                                <th scope="col" style="font-size: 13px">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($publicites as $item)
+                            @foreach ($admins as $item)
                                 <tr>
                                     <td>
-                                        <img height="200" width="200"
-                                            src="{{ $item->image ?? URL::asset('assets/images/user-list/user-list1.png') }}"
-                                            alt="" class="radius-8">
-                                    </td>
-                                    <td>
-                                        <strong style="font-size: 13px">
-                                            <a href="{{ $item->lien }}" target="_blank">{{ $item->name }}</a>
-                                        </strong>
-                                    </td>
-                                    <td>
-                                        <strong style="font-size: 13px">
-                                            {{ $item->price }}
-                                        </strong>
+                                        <div class="d-flex align-items-center">
+                                            <img src="assets/images/user-list/user-list1.png" alt=""
+                                                class="flex-shrink-0 me-12 radius-8">
+                                            <strong style="font-size: 13px">
+                                                {!! wordwrap($item->first_name, 20, '<br>') !!} {!! wordwrap($item->last_name, 20, '<br>') !!}
+                                            </strong>
+                                        </div>
                                     </td>
                                     <td style="font-size: 13px">
-                                        {{ \Carbon\Carbon::parse($item->start_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
-                                    </td>
-                                    <td style="font-size: 13px">
-                                        {{ \Carbon\Carbon::parse($item->end_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                                        {{ $item->email }}
+                                        <br>
+                                        {{ $item->phone_number }}
                                     </td>
                                     <td>
-                                        @if ($item->status == 'ACTIVE')
+                                        @if ($item->role == 'PHARMACIEN')
+                                            <span
+                                                class="badge text-sm fw-semibold text-info-600 bg-info-100 px-20 py-9 radius-4 text-white">PHARMACIEN</span>
+                                        @elseif ($item->role == 'GESTIONNAIRE')
+                                            <span
+                                                class="badge text-sm fw-semibold text-neutral-800 bg-neutral-300 px-20 py-9 radius-4 text-white">GESTIONNAIRE</span>
+                                        @else
+                                            <span
+                                                class="badge text-sm fw-semibold text-lilac-600 bg-lilac-100 px-20 py-9 radius-4 text-white">CAISSIERE</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($item->active == 'ACTIVE')
                                             <span
                                                 class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
                                         @else
@@ -167,10 +167,10 @@
                                     <td>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item->id_publicite }}">
+                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item->id_pharmacien }}">
                                             <iconify-icon icon="lucide:edit"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="edit{{ $item->id_publicite }}" tabindex="-1"
+                                        <div class="modal fade" id="edit{{ $item->id_pharmacien }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -183,93 +183,63 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form
-                                                            action="{{ route('publicites.update', $item->id_publicite) }}"
-                                                            method="post" role="form" enctype="multipart/form-data">
+                                                        <form action="{{ route('company.update', $item->id_pharmacien) }}"
+                                                            method="post">
                                                             @csrf
                                                             @method('PATCH')
-
-                                                            @php
-                                                                $dateDebut = \Carbon\Carbon::parse(
-                                                                    $item->start_date,
-                                                                )->format('Y-m-d');
-                                                                $dateFin = \Carbon\Carbon::parse(
-                                                                    $item->end_date,
-                                                                )->format('Y-m-d');
-                                                            @endphp
                                                             <div class="row">
-                                                                <div class="col-12 mb-20">
-                                                                    <img height="200" style="width: auto"
-                                                                        src="{{ $item['image'] ?? URL::asset('assets/images/user-list/user-list1.png') }}"
-                                                                        alt="" class="radius-8">
-                                                                </div>
-                                                                <div class="col-12 mb-20">
-                                                                    <label for="name"
-                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                                        Image
-                                                                    </label>
-                                                                    <input type="file" name="image"
-                                                                        class="form-control radius-8" id="name">
-                                                                </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                                        Libelle
+                                                                        Nom
                                                                     </label>
-                                                                    <input value="{{ $item->name }}" type="text"
-                                                                        name="libelle" required
+                                                                    <input type="text" name="firstname" required
                                                                         class="form-control radius-8" id="name"
-                                                                        placeholder="Saisir un libellé">
+                                                                        placeholder="Entrer son nom"
+                                                                        value="{{ $item['firstName'] }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                                        Lien
+                                                                        Prénom
                                                                     </label>
-                                                                    <input value="{{ $item->lien }}" type="text"
-                                                                        name="lien" required
+                                                                    <input type="text" name="lastname" required
                                                                         class="form-control radius-8" id="name"
-                                                                        placeholder="Entrer le lien">
+                                                                        placeholder="Entrer son prénom"
+                                                                        value="{{ $item['lastName'] }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                                        Coût
+                                                                        E-mail
                                                                     </label>
-                                                                    <input value="{{ $item->price }}" type="text"
-                                                                        name="lien" required
+                                                                    <input type="email" name="email" required
                                                                         class="form-control radius-8" id="name"
-                                                                        placeholder="Entrer le coût">
+                                                                        placeholder="Entrer son e-mail"
+                                                                        value="{{ $item['email'] }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
                                                                         class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                                        Date debut
+                                                                        Téléphone
                                                                     </label>
-                                                                    <input value="{{ $dateDebut }}" type="date"
-                                                                        name="debut" required
-                                                                        class="form-control radius-8" id="name">
-                                                                </div>
-                                                                <div class="col-6 mb-20">
-                                                                    <label for="name"
-                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                                        Date fin
-                                                                    </label>
-                                                                    <input value="{{ $dateFin }}" type="date"
-                                                                        name="fin" required
-                                                                        class="form-control radius-8" id="name">
+                                                                    <input type="text" name="phone"
+                                                                        class="form-control radius-8" id="name"
+                                                                        placeholder="Entrer son numéro de Téléphone"
+                                                                        value="{{ $item['phoneNumber'] }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="country"
-                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">Statut
+                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">Profil
                                                                     </label>
-                                                                    <select required name="statut"
+                                                                    <select required name="profil"
                                                                         class="form-control radius-8 form-select"
                                                                         id="country">
-                                                                        <option value="{{ $item->status }}">Sélectionne
+                                                                        <option value="{{ $item->role }}">Sélectionne
                                                                         </option>
-                                                                        <option value="ACTIVE">ACTIVE</option>
-                                                                        <option value="INACTIVE">INACTIVE</option>
+                                                                        <option value="PHARMACIEN">PHARMACIEN</option>
+                                                                        <option value="GESTIONNAIRE">GESTIONNAIRE</option>
+                                                                        <option value="CAISSIERE">CAISSIERE</option>
                                                                     </select>
                                                                 </div>
                                                                 <div
@@ -291,10 +261,10 @@
                                         </div>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_publicite }}">
+                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_pharmacien }}">
                                             <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="delete{{ $item->id_publicite }}" tabindex="-1"
+                                        <div class="modal fade" id="delete{{ $item->id_pharmacien }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -307,8 +277,7 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form
-                                                            action="{{ route('publicites.destroy', $item->id_publicite) }}"
+                                                        <form action="{{ route('company.destroy', $item['email']) }}"
                                                             method="post">
                                                             @csrf
                                                             @method('DELETE')

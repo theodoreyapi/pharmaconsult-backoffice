@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="{{ URL::asset('') }}assets/css/lib/slick.css">
     <!-- main css -->
     <link rel="stylesheet" href="{{ URL::asset('') }}assets/css/style.css">
+    @stack('csss')
 </head>
 
 <body>

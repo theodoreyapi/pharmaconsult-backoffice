@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assurances;
 use App\Models\Commune;
+use App\Models\MoyensPaiment;
 use App\Models\Pharmacy;
 use App\Models\PharmacyAssurances;
 use App\Models\PharmacyPaymentMethods;
 use App\Models\Review;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 
 class PharmacieController extends Controller
 {
@@ -46,81 +48,49 @@ class PharmacieController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
+
+        $timestamp = Carbon::now()->format('Ymd_His');
+
         $roles = [
-            'photo' => '',
             'name' => 'required',
             'adresse' => 'required',
             'responsable' => 'required',
             'commune' => 'required',
-            'phone' => '',
-            'whatsapp' => '',
-            'longitude' => '',
-        ];
-        $customMessages = [
-            'name.required' => "Veuillez saisir le nom d ela pharmacie.",
-            'responsable.required' => "Veuillez saisir le nom du pharmacie.",
-            'commune.required' => "Veuillez sélectionner la commune.",
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
 
-        $request->validate($roles, $customMessages);
+        $messages = [
+            'name.required' => "Le nom est obligatoire.",
+            'adresse.required' => "L'adresse est obligatoire.",
+            'responsable.required' => "Le responsable est obligatoire.",
+            'commune.required' => "La commune est obligatoire.",
+        ];
 
-        if ($request->file('photo') == null) {
-            //dd($request->all());
-            $response = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])->post(env('API_BASE_URL') . '/pharma/add', [
-                'pharmacyCmd' => json_encode([
-                    'name' => $request->name,
-                    'address' => $request->adresse,
-                    'phoneNumber' => $request->phone ?? '',
-                    'whatsAppPhoneNumber' => $request->whatsapp ?? '',
-                    'ownerName' => $request->responsable,
-                    'gpsCoordinates' => $request->longitude,
-                    'startGardeDate' => 0,
-                    'endGardeDate' => 0,
-                    'communeId' => $request->commune,
-                ])
-            ]);
-            // dd($response->status() . ' </br>' . $response->body());
-            if ($response->status() == 201) {
-                return back()->with('succes',  "Vous avez ajouter " . $request->name);
-            } else {
-                return back()->withErrors(["Impossible d'ajouter " . $request->name . ". Veuillez réessayer!!"]);
-            }
+        $request->validate($roles, $messages);
+
+        $imagePath = null;
+
+        if ($request->file('photo')) {
+            $file = $request->file('photo');
+            $name = 'pharmacy_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('pharmacys'), $name);
+
+            $imagePath = url('pharma/public/pharmacys/' . $name);
+        }
+
+        $pharmacy = new Pharmacy();
+        $pharmacy->name = $request->name;
+        $pharmacy->address = $request->adresse;
+        $pharmacy->owner_name = $request->responsable;
+        $pharmacy->commune_id = $request->commune;
+        $pharmacy->phone_number = $request->phone;
+        $pharmacy->whats_app_phone_number = $request->whatsapp;
+        $pharmacy->gps_coordinates = $request->longitude;
+        $pharmacy->facade_image = $imagePath;
+        if ($pharmacy->save()) {
+            return back()->with('succes',  "Pharmacie ajoutée avec succès. ");
         } else {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->attach(
-                    'facadeImage',
-                    file_get_contents($request->file('photo')->getRealPath()),
-                    $request->file('photo')->getClientOriginalName()
-                )->post(env('API_BASE_URL') . '/pharma/add', [
-                    'pharmacyCmd' => json_encode([
-                        'name' => $request->name,
-                        'address' => $request->adresse,
-                        'phoneNumber' => $request->phone ?? '',
-                        'whatsAppPhoneNumber' => $request->whatsapp ?? '',
-                        'ownerName' => $request->responsable,
-                        'gpsCoordinates' => $request->longitude,
-                        'startGardeDate' => 0,
-                        'endGardeDate' => 0,
-                        'communeId' => $request->commune,
-                    ])
-                ]);
-            //dd($response->status() . ' </br>' . $response->body(). ' </br>' . $response->json(). ' </br>' . $request->file('photo') . ' </br>' . $request->commune);
-            if ($response->status() == 201) {
-                return back()->with('succes',  "Vous avez ajouter " . $request->name);
-            } else {
-                return back()->withErrors(["Impossible d'ajouter " . $request->name . ". Veuillez réessayer!!"]);
-            }
+            return back()->withErrors(["Impossible d'ajouter. Veuillez réessayer!!"]);
         }
     }
 
@@ -132,21 +102,14 @@ class PharmacieController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/assurances/getAll');
 
-        if ($response->status() == 200) {
-            $assurances = $response->json();
+        $assurances = Assurances::orderBy('name', 'ASC')->get();
 
-            return view('pharmacies.asso-assurance', compact('assurances', 'id'));
-        } else {
-            return back()->withErrors(["Impossible de charger les assurances. Veuillez réessayer!!"]);
-        }
+        $selectedAssurances = PharmacyAssurances::where('pharmacy_id', $id)
+            ->pluck('assurance_id')
+            ->toArray();
+
+        return view('pharmacies.asso-assurance', compact('assurances', 'id', 'selectedAssurances'));
     }
 
     /**
@@ -157,107 +120,73 @@ class PharmacieController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/payment-methods/all');
 
-        if ($response->status() == 200) {
-            $paiements = $response->json();
+        $paiements = MoyensPaiment::all();
 
-            return view('pharmacies.asso-paiement', compact('paiements', 'id'));
-        } else {
-            return back()->withErrors(["Impossible de charger les moyens de paiement. Veuillez réessayer!!"]);
-        }
+        $selectedPaiement = PharmacyPaymentMethods::where('pharmacy_id', $id)
+            ->pluck('payment_method_id')
+            ->toArray();
+
+        return view('pharmacies.asso-paiement', compact('paiements', 'id', 'selectedPaiement'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
+
+        $timestamp = Carbon::now()->format('Ymd_His');
+
+        $pharmacy = Pharmacy::findOrFail($id);
+
         $roles = [
-            'photo' => '',
             'name' => 'required',
             'adresse' => 'required',
             'responsable' => 'required',
             'commune' => 'required',
-            'phone' => '',
-            'whatsapp' => '',
-            'longitude' => '',
-        ];
-        $customMessages = [
-            'name.required' => "Veuillez saisir le nom d ela pharmacie.",
-            'responsable.required' => "Veuillez saisir le nom du pharmacie.",
-            'commune.required' => "Veuillez sélectionner la commune.",
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
 
-        $request->validate($roles, $customMessages);
+        $request->validate($roles);
 
-        if ($request->file('photo') == null) {
-            //dd($request->all());
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->post(env('API_BASE_URL') . '/pharma/update/' . $id, [
-                    'pharmacyCmd' => json_encode([
-                        'name' => $request->name,
-                        'address' => $request->adresse,
-                        'phoneNumber' => $request->phone ?? '',
-                        'whatsAppPhoneNumber' => $request->whatsapp ?? '',
-                        'ownerName' => $request->responsable,
-                        'gpsCoordinates' => $request->longitude,
-                        'startGardeDate' => 0,
-                        'endGardeDate' => 0,
-                        'communeId' => $request->commune,
-                    ])
-                ]);
-            // dd($response->status() . ' </br>' . $response->body());
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Mise à jour effectuée");
-            } else {
-                return back()->withErrors(["Impossible de mettre à jour. Veuillez réessayer!!"]);
+        // Gestion image
+        if ($request->file('photo')) {
+
+            // 🔥 Supprimer ancienne image
+            if ($pharmacy->facade_image) {
+
+                // récupérer le chemin du fichier depuis l'URL
+                $oldPath = public_path(parse_url($pharmacy->facade_image, PHP_URL_PATH));
+
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
-        } else {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->attach(
-                    'facadeImage',
-                    file_get_contents($request->file('photo')->getRealPath()),
-                    $request->file('photo')->getClientOriginalName()
-                )->post(env('API_BASE_URL') . '/pharma/update/' . $id, [
-                    'pharmacyCmd' => json_encode([
-                        'name' => $request->name,
-                        'address' => $request->adresse,
-                        'phoneNumber' => $request->phone ?? '',
-                        'whatsAppPhoneNumber' => $request->whatsapp ?? '',
-                        'ownerName' => $request->responsable,
-                        'gpsCoordinates' => $request->longitude,
-                        'startGardeDate' => 0,
-                        'endGardeDate' => 0,
-                        'communeId' => $request->commune,
-                    ])
-                ]);
-            // dd($response->status() . ' </br>' . $response->body(). ' </br>' . $request->file('photo') . ' </br>' . $request->commune);
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Mise à jour effectuée");
-            } else {
-                return back()->withErrors(["Impossible de mettre à jour. Veuillez réessayer!!"]);
-            }
+
+            $file = $request->file('photo');
+            $name = 'pharmacy_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('pharmacys'), $name);
+            $diplomePath = url('pharma/public/pharmacys/' . $name);
+
+            $pharmacy->facade_image = $diplomePath;
         }
+
+        // Update champs
+        $pharmacy->name = $request->name;
+        $pharmacy->address = $request->adresse;
+        $pharmacy->owner_name = $request->responsable;
+        $pharmacy->commune_id = $request->commune;
+        $pharmacy->phone_number = $request->phone;
+        $pharmacy->whats_app_phone_number = $request->whatsapp;
+        $pharmacy->gps_coordinates = $request->longitude;
+
+        $pharmacy->save();
+
+        return back()->with('succes', "Pharmacie modifiée avec succès.");
     }
 
     /**
@@ -268,19 +197,10 @@ class PharmacieController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->delete(env('API_BASE_URL') . '/pharma/delete/' . $id);
 
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Suppression éffectuée");
-        } else {
-            return back()->withErrors(["Impossible de supprimer. Veuillez réessayer!!"]);
-        }
+        Pharmacy::findOrFail($id)->delete();
+
+        return back()->with('succes',  "Suppression éffectuée");
     }
 
     public function showAllGet($id)
@@ -352,27 +272,30 @@ class PharmacieController extends Controller
         ));
     }
 
-    public function assoAssurance(Request $request, string $id)
+    public function assoAssurance(Request $request, $id)
     {
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(env('API_BASE_URL') . '/pharma/associate/assurance', [
-            'pharmacyId' => (int) $id,
-            'assuranceIds' => array_map('intval', $request->assurances)
+
+        $request->validate([
+            'assurances' => 'required|array',
+        ], [
+            'assurances.required' => "Veuillez sélectionner au moins une assurance.",
         ]);
-        // dd($response->status() . ' </br>' . $response->body() . ' </br>' . json_encode(array_map('intval', $request->assurances)));
-        if ($response->status() == 201) {
-            return back()->with('succes',  "Les assurances ont été associés a la pharmacie ");
-        } else {
-            return back()->withErrors(["Impossible d'associer les assurances. Veuillez réessayer!!"]);
+
+        // 🔥 supprimer anciennes associations
+        PharmacyAssurances::where('pharmacy_id', $id)->delete();
+
+        // 🔥 insérer nouvelles
+        foreach ($request->assurances as $assuranceId) {
+            PharmacyAssurances::create([
+                'pharmacy_id' => $id,
+                'assurance_id' => $assuranceId,
+            ]);
         }
+
+        return back()->with('succes', "Les assurances ont été associées à la pharmacie");
     }
 
     public function assoPaiement(Request $request, string $id)
@@ -380,21 +303,24 @@ class PharmacieController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(env('API_BASE_URL') . '/pharma/associate/payment-methods', [
-            'pharmacyId' => (int) $id,
-            'paymentMethodIds' => array_map('intval', $request->paiements)
+
+        $request->validate([
+            'paiements' => 'required|array',
+        ], [
+            'paiements.required' => "Veuillez sélectionner au moins une assurance.",
         ]);
-        // dd($response->status() . ' </br>' . $response->body() . ' ' . json_encode(array_map('intval', $request->paiements)));
-        if ($response->status() == 201) {
-            return back()->with('succes',  "Les mayens de paiement ont été associés a la pharmacie ");
-        } else {
-            return back()->withErrors(["Impossible d'associer les moyens de paiement. Veuillez réessayer!!"]);
+
+        // 🔥 supprimer anciennes associations
+        PharmacyPaymentMethods::where('pharmacy_id', $id)->delete();
+
+        // 🔥 insérer nouvelles
+        foreach ($request->paiements as $paiementsId) {
+            PharmacyPaymentMethods::create([
+                'pharmacy_id' => $id,
+                'payment_method_id' => $paiementsId,
+            ]);
         }
+
+        return back()->with('succes',  "Les mayens de paiement ont été associés a la pharmacie ");
     }
 }

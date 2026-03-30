@@ -44,6 +44,7 @@ class PublicitesController extends Controller
             'image' => 'required',
             'libelle' => 'required',
             'lien' => 'required',
+            'price' => 'required',
             'debut' => 'required',
             'fin' => 'required',
         ];
@@ -51,41 +52,36 @@ class PublicitesController extends Controller
             'image.required' => "Veuillez selectionner la photo de la publicite.",
             'libelle.required' => "Veuillez saisir le nom de la publicite.",
             'lien.required' => "Veuillez saisir le lien de la publicite.",
+            'price.required' => "Veuillez saisir le coût de la publicite.",
             'debut.required' => "Veuillez sélectionner la date de debut de la publicite.",
             'fin.required' => "Veuillez sélectionner la date de fin de la publicite.",
         ];
 
         $request->validate($roles, $customMessages);
 
-        //dd($request->debut);
+        $timestamp = Carbon::now()->format('Ymd_His');
 
-        $debut = Carbon::parse($request->debut)->format('Y-m-d\TH:i:s');
-        //dd($debut);
-        $fin = Carbon::parse($request->fin)->format('Y-m-d\TH:i:s');
+        $imagePath = null;
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->asMultipart()
-            ->withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                'Accept' => 'application/json',
-            ])->attach(
-                'medicamentPicture',
-                file_get_contents($request->file('image')->getRealPath()),
-                $request->file('image')->getClientOriginalName()
-            )->post(env('API_BASE_URL_PHARMA') . '/publicites/create', [
-                'publiciteCmd' => json_encode([
-                    'name' => $request->libelle,
-                    'lien' => $request->lien,
-                    'startDate' => $debut,
-                    'endDate' => $fin,
-                ])
-            ]);
-        //dd($response->status() . ' </br>' . $response->body(). ' </br>' . $response->json(). ' </br>' . $request->file('image') . ' </br>' . $request->commune);
-        if ($response->status() == 201) {
-            return back()->with('succes',  "La publicité " . $request->name . " a été ajoutée avec succès.");
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $name = 'publicite_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('publicites'), $name);
+
+            $imagePath = url('pharma/public/publicites/' . $name);
+        }
+
+        $publicite = new Publicite();
+        $publicite->end_date = $request->fin;
+        $publicite->lien = $request->lien;
+        $publicite->price = $request->price ?? 0;
+        $publicite->start_date = $request->debut;
+        $publicite->name = $request->libelle;
+        $publicite->image = $imagePath;
+        if ($publicite->save()) {
+            return back()->with('succes',  "La publicité " . $request->libelle . " a été ajoutée avec succès.");
         } else {
-            return back()->withErrors(["Impossible d'ajouter " . $request->name . ". Veuillez réessayer!!"]);
+            return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
         }
     }
 
@@ -117,6 +113,7 @@ class PublicitesController extends Controller
             'image' => '',
             'libelle' => 'required',
             'lien' => 'required',
+            'price' => 'required',
             'debut' => 'required',
             'fin' => 'required',
             'statut' => 'required',
@@ -124,6 +121,7 @@ class PublicitesController extends Controller
         $customMessages = [
             'libelle.required' => "Veuillez saisir le nom de la publicite.",
             'lien.required' => "Veuillez saisir le lien de la publicite.",
+            'price.required' => "Veuillez saisir le coût de la publicite.",
             'debut.required' => "Veuillez sélectionner la date de debut de la publicite.",
             'fin.required' => "Veuillez sélectionner la date de fin de la publicite.",
             'statut.required' => "Veuillez sélectionner la date de fin de la publicite.",
@@ -131,74 +129,46 @@ class PublicitesController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $debut = Carbon::parse($request->debut)->format('Y-m-d\TH:i:s');
-        //dd($debut);
-        $fin = Carbon::parse($request->fin)->format('Y-m-d\TH:i:s');
+        $timestamp = Carbon::now()->format('Ymd_His');
 
-        $publiciteCmd = [
-            'name' => $request->libelle,
-            'lien' => $request->lien,
-            'startDate' => $debut,
-            'endDate' => $fin,
-            'status' => $request->statut,
-        ];
+        $publicite = Publicite::findOrFail($id);
 
-        if ($request->file('image') == null) {
+        // Gestion image
+        if ($request->file('image')) {
 
-            $response = Http::withOptions(['verify' => false])
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])
-                ->attach(
-                    'publiciteCmd',
-                    json_encode($publiciteCmd),
-                    'publiciteCmd.json' // nom temporaire
-                )
-                ->put(env('API_BASE_URL_PHARMA') . '/publicites/update/' . $id);
+            // 🔥 Supprimer ancienne image
+            if ($publicite->image) {
 
+                // récupérer le chemin du fichier depuis l'URL
+                $oldPath = public_path(parse_url($publicite->image, PHP_URL_PATH));
 
-            dd($response->status() . ' </br>' . $response->body() . ' </br>' . $response->json() . ' </br>' . json_encode([
-                'name' => $request->libelle,
-                'lien' => $request->lien,
-                'startDate' => $debut,
-                'endDate' => $fin,
-                'status' => $request->statut,
-                'id' => $id,
-            ]));
-
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Modification éffectuée ");
-            } else {
-                return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
+
+            $file = $request->file('image');
+            $name = 'publicite_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('publicites'), $name);
+            $diplomePath = url('pharma/public/publicites/' . $name);
+
+            $publicite->image = $diplomePath;
+        }
+
+        // Update champs
+        $publicite->end_date = $request->fin;
+        $publicite->lien = $request->lien;
+        $publicite->price = $request->price ?? 0;
+        $publicite->start_date = $request->debut;
+        $publicite->name = $request->libelle;
+
+        if ($publicite->save()) {
+            return back()->with('succes',  "Modification éffectuée ");
         } else {
-            $response = Http::withOptions(['verify' => false])
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])
-                ->attach(
-                    'publiciteCmd',
-                    json_encode($publiciteCmd),
-                    'publiciteCmd.json'
-                )
-                ->attach(
-                    'pubicitePicture',
-                    fopen($request->file('image')->getPathname(), 'r'),
-                    $request->file('image')->getClientOriginalName()
-                )
-                ->put(env('API_BASE_URL_PHARMA') . '/publicites/update/' . $id);
-
-            //dd($response->status() . ' </br>' . $response->body() . ' </br>' . $response->json());
-
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Modification éffectuée ");
-            } else {
-                return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
-            }
+            return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -208,18 +178,22 @@ class PublicitesController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->delete(env('API_BASE_URL_PHARMA') . '/publicites/delete/' . $id);
 
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Suppression éffectuée");
-        } else {
-            return back()->withErrors(["Impossible de supprimer. Veuillez réessayer!!"]);
+        $publicite =  Publicite::findOrFail($id);
+
+        // 🔥 Supprimer ancienne image
+        if ($publicite->image) {
+
+            // récupérer le chemin du fichier depuis l'URL
+            $oldPath = public_path(parse_url($publicite->image, PHP_URL_PATH));
+
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
         }
+
+        $publicite->delete();
+
+        return back()->with('succes',  "Suppression éffectuée");
     }
 }

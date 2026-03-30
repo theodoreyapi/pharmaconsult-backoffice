@@ -44,26 +44,25 @@ class PriceFicheController extends Controller
             return response()->json(['html' => '']);
         }
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . "/pharma/medicaments/search?name=$name&page=$page&size=$size");
+        $medicaments = Medicamants::all();
 
-        if ($response->successful()) {
-            $data = $response->json();
-            $medicaments = $data['content'] ?? [];
+        $html = view('pharmacies.partials.medicament-list', compact('medicaments'))->render();
 
-            $html = view('pharmacies.partials.medicament-list', compact('medicaments'))->render();
-
-            return response()->json(['html' => $html]);
-        }
+        return response()->json(['html' => $html]);
 
         return response()->json(['html' => '<p>Erreur lors de la recherche.</p>']);
     }
 
+    public function searchh(Request $request)
+    {
+        $search = $request->search;
+
+        $medicaments = Medicamants::where('name', 'LIKE', "%$search%")
+            ->limit(10)
+            ->get();
+
+        return response()->json($medicaments);
+    }
 
     /**
      * Show the form for creating a new resource.

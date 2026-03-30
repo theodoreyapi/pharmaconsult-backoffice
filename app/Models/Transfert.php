@@ -14,6 +14,8 @@ class Transfert extends Model
         'receiver_username',
         'sender_username',
         'execute_by',
+        'type_operation',
+        'type',
     ];
 
     protected $primaryKey = 'id_transfert';

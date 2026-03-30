@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assurances;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -39,6 +40,7 @@ class AssuranceController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
+        
         $roles = [
             'description' => 'required',
             'libelle' => 'required',
@@ -51,50 +53,26 @@ class AssuranceController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        if ($request->file('photo') == null) {
+        $timestamp = Carbon::now()->format('Ymd_His');
 
-            $response = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])->post(env('API_BASE_URL') . '/assurances/add', [
-                'assuranceCmd' => json_encode([
-                    'name' => $request->libelle,
-                    'description' => $request->description,
-                ])
-            ]);
+        $imagePath = null;
 
-            if ($response->status() == 201) {
-                return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
-            } else {
-                return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
-            }
+        if ($request->file('photo')) {
+            $file = $request->file('photo');
+            $name = 'assurance_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assurances'), $name);
+
+            $imagePath = url('pharma/public/assurances/' . $name);
+        }
+
+        $assurance = new Assurances();
+        $assurance->description = $request->description;
+        $assurance->name = $request->libelle;
+        $assurance->assurance_picture = $imagePath;
+        if ($assurance->save()) {
+            return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
         } else {
-
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->attach(
-                    'assurancePicture',
-                    file_get_contents($request->file('photo')->getRealPath()),
-                    $request->file('photo')->getClientOriginalName()
-                )->post(env('API_BASE_URL') . '/assurances/add', [
-                    'assuranceCmd' => json_encode([
-                        'name' => $request->libelle,
-                        'description' => $request->description,
-                    ])
-                ]);
-
-            if ($response->status() == 201) {
-                return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
-            } else {
-                return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
-            }
+            return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
         }
     }
 
@@ -134,51 +112,40 @@ class AssuranceController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        if ($request->file('photo') == null) {
+        $timestamp = Carbon::now()->format('Ymd_His');
 
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ])->post(env('API_BASE_URL') . '/assurances/update/' . $id, [
-                    'assuranceCmd' => json_encode([
-                        'name' => $request->libelle,
-                        'description' => $request->description,
-                    ])
-                ]);
+        $assurance = Assurances::findOrFail($id);
 
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Modification effectuée ");
-            } else {
-                return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
+        // Gestion image
+        if ($request->file('photo')) {
+
+            // 🔥 Supprimer ancienne image
+            if ($assurance->assurance_picture) {
+
+                // récupérer le chemin du fichier depuis l'URL
+                $oldPath = public_path(parse_url($assurance->assurance_picture, PHP_URL_PATH));
+
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
+
+            $file = $request->file('photo');
+            $name = 'assurance_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assurances'), $name);
+            $diplomePath = url('pharma/public/assurances/' . $name);
+
+            $assurance->assurance_picture = $diplomePath;
+        }
+
+        // Update champs
+        $assurance->description = $request->description;
+        $assurance->name = $request->libelle;
+
+        if ($assurance->save()) {
+            return back()->with('succes',  "Modification effectuée ");
         } else {
-
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->attach(
-                    'assurancePicture',
-                    file_get_contents($request->file('photo')->getRealPath()),
-                    $request->file('photo')->getClientOriginalName()
-                )->put(env('API_BASE_URL') . '/assurances/update/' . $id, [
-                    'assuranceCmd' => json_encode([
-                        'name' => $request->libelle,
-                        'description' => $request->description,
-                    ])
-                ]);
-
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Modification effectuée ");
-            } else {
-                return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
-            }
+            return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
         }
     }
 
@@ -190,18 +157,9 @@ class AssuranceController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->delete(env('API_BASE_URL') . '/assurances/delete/' . $id);
 
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Suppression éffectuée ");
-        } else {
-            return back()->withErrors(["Impossible de supprimer. Veuillez réessayer!!"]);
-        }
+        Assurances::findOrFail($id)->delete();
+
+        return back()->with('succes',  "Suppression éffectuée ");
     }
 }

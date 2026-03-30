@@ -54,7 +54,7 @@
             <div class="d-flex align-items-center flex-wrap gap-3">
             </div>
             <div class="d-flex align-items-center flex-wrap gap-3">
-                <a href="{{ url()->previous() }}"
+                <a href="{{ url('view-pharmacy', $id) }}"
                     class="btn btn-info text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
                     Revenir a la pharmacie
                 </a>
@@ -135,13 +135,14 @@
                                 <div class="col-sm-4 mb-3">
                                     <div class="assurance-card d-flex align-items-center gap-2">
                                         <input class="form-check-input me-2" id="assurance_{{ $key }}"
-                                            type="checkbox" name="assurances[]" value="{{ $item['id'] }}">
+                                            type="checkbox" name="assurances[]" value="{{ $item->id_assurance }}"
+                                            {{ in_array($item->id_assurance, $selectedAssurances) ? 'checked' : '' }}>
                                         <label for="assurance_{{ $key }}"
                                             class="d-flex align-items-center gap-2 m-0 w-100">
-                                            <img src="{{ str_replace(' ', '%20', $item['assurancePicture'] ?? URL::asset('assets/images/user-list/user-list1.png')) }}"
-                                                alt="{{ $item['name'] }}">
+                                            <img src="{{ str_replace(' ', '%20', $item->assurance_picture ?? URL::asset('assets/images/user-list/user-list1.png')) }}"
+                                                alt="{{ $item->name }}">
                                             <span class="text-secondary-light fw-medium">
-                                                {{ $item['name'] }}
+                                                {{ $item->name }}
                                             </span>
                                         </label>
                                     </div>

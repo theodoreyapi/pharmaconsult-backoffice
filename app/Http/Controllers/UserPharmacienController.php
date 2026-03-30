@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Pharmacien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 
-class QrCodeController extends Controller
+class UserPharmacienController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,17 +17,9 @@ class QrCodeController extends Controller
             return redirect()->intended('logout');
         }
 
-        $admins = Pharmacien::join('pharmacy', 'pharmacien.pharmacy_id', '=', 'pharmacy.id_pharmacy')
-            ->where('pharmacien.role', '=', 'PHARMACIEN')
-            ->select(
-                'pharmacien.username',
-                'pharmacien.first_name as nomPharmacien',
-                'pharmacy.name as nomPharmacy',
-                'pharmacy.id_pharmacy as pharmacyId',
-            )
-            ->get();
+        $admins = Pharmacien::all();
 
-        return view('users.qrcode', compact('admins'));
+        return view('users.user-pharma', compact('admins'));
     }
 
     /**

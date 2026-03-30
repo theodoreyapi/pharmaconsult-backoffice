@@ -22,10 +22,10 @@
                                 <div class="col-sm-4 mb-3">
                                     <div class="assurance-card d-flex align-items-center gap-2">
                                         <input class="form-check-input me-2" id="assurance_${index}"
-                                            type="checkbox" name="pharmacys[]" value="${item.id}">
+                                            type="checkbox" name="pharmacys[]" value="${item.id_pharmacy}">
                                         <label for="assurance_${index}"
                                             class="d-flex align-items-center gap-2 m-0 w-100">
-                                            <img src="${item.facadeImage ? item.facadeImage.replace(/ /g, '%20') : '/assets/images/user-list/user-list1.png'}"
+                                            <img src="${item.facade_image ? item.facade_image.replace(/ /g, '%20') : '/assets/images/user-list/user-list1.png'}"
                                                 alt="${item.name}" width="40" height="40">
                                             <span class="text-secondary-light fw-medium">
                                                 ${item.name}
@@ -35,7 +35,7 @@
                                 </div>
                             `;
                             });
-                        } else if (response == 'undefined' || response == null) {
+                        } else {
                             html =
                                 '<div class="col-12"><p class="text-muted">Aucune pharmacie trouvée pour cette commune.</p></div>';
                         }
@@ -144,8 +144,8 @@
                             <span class="text-danger-600">*</span> </label>
                         <select name="commune" required class="form-control radius-8 form-select" id="depart">
                             <option value="">Sélectionnez la commune</option>
-                            @foreach ($communes['content'] as $item)
-                                <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
+                            @foreach ($communes as $item)
+                                <option value="{{ $item->id_commune }}">{{ $item->name }}</option>
                             @endforeach
                         </select>
                     </div>

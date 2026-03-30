@@ -77,20 +77,20 @@
                             @foreach ($admins as $item)
                                 <tr>
                                     <td>
-                                        {{ $item['nomPharmacien'] }}<br>
-                                        {{ $item['username'] }}
+                                        {{ $item->nomPharmacien }}<br>
+                                        {{ $item->username }}
                                     </td>
                                     <td style="font-size: 13px">
-                                        {{ $item['nomPharmacy'] }}
+                                        {{ $item->nomPharmacy }}
                                     </td>
                                     <td>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-success-focus text-dark-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#qrcodes{{ $item['pharmacyId'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#qrcodes{{ $item->pharmacyId }}">
                                             <iconify-icon icon="hugeicons:qr-code"></iconify-icon>
                                         </a>
 
-                                        <div class="modal fade" id="qrcodes{{ $item['pharmacyId'] }}" tabindex="-1"
+                                        <div class="modal fade" id="qrcodes{{ $item->pharmacyId }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -110,17 +110,17 @@
                                                         <div class="p-4">
                                                             <br>
                                                             <br>
-                                                            <h5 class="fw-bold mb-0">{{ $item['nomPharmacy'] }}</h5>
+                                                            <h5 class="fw-bold mb-0">{{ $item->nomPharmacy }}</h5>
                                                             <p class="fw-bold text-muted mb-3">Dr
-                                                                {{ $item['nomPharmacien'] }}</p>
+                                                                {{ $item->nomPharmacien }}</p>
                                                             <br>
                                                             {{-- Génération du QR code --}}
-                                                            <div id="qrcode-container-{{ $item['pharmacyId'] }}"
+                                                            <div id="qrcode-container-{{ $item->pharmacyId }}"
                                                                 style="background-color: rgba(255,255,255,0.85);
                                     border-radius: 12px;
                                     display: inline-block;
                                     padding: 3%;">
-                                                                {!! QrCode::format('svg')->size(250)->generate(\App\Helpers\CryptoHelper::encryptData($item['username'])) !!}
+                                                                {!! QrCode::format('svg')->size(250)->generate(\App\Helpers\CryptoHelper::encryptData($item->username)) !!}
                                                             </div>
                                                             <br>
                                                             <br>
@@ -136,7 +136,7 @@
                                                         <button type="button" class="btn btn-outline-danger px-4"
                                                             data-bs-dismiss="modal">Fermer</button>
                                                         <button class="btn btn-success px-4"
-                                                            onclick="captureQrCode('{{ $item['pharmacyId'] }}')">
+                                                            onclick="captureQrCode('{{ $item->pharmacyId }}')">
                                                             Télécharger en PDF
                                                         </button>
 

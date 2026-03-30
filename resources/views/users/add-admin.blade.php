@@ -20,10 +20,10 @@
                         <div class="col-sm-4 mb-3">
                             <div class="assurance-card d-flex align-items-center gap-2">
                                 <input class="form-check-input me-2" id="assurance_${index}"
-                                    type="checkbox" name="pharmacys[]" value="${item.id}">
+                                    type="checkbox" name="pharmacys[]" value="${item.id_pharmacy}">
                                 <label for="assurance_${index}"
                                     class="d-flex align-items-center gap-2 m-0 w-100">
-                                    <img src="${item.facadeImage ? item.facadeImage.replace(/ /g, '%20') : '/assets/images/user-list/user-list1.png'}"
+                                    <img src="${item.facade_image ? item.facade_image.replace(/ /g, '%20') : '/assets/images/user-list/user-list1.png'}"
                                         alt="${item.name}" width="40" height="40">
                                     <span class="text-secondary-light fw-medium">${item.name}</span>
                                 </label>
@@ -183,7 +183,7 @@
                         <label for="depart" class="form-label fw-semibold text-primary-light text-sm mb-8">Commune</label>
                         <select name="commune" class="form-control radius-8 form-select" id="depart">
                             <option value="">Sélectionnez la commune</option>
-                            @foreach ($communes['content'] as $item)
+                            @foreach ($communes as $item)
                                 <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
                             @endforeach
                         </select>

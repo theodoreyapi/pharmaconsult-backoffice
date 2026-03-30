@@ -50,8 +50,7 @@
                                     <!-- Upload Image Start -->
                                     <div class="mb-24 mt-16">
                                         <div class="avatar-upload">
-                                                <input name="photo" type='file'
-                                                    accept=".png, .jpg, .jpeg">
+                                            <input name="photo" type='file' accept=".png, .jpg, .jpeg">
                                         </div>
                                     </div>
                                     <!-- Upload Image End -->
@@ -90,8 +89,8 @@
                                                 <select name="commune" required class="form-control radius-8 form-select"
                                                     id="depart">
                                                     <option value="">Sélectionnez la commune de la pharmacie</option>
-                                                    @foreach ($communes['content'] as $item)
-                                                        <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
+                                                    @foreach ($communes as $item)
+                                                        <option value="{{ $item->id_commune }}">{{ $item->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>

@@ -25,6 +25,18 @@ use App\Http\Controllers\RequetesController;
 use App\Http\Controllers\ReservationsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserPharmacienController;
+use App\Models\Commune;
+use App\Models\Medicamants;
+use App\Models\Pharmacy;
+use App\Models\PharmacyRequest;
+use App\Models\Rechargements;
+use App\Models\RequestMedicament;
+use App\Models\ReservationMedicament;
+use App\Models\Subscriptions;
+use App\Models\Transfert;
+use App\Models\UsersPharma;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -46,11 +58,7 @@ Route::get('/', function () {
 });
 
 Route::get('/proxy/pharmacies/{commune}', function ($commune) {
-    $response = Http::withOptions([
-        'verify' => false
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/pharmacies/getByCommune/' . $commune);
-
-    return response()->json($response->json());
+    return Pharmacy::where('commune_id', $commune)->get();
 });
 
 // Authentification
@@ -71,26 +79,85 @@ Route::get('index', function () {
         return redirect()->intended('logout');
     }
 
-    $responsestates = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/statistiques');
+    $currentYear = date('Y');
 
-    $statistiques = $responsestates->json();
+    // ── Statistiques générales ─────────────────────────────────────────
+    $statistiques = [
 
+        // Nombre total d'utilisateurs
+        'totalUsers' => UsersPharma::count(),
 
-    $response = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/statistiques/subscription-amounts/year');
+        // Souscriptions totales (toutes confondues)
+        'totalSubscriptions' => Subscriptions::count(),
 
-    $souscriptions = $response->json();
+        // Opérations totales (transferts)
+        'totalOperations' => Transfert::count(),
+
+        // Réservations totales
+        'totalReservations' => ReservationMedicament::count(),
+
+        // Requêtes totales (pharmacy_request)
+        'totalRequests' => PharmacyRequest::count(),
+
+        // Requêtes utilisateurs (request_medicament)
+        'totalRequestsUsers' => RequestMedicament::count(),
+
+        // Rechargements totaux (réussis)
+        'totalRechargements' => Rechargements::where('status', 'success')
+            ->count(),
+
+        // Transferts totaux (uniquement DEBIT pour éviter le double comptage)
+        'totalTransferts' => Transfert::where('type_operation', 'DEBIT')
+            ->count(),
+
+        // Nombre d'utilisateurs avec au moins une souscription active
+        'totalActifSubscriptions' => Subscriptions::where('status', 'active')
+            ->where('valid_until', '>', Carbon::now())
+            ->distinct('username')
+            ->count('username'),
+
+        // Revenu total = somme des montants des rechargements réussis
+        'totalSubscriptionAmount' => Rechargements::where('status', 'success')
+            ->sum('montant'),
+    ];
+
+    // ── Statistiques des souscriptions par mois (année en cours) ──────
+    // Regroupe les rechargements réussis par mois pour le graphique
+    $souscriptionsParMois = Rechargements::selectRaw("DATE_FORMAT(created_at, '%m') as mois_num, DATE_FORMAT(created_at, '%b') as mois, SUM(montant) as cumulTotal")
+        ->where('status', 'success')
+        ->whereYear('created_at', $currentYear)
+        ->groupByRaw("DATE_FORMAT(created_at, '%m'), DATE_FORMAT(created_at, '%b')")
+        ->orderByRaw("DATE_FORMAT(created_at, '%m')")
+        ->get()
+        ->toArray();
+
+    // Remplir les mois manquants avec 0 pour avoir les 12 mois
+    $moisFr = [
+        '01' => 'Jan',
+        '02' => 'Fév',
+        '03' => 'Mar',
+        '04' => 'Avr',
+        '05' => 'Mai',
+        '06' => 'Juin',
+        '07' => 'Juil',
+        '08' => 'Août',
+        '09' => 'Sep',
+        '10' => 'Oct',
+        '11' => 'Nov',
+        '12' => 'Déc',
+    ];
+
+    $souscriptionsIndexed = collect($souscriptionsParMois)->keyBy('mois_num')->toArray();
+
+    $souscriptions = [];
+    foreach ($moisFr as $num => $label) {
+        $souscriptions[] = [
+            'mois'       => $label,
+            'cumulTotal' => isset($souscriptionsIndexed[$num])
+                ? (float) $souscriptionsIndexed[$num]->cumulTotal
+                : 0,
+        ];
+    }
 
     return view('home.index', compact('statistiques', 'souscriptions'));
 });
@@ -171,28 +238,20 @@ Route::post('rechargement/init', [RechargementController::class, 'init'])->name(
 Route::post('/save-fcm-token', [NotificationController::class, 'storeToken']);
 
 Route::get('add-pharmacy', function () {
-    $response = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/communes/search?page=0&size=1000');
 
-    if ($response->status() == 200) {
-        $communes = $response->json();
+    $communes = Commune::orderBy('name', 'ASC')->get();
 
-        return view('pharmacies.add-pharmacy', compact('communes'));
-    } else {
-        return back()->withErrors(["Impossible de charger les communes. Veuillez réessayer!!"]);
-    }
+    return view('pharmacies.add-pharmacy', compact('communes'));
 });
 Route::get('view-pharmacy/{id}', [PharmacieController::class, 'showAllGet'])->name('pharmacy.showAllGet');
 Route::get('view-medicament', [PriceFicheController::class, 'showAllGet'])->name('medicament.showAllGet');
 
 Route::get('add-medicament', function () {
-    return view('pharmacies.add-medicament');
+    $medicaments = Medicamants::all();
+    return view('pharmacies.add-medicament', compact('medicaments'));
 });
+
+Route::get('/medicament/search', [PriceFicheController::class, 'searchh'])->name('medicament.search');
 
 Route::get('/pharmacy/search', [PriceFicheController::class, 'search'])->name('search.pharmacy');
 
@@ -212,6 +271,8 @@ Route::get('pharmacies', function () {
 
 // abonnement
 Route::resource('pricing', AbonnementController::class);
+Route::post('add-forfait/{id}', [AbonnementController::class, 'addForfait']);
+Route::post('update-module/{id}', [AbonnementController::class, 'updateModule']);
 
 // termes
 Route::resource('terms-about', AboutController::class);
@@ -237,6 +298,7 @@ Route::get('add-condition', function () {
 
 // setting
 Route::resource('company', AdminController::class);
+Route::resource('user-pharma', UserPharmacienController::class);
 Route::resource('pharmacien', PharmacienController::class);
 Route::post('profile', [PharmacienController::class, 'profile']);
 Route::get('notification', function () {
@@ -252,19 +314,8 @@ Route::get('view-profile', function () {
     return view('users.profile');
 });
 Route::get('add-admin', function () {
-    $response = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/communes/search?page=0&size=1000');
 
-    if ($response->status() == 200) {
-        $communes = $response->json();
+    $communes = Commune::orderBy('name', 'ASC')->get();
 
-        return view('users.add-admin', compact('communes'));
-    } else {
-        return back()->withErrors(["Impossible de charger les communes. Veuillez réessayer!!"]);
-    }
+    return view('users.add-admin', compact('communes'));
 });

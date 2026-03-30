@@ -9,7 +9,7 @@
 @section('content')
     <div class="dashboard-main-body">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-            <h6 class="fw-semibold mb-0">Forfaits - {{ $id }}</h6>
+            <h6 class="fw-semibold mb-0">Forfaits - {{ $libelle->libelle }}</h6>
             <ul class="d-flex align-items-center gap-2">
                 <li class="fw-medium">
                     <a href="{{ url('index') }}" class="d-flex align-items-center gap-1 hover-text-primary">
@@ -25,7 +25,7 @@
         @include('layouts.statuts')
 
         <div class="card h-100 p-0 radius-12">
-            {{-- <div
+            <div
                 class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                 </div>
@@ -33,9 +33,9 @@
                     class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
                     data-bs-toggle="modal" data-bs-target="#addExampleModal">
                     <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-                    Ajouter une publicite
+                    Ajouter un forfait
                 </a>
-            </div> --}}
+            </div>
             <div class="modal fade" id="addExampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
@@ -43,65 +43,57 @@
                         <div
                             class="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0 bg-success text-white">
                             <h1 class="modal-title fs-5 text-white" id="exampleModalLabel">
-                                Ajout d'une nouvelle publicite
+                                Ajout d'un forfait
                             </h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                                 style="color: white"></button>
                         </div>
                         <div class="modal-body p-24">
-                            <form action="{{ route('publicites.store') }}" method="post" role="form"
+                            <form action="{{ url('add-forfait', $id) }}" method="post" role="form"
                                 enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
-                                    <div class="col-12 mb-20">
-                                        <label for="name"
+                                    <div class="col-md-6 mb-20">
+                                        <label for="libelle"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Image
-                                        </label>
-                                        <input type="file" name="image" required class="form-control radius-8"
-                                            id="name">
-                                    </div>
-                                    <div class="col-6 mb-20">
-                                        <label for="name"
-                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Libelle
+                                            Libellé
                                         </label>
                                         <input type="text" name="libelle" required class="form-control radius-8"
-                                            id="name" placeholder="Saisir un libellé">
+                                            id="libelle" placeholder="Saisir un libellé">
                                     </div>
-                                    <div class="col-6 mb-20">
-                                        <label for="name"
+                                    <div class="col-md-6 mb-20">
+                                        <label for="prix"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Lien
+                                            Prix
                                         </label>
-                                        <input type="text" name="lien" required class="form-control radius-8"
-                                            id="name" placeholder="Entrer le lien">
+                                        <input type="number" name="prix" required class="form-control radius-8"
+                                            id="prix">
                                     </div>
-                                    <div class="col-6 mb-20">
-                                        <label for="name"
+                                    <div class="col-12 mb-20">
+                                        <label for="description"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Date debut
+                                            Description
                                         </label>
-                                        <input type="date" name="debut" required class="form-control radius-8"
-                                            id="name">
+                                        <textarea name="description" required class="form-control radius-8" id="description" rows="3"
+                                            placeholder="Entrer la description"></textarea>
                                     </div>
-                                    <div class="col-6 mb-20">
-                                        <label for="name"
+                                    <div class="col-md-6 mb-20">
+                                        <label for="duration"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Date fin
+                                            Durée (en jours)
                                         </label>
-                                        <input type="date" name="fin" required class="form-control radius-8"
-                                            id="name">
+                                        <input type="number" name="duration" required class="form-control radius-8"
+                                            id="duration">
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                                        <button type="reset" data-bs-dismiss="modal" aria-label="Close"
-                                            class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                                            Annuler
-                                        </button>
-                                        <button type="submit"
-                                            class="btn btn-primary border border-primary-600 text-md px-50 py-12 radius-8">
-                                            Enregistrer
-                                        </button>
+                                    <div class="col-12">
+                                        <div class="d-flex align-items-center justify-content-end gap-3 mt-24">
+                                            <button type="button" data-bs-dismiss="modal" class="btn btn-outline-danger">
+                                                Annuler
+                                            </button>
+                                            <button type="submit" class="btn btn-success">
+                                                Enregistrer
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -114,7 +106,7 @@
                     @foreach ($publicites as $index => $item)
                         @php
                             // Palette de couleurs (tu peux ajouter d'autres)
-                            $colors = ['#e3f2fd', '#e8f5e9', '#fff3e0', '#f3e5f5', '#ede7f6', '#fbe9e7'];
+$colors = ['#e3f2fd', '#e8f5e9', '#fff3e0', '#f3e5f5', '#ede7f6', '#fbe9e7'];
                             $bgColor = $colors[$index % count($colors)]; // Cycle des couleurs
                         @endphp
 
@@ -130,32 +122,32 @@
                                     </div>
 
                                     {{-- Libellé --}}
-                                    <h4 class="card-title text-primary-dark mb-12 text-center">{{ $item['libelle'] }}</h4>
+                                    <h4 class="card-title text-primary-dark mb-12 text-center">{{ $item->libelle }}</h4>
 
                                     {{-- Prix et Durée --}}
                                     <div class="price-section mb-24 text-center">
                                         <span class="display-5 fw-bolder text-gradient">
-                                            {{ number_format($item['price'], 0, ',', ' ') }}
+                                            {{ number_format($item->price, 0, ',', ' ') }}
                                         </span>
                                         <small class="fs-6 text-muted">FCFA</small>
-                                        <p class="text-muted mt-1">/ {{ $item['duration'] }} jours</p>
+                                        <p class="text-muted mt-1">/ {{ $item->duration }} jours</p>
                                     </div>
 
                                     {{-- Description --}}
                                     <p class="card-text text-secondary-light mb-32 flex-grow-1">
-                                        {!! $item['description'] !!}
+                                        {!! $item->description !!}
                                     </p>
 
                                     {{-- Bouton --}}
                                     <div class="mt-auto">
                                         <a href="javascript:void(0)" class="btn btn-primary w-100 animate-btn"
-                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item->id_service }}">
                                             Modifier le forfait
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal fade" id="edit{{ $item['id'] }}" tabindex="-1"
+                            <div class="modal fade" id="edit{{ $item->id_service }}" tabindex="-1"
                                 aria-labelledby="exampleModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                     <div class="modal-content radius-16 bg-base">
@@ -167,46 +159,46 @@
                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body p-24">
-                                            <form action="{{ route('pricing.update', $item['id']) }}" method="post"
+                                            <form action="{{ route('pricing.update', $item->id_service) }}" method="post"
                                                 role="form" enctype="multipart/form-data">
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="row">
                                                     <div class="col-md-6 mb-20">
-                                                        <label for="libelle{{ $item['id'] }}"
+                                                        <label for="libelle{{ $item->id_service }}"
                                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                             Libellé
                                                         </label>
-                                                        <input value="{{ $item['libelle'] }}" type="text"
+                                                        <input value="{{ $item->libelle }}" type="text"
                                                             name="libelle" required class="form-control radius-8"
-                                                            id="libelle{{ $item['id'] }}"
+                                                            id="libelle{{ $item->id_service }}"
                                                             placeholder="Saisir un libellé">
                                                     </div>
                                                     <div class="col-md-6 mb-20">
-                                                        <label for="prix{{ $item['id'] }}"
+                                                        <label for="prix{{ $item->id_service }}"
                                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                             Prix
                                                         </label>
-                                                        <input value="{{ $item['price'] }}" type="number"
-                                                            name="prix" required class="form-control radius-8"
-                                                            id="prix{{ $item['id'] }}">
+                                                        <input value="{{ $item->price }}" type="number" name="prix"
+                                                            required class="form-control radius-8"
+                                                            id="prix{{ $item->id_service }}">
                                                     </div>
                                                     <div class="col-12 mb-20">
-                                                        <label for="description{{ $item['id'] }}"
+                                                        <label for="description{{ $item->id_service }}"
                                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                             Description
                                                         </label>
-                                                        <textarea name="description" required class="form-control radius-8" id="description{{ $item['id'] }}"
-                                                            rows="3" placeholder="Entrer la description">{{ $item['description'] }}</textarea>
+                                                        <textarea name="description" required class="form-control radius-8" id="description{{ $item->id_service }}"
+                                                            rows="3" placeholder="Entrer la description">{{ $item->description }}</textarea>
                                                     </div>
                                                     <div class="col-md-6 mb-20">
-                                                        <label for="duration{{ $item['id'] }}"
+                                                        <label for="duration{{ $item->id_service }}"
                                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                             Durée (en jours)
                                                         </label>
-                                                        <input value="{{ $item['duration'] }}" type="number"
+                                                        <input value="{{ $item->duration }}" type="number"
                                                             name="duration" required class="form-control radius-8"
-                                                            id="duration{{ $item['id'] }}">
+                                                            id="duration{{ $item->id_service }}">
                                                     </div>
                                                     <div class="col-12">
                                                         <div

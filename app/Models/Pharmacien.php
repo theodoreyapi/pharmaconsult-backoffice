@@ -30,6 +30,7 @@ class Pharmacien extends Model
         'otp_expire_at',
         'otp_verified',
         'created_by',
+        'pharmacy_id',
     ];
 
     protected $primaryKey = 'id_pharmacien';

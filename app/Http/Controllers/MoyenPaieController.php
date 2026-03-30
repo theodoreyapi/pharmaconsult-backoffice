@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MoyensPaiment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -18,9 +19,9 @@ class MoyenPaieController extends Controller
             return redirect()->intended('logout');
         }
 
-            $paiements = MoyensPaiment::all();
+        $paiements = MoyensPaiment::all();
 
-            return view('pharmacies.paiement', compact('paiements'));
+        return view('pharmacies.paiement', compact('paiements'));
     }
 
     /**
@@ -51,48 +52,26 @@ class MoyenPaieController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        if ($request->file('photo') == null) {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])->post(env('API_BASE_URL') . '/payment-methods/add', [
-                'paymentMethodCmd' => json_encode([
-                    'name' => $request->libelle,
-                    'description' => $request->description,
-                ])
-            ]);
+        $timestamp = Carbon::now()->format('Ymd_His');
 
-            if ($response->status() == 201) {
-                return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
-            } else {
-                return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
-            }
+        $imagePath = null;
+
+        if ($request->file('photo')) {
+            $file = $request->file('photo');
+            $name = 'paiement_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('paiements'), $name);
+
+            $imagePath = url('pharma/public/paiements/' . $name);
+        }
+
+        $assurance = new MoyensPaiment();
+        $assurance->description = $request->description;
+        $assurance->name = $request->libelle;
+        $assurance->payment_method_picture = $imagePath;
+        if ($assurance->save()) {
+            return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
         } else {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->attach(
-                    'paymentMethodPicture',
-                    file_get_contents($request->file('photo')->getRealPath()),
-                    $request->file('photo')->getClientOriginalName()
-                )->post(env('API_BASE_URL') . '/payment-methods/add', [
-                    'paymentMethodCmd' => json_encode([
-                        'name' => $request->libelle,
-                        'description' => $request->description,
-                    ])
-                ]);
-
-            if ($response->status() == 201) {
-                return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
-            } else {
-                return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
-            }
+            return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
         }
     }
 
@@ -132,49 +111,40 @@ class MoyenPaieController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        if ($request->file('photo') == null) {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ])->post(env('API_BASE_URL') . '/payment-methods/update/' . $id, [
-                    'paymentMethodCmd' => json_encode([
-                        'name' => $request->libelle,
-                        'description' => $request->description,
-                    ])
-                ]);
+        $timestamp = Carbon::now()->format('Ymd_His');
 
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Mise à jour effectuée");
-            } else {
-                return back()->withErrors(["Impossible de mettre à jour. Veuillez réessayer!!"]);
+        $assurance = MoyensPaiment::findOrFail($id);
+
+        // Gestion image
+        if ($request->file('photo')) {
+
+            // 🔥 Supprimer ancienne image
+            if ($assurance->payment_method_picture) {
+
+                // récupérer le chemin du fichier depuis l'URL
+                $oldPath = public_path(parse_url($assurance->payment_method_picture, PHP_URL_PATH));
+
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
+
+            $file = $request->file('photo');
+            $name = 'paiement_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('paiements'), $name);
+            $diplomePath = url('pharma/public/paiements/' . $name);
+
+            $assurance->payment_method_picture = $diplomePath;
+        }
+
+        // Update champs
+        $assurance->description = $request->description;
+        $assurance->name = $request->libelle;
+
+        if ($assurance->save()) {
+            return back()->with('succes',  "Mise à jour effectuée");
         } else {
-            $response = Http::withOptions([
-                'verify' => false
-            ])->asMultipart()
-                ->withHeaders([
-                    'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                    'Accept' => 'application/json',
-                ])->attach(
-                    'paymentMethodPicture',
-                    file_get_contents($request->file('photo')->getRealPath()),
-                    $request->file('photo')->getClientOriginalName()
-                )->post(env('API_BASE_URL') . '/payment-methods/update/' . $id, [
-                    'paymentMethodCmd' => json_encode([
-                        'name' => $request->libelle,
-                        'description' => $request->description,
-                    ])
-                ]);
-
-            if ($response->status() == 200) {
-                return back()->with('succes',  "Mise à jour effectuée");
-            } else {
-                return back()->withErrors(["Impossible de mettre à jour. Veuillez réessayer!!"]);
-            }
+            return back()->withErrors(["Impossible de mettre à jour. Veuillez réessayer!!"]);
         }
     }
 
@@ -186,18 +156,9 @@ class MoyenPaieController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->delete(env('API_BASE_URL') . '/payment-methods/delete/' . $id);
 
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Suppression éffectuée ");
-        } else {
-            return back()->withErrors(["Impossible de supprimer. Veuillez réessayer!!"]);
-        }
+        MoyensPaiment::findOrFail($id)->delete();
+
+        return back()->with('succes',  "Suppression éffectuée ");
     }
 }

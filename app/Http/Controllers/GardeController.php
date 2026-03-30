@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Commune;
 use App\Models\PeriodeGarde;
 use App\Models\Pharmacy;
 use Carbon\Carbon;
@@ -31,7 +32,7 @@ class GardeController extends Controller
             ->groupBy('commune.id_commune', 'commune.name')
             ->get();
 
-            return view('pharmacies.garde', compact('gardes', 'premier'));
+        return view('pharmacies.garde', compact('gardes', 'premier'));
     }
 
     /**
@@ -50,41 +51,31 @@ class GardeController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
+
         $roles = [
             'commune' => 'required',
-            'debut' => 'required',
-            'fin' => 'required',
+            'debut' => 'required|date',
+            'fin' => 'required|date|after_or_equal:debut',
+            'pharmacys' => 'required|array',
         ];
+
         $customMessages = [
             'commune.required' => "Veuillez sélectionner la commune.",
-            'debut.required' => "Veuillez sélectionner la date début de la période.",
-            'fin.required' => "Veuillez sélectionner la date de fin de la periode.",
+            'debut.required' => "Veuillez sélectionner la date début.",
+            'fin.required' => "Veuillez sélectionner la date fin.",
+            'fin.after_or_equal' => "La date de fin doit être après la date de début.",
+            'pharmacys.required' => "Veuillez sélectionner au moins une pharmacie.",
         ];
 
         $request->validate($roles, $customMessages);
 
-        $debut = Carbon::parse($request->debut)->getTimestampMs();
-        $fin = Carbon::parse($request->fin)->getTimestampMs();
+        Pharmacy::whereIn('id_pharmacy', $request->pharmacys)
+            ->update([
+                'start_garde_date' => $request->debut,
+                'end_garde_date' => $request->fin,
+            ]);
 
-        $pharmacy = (array) $request->pharmacys;
-
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->put(env('API_BASE_URL') . '/pharma/addGarde', [
-            'startGardeDate' => (int) $debut,
-            'endGardeDate' => (int) $fin,
-            'pharmaciesIds' => array_map('intval', $pharmacy)
-        ]);
-        // dd($response->status() . ' </br>' . $response->body() . ' </br>' . ' ' . $debut . ' ' . $fin);
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Les pharmacies ont été ajoutées a la garde.");
-        } else {
-            return back()->withErrors(["Impossible d'ajouter la garde. Veuillez réessayer!!"]);
-        }
+        return back()->with('succes', "Les pharmacies ont été ajoutées à la garde.");
     }
 
     /**
@@ -124,22 +115,10 @@ class GardeController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/communes/search?page=0&size=1000');
 
-        if ($response->status() == 200) {
-            $communes = $response->json();
+        $communes = Commune::orderBy('name', 'ASC')->get();
 
-            return view('pharmacies.add-garde', compact('communes'));
-        } else {
-            // Gérer l'erreur
-            return abort(500, 'Erreur lors du chargement des données.');
-        }
+        return view('pharmacies.add-garde', compact('communes'));
     }
 
     public function storeGarde(Request $request)
@@ -147,39 +126,43 @@ class GardeController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
+
         $roles = [
-            'debut' => 'required',
-            'fin' => 'required',
+            'debut' => 'required|date',
+            'fin' => 'required|date|after_or_equal:debut',
         ];
+
         $customMessages = [
-            'debut.required' => "Veuillez sélectionner la date début de la période.",
-            'fin.required' => "Veuillez sélectionner la date de fin de la periode.",
+            'debut.required' => "Veuillez sélectionner la date début.",
+            'fin.required' => "Veuillez sélectionner la date fin.",
+            'fin.after_or_equal' => "La date de fin doit être après la date de début.",
         ];
 
         $request->validate($roles, $customMessages);
 
-        $debut = Carbon::parse($request->debut)
-            ->setTimezone('UTC')
-            ->format('Y-m-d\TH:i:s.v\Z');
-        $fin = Carbon::parse($request->fin)
-            ->setTimezone('UTC')
-            ->format('Y-m-d\TH:i:s.v\Z');
+        // 👉 Ici on suppose qu’il n’y a qu’une seule ligne (cas classique)
+        $garde = PeriodeGarde::first();
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->put(env('API_BASE_URL_PHARMA') . '/periodes-garde/update', [
-            'dateDebut' => $debut,
-            'dateFin' => $fin,
-        ]);
-        //dd($response->status());
-        if ($response->status() == 200) {
-            return back()->with('succes',  "La période de garde a été mise à jour");
+        if ($garde) {
+            // UPDATE
+            PeriodeGarde::where('id_garde', $garde->id_garde)
+                ->update([
+                    'date_debut' => $request->debut,
+                    'date_fin' => $request->fin,
+                    'date_miseajour' => now(),
+                    'updated_at' => now(),
+                ]);
         } else {
-            return back()->withErrors(["Impossible de mettre à jour la période de garde. Veuillez réessayer!!"]);
+            // INSERT
+            PeriodeGarde::insert([
+                'date_debut' => $request->debut,
+                'date_fin' => $request->fin,
+                'date_miseajour' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
+
+        return back()->with('succes', "La période de garde a été mise à jour");
     }
 }
