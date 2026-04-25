@@ -40,7 +40,7 @@ class AssuranceController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        
+
         $roles = [
             'description' => 'required',
             'libelle' => 'required',
@@ -62,7 +62,7 @@ class AssuranceController extends Controller
             $name = 'assurance_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('assurances'), $name);
 
-            $imagePath = url('pharma/public/assurances/' . $name);
+            $imagePath = url('admin/public/assurances/' . $name);
         }
 
         $assurance = new Assurances();
@@ -133,7 +133,7 @@ class AssuranceController extends Controller
             $file = $request->file('photo');
             $name = 'assurance_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('assurances'), $name);
-            $diplomePath = url('pharma/public/assurances/' . $name);
+            $diplomePath = url('admin/public/assurances/' . $name);
 
             $assurance->assurance_picture = $diplomePath;
         }

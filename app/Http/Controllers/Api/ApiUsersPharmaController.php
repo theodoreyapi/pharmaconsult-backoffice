@@ -451,7 +451,7 @@ class ApiUsersPharmaController extends Controller
         $file = $request->file('userPicture');
         $fileName = uniqid($username . 'users_profile_') . '.' . $file->getClientOriginalExtension();
         $file->move(public_path('users'), $fileName);
-        $imageUrl = url('pharma/public/users/' . $fileName);
+        $imageUrl = url('admin/public/users/' . $fileName);
 
         // Mettre à jour en base
         UsersPharma::where('phone_number', $username)

@@ -9,9 +9,18 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Contract\Messaging;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class PaymentWaveController extends Controller
 {
+    protected $messaging;
+
+    public function __construct(Messaging $messaging)
+    {
+        $this->messaging = $messaging;
+    }
+
     /**
      * ✅ PAGE SUCCESS
      */
@@ -47,6 +56,8 @@ class PaymentWaveController extends Controller
             ]);
         }
 
+        $newAmount = 0;
+
         // ── Traitement idempotent (eviter double crédit) ──────────────────
         if ($payment->status !== 'success') {
             DB::transaction(function () use ($payment, $session) {
@@ -67,21 +78,66 @@ class PaymentWaveController extends Controller
                     'updated_at'     => Carbon::now(),
                 ]);
 
+                $newAmount = $user->amount + $payment->montant;
+
                 // CORRECTION : utiliser le montant frais depuis la DB (lockForUpdate)
                 $user->update([
                     'last_amount' => $user->amount,
-                    'amount'      => $user->amount + $payment->montant,
+                    'amount'      => $newAmount,
                     'updated_at'  => Carbon::now(),
                 ]);
             });
 
             // ── Notifier l'utilisateur via FCM ────────────────────────────
-            (new FcmService())->sendToUser(
-                $payment->username,
-                '✅ Rechargement réussi',
-                number_format($payment->montant, 0, ',', ' ') . ' FCFA ont été ajoutés à votre wallet.',
-                ['type' => 'RECHARGEMENT', 'amount' => (string) $payment->montant]
-            );
+
+            // ✅ 1. Récupérer les tokens du user
+            $tokens = DB::table('fcm_token')
+                ->where('username', $payment->username)
+                ->whereNotNull('token')
+                ->pluck('token')
+                ->toArray();
+
+            Log::info("FCM Tokens user ({$payment->username}) : " . count($tokens));
+
+            if (!empty($tokens)) {
+
+                $title = '✅ Rechargement réussi';
+                $body = 'Votre compte a été rechargé de ' . number_format($payment->montant, 0, ',', ' ') .
+                    ' FCFA. Nouveau solde: ' . number_format($newAmount, 0, ',', ' ') . ' FCFA.';
+
+                $message = CloudMessage::new()
+                    ->withNotification([
+                        'title' => $title,
+                        'body'  => $body,
+                    ])
+                    ->withData([
+                        'type'   => 'RECHARGEMENT',
+                        'amount' => (string) $payment->montant,
+                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    ]);
+
+                try {
+                    $response = $this->messaging->sendMulticast($message, $tokens);
+
+                    Log::info("FCM Success: " . $response->successes()->count());
+                    Log::info("FCM Failures: " . $response->failures()->count());
+
+                    // ✅ Nettoyage tokens invalides
+                    foreach ($response->failures()->getItems() as $failure) {
+                        $invalidToken = $failure->target()->value();
+
+                        DB::table('fcm_token')
+                            ->where('token', $invalidToken)
+                            ->delete();
+
+                        Log::warning("Token supprimé: " . $invalidToken);
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("Erreur FCM: " . $e->getMessage());
+                }
+            } else {
+                Log::warning("Aucun token pour user: " . $payment->username);
+            }
         }
 
         return view('payment.success', [

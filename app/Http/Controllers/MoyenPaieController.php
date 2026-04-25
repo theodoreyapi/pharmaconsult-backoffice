@@ -61,7 +61,7 @@ class MoyenPaieController extends Controller
             $name = 'paiement_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('paiements'), $name);
 
-            $imagePath = url('pharma/public/paiements/' . $name);
+            $imagePath = url('admin/public/paiements/' . $name);
         }
 
         $assurance = new MoyensPaiment();
@@ -132,7 +132,7 @@ class MoyenPaieController extends Controller
             $file = $request->file('photo');
             $name = 'paiement_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('paiements'), $name);
-            $diplomePath = url('pharma/public/paiements/' . $name);
+            $diplomePath = url('admin/public/paiements/' . $name);
 
             $assurance->payment_method_picture = $diplomePath;
         }

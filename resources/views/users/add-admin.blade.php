@@ -20,7 +20,7 @@
                         <div class="col-sm-4 mb-3">
                             <div class="assurance-card d-flex align-items-center gap-2">
                                 <input class="form-check-input me-2" id="assurance_${index}"
-                                    type="checkbox" name="pharmacys[]" value="${item.id_pharmacy}">
+                                    type="checkbox" name="pharmacys" value="${item.id_pharmacy}">
                                 <label for="assurance_${index}"
                                     class="d-flex align-items-center gap-2 m-0 w-100">
                                     <img src="${item.facade_image ? item.facade_image.replace(/ /g, '%20') : '/assets/images/user-list/user-list1.png'}"
@@ -49,8 +49,8 @@
         });
 
         // 🔒 Empêcher la sélection multiple
-        $(document).on('change', 'input[name="pharmacys[]"]', function() {
-            $('input[name="pharmacys[]"]').not(this).prop('checked', false);
+        $(document).on('change', 'input[name="pharmacys"]', function() {
+            $('input[name="pharmacys"]').not(this).prop('checked', false);
         });
     </script>
 @endpush
@@ -135,7 +135,7 @@
             });
         </script>
         <br><br>
-        <form action="{{ route('company.store') }}" method="post">
+        <form action="{{ route('user-pharma.store') }}" method="post">
             @csrf
             <div class="row gy-4 card">
                 <div class="col-lg-12 row">
@@ -168,23 +168,28 @@
                             placeholder="Entrer son numéro de Téléphone">
                     </div>
                     <div class="col-6 mb-20">
+                        <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            Mot de passe
+                        </label>
+                        <input type="password" required name="password" class="form-control radius-8" id="name"
+                            placeholder="Entrer son mot de passe">
+                    </div>
+                    <div class="col-6 mb-20">
                         <label for="country" class="form-label fw-semibold text-primary-light text-sm mb-8">Profil
                         </label>
                         <select name="profil" required class="form-control radius-8 form-select" id="country">
                             <option value="">Sélectionne</option>
-                            <option value="SUPERADMIN">SUPERADMIN</option>
-                            <option value="ADMIN">ADMIN</option>
                             <option value="PHARMACIEN">PHARMACIEN</option>
                             <option value="GESTIONNAIRE">GESTIONNAIRE</option>
                             <option value="CAISSIERE">CAISSIERE</option>
                         </select>
                     </div>
-                    <div class="mb-20 col-md-4">
+                    <div class="mb-20 col-md-6">
                         <label for="depart" class="form-label fw-semibold text-primary-light text-sm mb-8">Commune</label>
                         <select name="commune" class="form-control radius-8 form-select" id="depart">
                             <option value="">Sélectionnez la commune</option>
                             @foreach ($communes as $item)
-                                <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
+                                <option value="{{ $item->id_commune }}">{{ $item->name }}</option>
                             @endforeach
                         </select>
                     </div>

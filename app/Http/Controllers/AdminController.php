@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
@@ -56,28 +56,70 @@ class AdminController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(env('API_BASE_URL') . '/user/createUser', [
-            'username' => $request->email,
-            'email' => $request->email,
-            'phoneNumber' => $request->phone,
-            'firstName' => $request->firstname,
-            'lastName' => $request->lastname,
-            'typeUser' => $request->profil,
-            'createdBy' => session('user_data')['lastName'] . ' ' . session('user_data')['firstName'],
-            'pharmacyId' => $request->pharmacys[0] ?? 0,
-        ]);
+        $user = new User();
+        $user->name = $request->firstname;
+        $user->email = $request->email;
+        $user->password = password_hash($request->password, PASSWORD_BCRYPT, ['cost' => 10]);
+        $user->last_name = $request->lastname;
+        $user->phone = $request->phone;
+        $user->role = $request->profil;
+        if ($user->save()) {
 
-        if ($response->status() == 201) {
-            return back()->with('succes',  "Vous avez ajouter " . $request->firstname);
+            $this->sendEmail($request->email, $request->password, $request->firstname);
+
+            return back()->with('succes',  "Ajoutée avec succès.");
         } else {
-            return back()->withErrors(["Impossible d'ajouter " . $request->firstname . ". Veuillez réessayer!!"]);
+            return back()->withErrors(["Impossible d'ajouter. Veuillez réessayer!!"]);
         }
+    }
+
+    /**
+     * Envoie les informations de connexion par Email via SMTP Gmail
+     */
+    private function sendEmail(string $email, string $password, string $firstName): void
+    {
+        Mail::send([], [], function ($message) use ($email, $password, $firstName) {
+            $message
+                ->to($email)
+                ->from(
+                    env('MAIL_FROM_ADDRESS', 'contact.pharmaconsults@gmail.com'),
+                    env('MAIL_FROM_NAME', 'PharmaConsults')
+                )
+                ->subject('Vos paramètres de connexion - PharmaConsults')
+                ->html("
+                <div style='font-family: Helvetica, Arial, sans-serif; max-width: 500px; margin: 20px auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; color: #333;'>
+                    <div style='text-align: center; margin-bottom: 25px;'>
+                        <h2 style='color: #115010; margin-bottom: 10px;'>Bonjour $firstName</h2>
+                        <p style='color: #666; font-size: 15px;'>Utilisez les informations ci-dessous pour accéder à votre compte.</p>
+                    </div>
+
+                    <div style='background-color: #f4fbf4; padding: 25px; border-radius: 10px; border: 1px solid #41BA3E;'>
+                        <div style='margin-bottom: 20px; text-align: center;'>
+                            <span style='font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold;'>Identifiant (E-mail)</span>
+                            <div style='font-size: 18px; color: #115010; margin-top: 5px; font-weight: bold;'>$email</div>
+                        </div>
+
+                        <div style='text-align: center;'>
+                            <span style='font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold;'>Mot de passe temporaire</span>
+                            <div style='font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #115010; margin-top: 10px; font-family: monospace;'>
+                                $password
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style='margin-top: 25px; text-align: center;'>
+                        <p style='font-size: 14px;'>Ce code expire dans <strong style='color: #d9534f;'>2 minutes</strong>.</p>
+                        <p style='color: #999; font-size: 12px; margin-top: 20px; line-height: 1.5;'>
+                            Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.
+                        </p>
+                    </div>
+
+                    <div style='border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center; color: #bbb; font-size: 11px;'>
+                        &copy; " . date('Y') . " PharmaConsults — Sécurité & Santé
+                    </div>
+                </div>
+            ");
+        });
     }
 
     /**
@@ -116,26 +158,20 @@ class AdminController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->put(env('API_BASE_URL') . '/user/updateUser', [
-            'username' => $request->email,
-            'mobilePhone' => $request->phone,
-            'firstName' => $request->firstname,
-            'lastName' => $request->lastname,
-            'role' => $request->profil,
-            'pharmacyId' => $request->pharmacys[0] ?? 0,
-        ]);
+        $user = User::findOrFail($id);
+        $user->name = $request->firstname;
+        $user->email = $request->email;
 
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Modification effectuée ");
-        } else {
-            return back()->withErrors(["Impossible de modifier. Veuillez réessayer!!"]);
+        if ($request->password != null && !password_verify($request->password, $user->password)) {
+            $user->password = password_hash($request->password, PASSWORD_BCRYPT, ['cost' => 10]);
         }
+
+        $user->last_name = $request->lastname;
+        $user->phone = $request->phone;
+        $user->role = $request->profil;
+        $user->save();
+
+        return back()->with('succes',  "Modification éffectuée ");
     }
 
     /**
@@ -146,18 +182,9 @@ class AdminController extends Controller
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->delete(env('API_BASE_URL') . '/user/deleteUser/' . $id);
-        // dd($response->status() . ' ' . $response->body());
-        if ($response->status() == 200) {
-            return back()->with('succes',  "Suppression éffectuée ");
-        } else {
-            return back()->withErrors(["Impossible de supprimer. Veuillez réessayer!!"]);
-        }
+
+        User::findOrFail($id)->delete();
+
+        return back()->with('succes',  "Suppression éffectuée ");
     }
 }

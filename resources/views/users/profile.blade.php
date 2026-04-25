@@ -39,7 +39,7 @@
             <h6 class="fw-semibold mb-0">Profil utilisateur</h6>
             <ul class="d-flex align-items-center gap-2">
                 <li class="fw-medium">
-                    <a href="index" class="d-flex align-items-center gap-1 hover-text-primary">
+                    <a href="{{ url('index') }}" class="d-flex align-items-center gap-1 hover-text-primary">
                         <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
                         Tableau de bord
                     </a>
@@ -60,9 +60,8 @@
                             <img src="{{ session('user_data')['userDetails']['profilePicture'] ?? URL::asset('assets/images/user-grid/user-grid-img14.png') }}"
                                 alt=""
                                 class="border br-white border-width-2-px w-200-px h-200-px rounded-circle object-fit-cover">
-                            <h6 class="mb-0 mt-16">{{ session('user_data')['firstName'] }}
-                                {{ session('user_data')['lastName'] }}</h6>
-                            <span class="text-secondary-light mb-16">{{ session('user_data')['email'] }}</span>
+                            <h6 class="mb-0 mt-16">{{ Auth::user()->name }} {{ Auth::user()->last_name }}</h6>
+                            <span class="text-secondary-light mb-16">{{ Auth::user()->email }}</span>
                         </div>
                         <div class="mt-24">
                             <h6 class="text-xl mb-16">Info personnelle</h6>
@@ -70,7 +69,7 @@
                                 <li class="d-flex align-items-center gap-1 mb-12">
                                     <span class="w-30 text-md fw-semibold text-primary-light">Telephone</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        {{ session('user_data')['phoneNumber'] }}</span>
+                                        {{ Auth::user()->phone }}</span>
                                 </li>
                             </ul>
                         </div>

@@ -161,44 +161,6 @@ Route::get('index', function () {
 
     return view('home.index', compact('statistiques', 'souscriptions'));
 });
-Route::get('pharma-index', function () {
-
-    if (!Auth::check()) {
-        return redirect()->intended('logout');
-    }
-
-    $responsestates = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/statistiques/pharmacy/' . session('user_data')['wallet']['pharmacyId'] . '/cumulative-money');
-
-    $statistiques = $responsestates->json();
-
-    $response = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL_PHARMA') . '/pharma/statistiques/monthly-stats/pharmacy?pharmacyId=' . session('user_data')['wallet']['pharmacyId']);
-
-    $souscriptions = $response->json();
-
-    $montant = Http::withOptions([
-        'verify' => false
-    ])->withHeaders([
-        'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-    ])->get(env('API_BASE_URL') . '/pharma' . '/' . session('user_data')['wallet']['pharmacyId'] . '/wallet-balance');
-
-    $solde = $montant->json();
-
-    return view('home.pharma-index', compact('statistiques', 'souscriptions', 'solde'));
-});
 
 // utilisateurs
 Route::resource('users', UserController::class);
@@ -244,14 +206,15 @@ Route::get('add-pharmacy', function () {
     return view('pharmacies.add-pharmacy', compact('communes'));
 });
 Route::get('view-pharmacy/{id}', [PharmacieController::class, 'showAllGet'])->name('pharmacy.showAllGet');
-Route::get('view-medicament', [PriceFicheController::class, 'showAllGet'])->name('medicament.showAllGet');
+Route::get('view-medicament/{id}', [PriceFicheController::class, 'showAllGet'])->name('medicament.showAllGet');
 
 Route::get('add-medicament', function () {
-    $medicaments = Medicamants::all();
+    $medicaments = Medicamants::select('id_medicament', 'name')->orderBy('name')->get();
     return view('pharmacies.add-medicament', compact('medicaments'));
 });
 
-Route::get('/medicament/search', [PriceFicheController::class, 'searchh'])->name('medicament.search');
+Route::get('/medicament/search', [PriceFicheController::class, 'searchh'])
+    ->name('medicament.search');
 
 Route::get('/pharmacy/search', [PriceFicheController::class, 'search'])->name('search.pharmacy');
 
@@ -298,8 +261,7 @@ Route::get('add-condition', function () {
 
 // setting
 Route::resource('company', AdminController::class);
-Route::resource('user-pharma', UserPharmacienController::class);
-Route::resource('pharmacien', PharmacienController::class);
+Route::resource('user-pharma', PharmacienController::class);
 Route::post('profile', [PharmacienController::class, 'profile']);
 Route::get('notification', function () {
     return view('layouts.master');

@@ -29,9 +29,8 @@
                 class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                 </div>
-                <a href="{{ url('add-admin') }}"
-                    class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-                    >
+                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#addExampleModal"
+                    class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
                     <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
                     Ajouter utilisateur
                 </a>
@@ -85,6 +84,14 @@
                                             placeholder="Entrer son numéro de Téléphone">
                                     </div>
                                     <div class="col-6 mb-20">
+                                        <label for="name"
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            Mot de passe
+                                        </label>
+                                        <input type="password" name="password" class="form-control radius-8" id="name"
+                                            placeholder="Entrer son mot de passe">
+                                    </div>
+                                    <div class="col-6 mb-20">
                                         <label for="country"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">Profil
                                         </label>
@@ -93,9 +100,6 @@
                                             <option value="">Sélectionne</option>
                                             <option value="SUPERADMIN">SUPERADMIN</option>
                                             <option value="ADMIN">ADMIN</option>
-                                            <option value="PHARMACIEN">PHARMACIEN</option>
-                                            <option value="GESTIONNAIRE">GESTIONNAIRE</option>
-                                            <option value="CAISSIERE">CAISSIERE</option>
                                         </select>
                                     </div>
                                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
@@ -122,7 +126,7 @@
                                 <th scope="col" style="font-size: 13px">Nom</th>
                                 <th scope="col" style="font-size: 13px">Contact</th>
                                 <th scope="col" style="font-size: 13px">Profil</th>
-                                <th scope="col" style="font-size: 13px">Statut</th>
+                                {{-- <th scope="col" style="font-size: 13px">Statut</th> --}}
                                 <th scope="col" style="font-size: 13px">Action</th>
                             </tr>
                         </thead>
@@ -134,34 +138,25 @@
                                             <img src="assets/images/user-list/user-list1.png" alt=""
                                                 class="flex-shrink-0 me-12 radius-8">
                                             <strong style="font-size: 13px">
-                                                {!! wordwrap($item['firstName'], 20, '<br>') !!} {!! wordwrap($item['lastName'], 20, '<br>') !!}
+                                                {!! wordwrap($item->name, 20, '<br>') !!} {!! wordwrap($item->last_name, 20, '<br>') !!}
                                             </strong>
                                         </div>
                                     </td>
                                     <td style="font-size: 13px">
-                                        {{ $item['email'] }}
+                                        {{ $item->email }}
                                         <br>
-                                        {{ $item['phoneNumber'] }}
+                                        {{ $item->phone }}
                                     </td>
                                     <td>
-                                        @if ($item['role'] == 'SUPERADMIN')
+                                        @if ($item->role == 'SUPERADMIN')
                                             <span
-                                                class="badge text-sm fw-semibold text-danger-600 bg-danger-100 px-20 py-9 radius-4 text-white">Superadmin</span>
-                                        @elseif ($item['role'] == 'ADMIN')
-                                            <span
-                                                class="badge text-sm fw-semibold text-warning-600 bg-warning-100 px-20 py-9 radius-4 text-white">Admin</span>
-                                        @elseif ($item['role'] == 'PHARMACIEN')
-                                            <span
-                                                class="badge text-sm fw-semibold text-info-600 bg-info-100 px-20 py-9 radius-4 text-white">Pharmacien</span>
-                                        @elseif ($item['role'] == 'GESTIONNAIRE')
-                                            <span
-                                                class="badge text-sm fw-semibold text-neutral-800 bg-neutral-300 px-20 py-9 radius-4 text-white">Gestionnaire</span>
+                                                class="badge text-sm fw-semibold text-danger-600 bg-danger-100 px-20 py-9 radius-4 text-white">SUPERADMIN</span>
                                         @else
                                             <span
-                                                class="badge text-sm fw-semibold text-lilac-600 bg-lilac-100 px-20 py-9 radius-4 text-white">Caissiere</span>
+                                                class="badge text-sm fw-semibold text-warning-600 bg-warning-100 px-20 py-9 radius-4 text-white">ADMIN</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    {{-- <td>
                                         @if ($item['active'] == 'ACTIVE')
                                             <span
                                                 class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
@@ -169,14 +164,14 @@
                                             <span
                                                 class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">Inactive</span>
                                         @endif
-                                    </td>
+                                    </td> --}}
                                     <td>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#edit{{ $item->id }}">
                                             <iconify-icon icon="lucide:edit"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="edit{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="edit{{ $item->id }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -189,7 +184,7 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('company.update', $item['id']) }}"
+                                                        <form action="{{ route('company.update', $item->id) }}"
                                                             method="post">
                                                             @csrf
                                                             @method('PATCH')
@@ -202,7 +197,7 @@
                                                                     <input type="text" name="firstname" required
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Entrer son nom"
-                                                                        value="{{ $item['firstName'] }}">
+                                                                        value="{{ $item->name }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
@@ -212,7 +207,7 @@
                                                                     <input type="text" name="lastname" required
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Entrer son prénom"
-                                                                        value="{{ $item['lastName'] }}">
+                                                                        value="{{ $item->last_name }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
@@ -222,7 +217,7 @@
                                                                     <input type="email" name="email" required
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Entrer son e-mail"
-                                                                        value="{{ $item['email'] }}">
+                                                                        value="{{ $item->email }}">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="name"
@@ -232,7 +227,16 @@
                                                                     <input type="text" name="phone"
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Entrer son numéro de Téléphone"
-                                                                        value="{{ $item['phoneNumber'] }}">
+                                                                        value="{{ $item->phone }}">
+                                                                </div>
+                                                                <div class="col-6 mb-20">
+                                                                    <label for="name"
+                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                                                        Mot de passe
+                                                                    </label>
+                                                                    <input type="text" name="password"
+                                                                        class="form-control radius-8" id="name"
+                                                                        placeholder="Entrer son mot de passe">
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label for="country"
@@ -241,13 +245,12 @@
                                                                     <select required name="profil"
                                                                         class="form-control radius-8 form-select"
                                                                         id="country">
-                                                                        <option value="{{ $item['role'] }}">Sélectionne
-                                                                        </option>
-                                                                        <option value="SUPERADMIN">SUPERADMIN</option>
-                                                                        <option value="ADMIN">ADMIN</option>
-                                                                        <option value="PHARMACIEN">PHARMACIEN</option>
-                                                                        <option value="GESTIONNAIRE">GESTIONNAIRE</option>
-                                                                        <option value="CAISSIERE">CAISSIERE</option>
+                                                                        <option
+                                                                            @if ($item->role == 'SUPERADMIN') selected @endif
+                                                                            value="SUPERADMIN">SUPERADMIN</option>
+                                                                        <option
+                                                                            @if ($item->role == 'ADMIN') selected @endif
+                                                                            value="ADMIN">ADMIN</option>
                                                                     </select>
                                                                 </div>
                                                                 <div
@@ -269,10 +272,10 @@
                                         </div>
                                         <a href="javascript:void(0)"
                                             class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item['id'] }}">
+                                            data-bs-toggle="modal" data-bs-target="#delete{{ $item->id }}">
                                             <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                         </a>
-                                        <div class="modal fade" id="delete{{ $item['id'] }}" tabindex="-1"
+                                        <div class="modal fade" id="delete{{ $item->id }}" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
                                                 <div class="modal-content radius-16 bg-base">
@@ -285,7 +288,7 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-24">
-                                                        <form action="{{ route('company.destroy', $item['email']) }}"
+                                                        <form action="{{ route('company.destroy', $item->id) }}"
                                                             method="post">
                                                             @csrf
                                                             @method('DELETE')

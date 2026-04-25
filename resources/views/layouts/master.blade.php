@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pharmaconsults - {{ $title }}</title>
-    <link rel="icon" type="image/png" href="{{ URL::asset('') }}assets/images/favicon.png" sizes="16x16">
+    <link rel="icon" type="image/x-icon" href="{{ URL::asset('') }}assets/images/favicon.ico">
     <!-- remix icon font css  -->
     <link rel="stylesheet" href="{{ URL::asset('') }}assets/css/remixicon.css">
     <!-- BootStrap css -->

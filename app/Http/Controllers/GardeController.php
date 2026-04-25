@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Commune;
 use App\Models\PeriodeGarde;
 use App\Models\Pharmacy;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Contract\Messaging;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class GardeController extends Controller
 {
@@ -121,46 +122,97 @@ class GardeController extends Controller
         return view('pharmacies.add-garde', compact('communes'));
     }
 
+    protected $messaging;
+
+    public function __construct(Messaging $messaging)
+    {
+        $this->messaging = $messaging;
+    }
+
     public function storeGarde(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
-        $roles = [
+        // ✅ VALIDATION
+        $request->validate([
             'debut' => 'required|date',
             'fin' => 'required|date|after_or_equal:debut',
-        ];
-
-        $customMessages = [
+        ], [
             'debut.required' => "Veuillez sélectionner la date début.",
             'fin.required' => "Veuillez sélectionner la date fin.",
             'fin.after_or_equal' => "La date de fin doit être après la date de début.",
-        ];
+        ]);
 
-        $request->validate($roles, $customMessages);
-
-        // 👉 Ici on suppose qu’il n’y a qu’une seule ligne (cas classique)
+        // ✅ INSERT / UPDATE
         $garde = PeriodeGarde::first();
 
         if ($garde) {
-            // UPDATE
-            PeriodeGarde::where('id_garde', $garde->id_garde)
-                ->update([
-                    'date_debut' => $request->debut,
-                    'date_fin' => $request->fin,
-                    'date_miseajour' => now(),
-                    'updated_at' => now(),
-                ]);
-        } else {
-            // INSERT
-            PeriodeGarde::insert([
+            $garde->update([
                 'date_debut' => $request->debut,
                 'date_fin' => $request->fin,
                 'date_miseajour' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
+        } else {
+            PeriodeGarde::create([
+                'date_debut' => $request->debut,
+                'date_fin' => $request->fin,
+                'date_miseajour' => now(),
+            ]);
+        }
+
+        // ===============================
+        // 🔔 ENVOI NOTIFICATION FCM
+        // ===============================
+
+        // ✅ 1. Récupérer tokens
+        $tokens = DB::table('fcm_token')
+            ->whereNotNull('token')
+            ->pluck('token')
+            ->toArray();
+
+        Log::info("FCM Tokens count: " . count($tokens));
+
+        if (empty($tokens)) {
+            Log::warning("Aucun token FCM trouvé !");
+            return back()->with('succes', "Période mise à jour (aucun utilisateur à notifier)");
+        }
+
+        $title = "Pharmacie de garde";
+        $body = "La liste des pharmacies de garde vient d'être mise à jour : du {$request->debut} au {$request->fin}";
+
+        // ✅ 2. Message FCM (format SAFE Android/iOS)
+        $message = CloudMessage::new()
+            ->withNotification([
+                'title' => $title,
+                'body' => $body,
+            ])
+            ->withData([
+                'type' => 'garde_update',
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+            ]);
+
+        try {
+            // ✅ 3. Envoi multicast
+            $response = $this->messaging->sendMulticast($message, $tokens);
+
+            Log::info("FCM Success: " . $response->successes()->count());
+            Log::info("FCM Failures: " . $response->failures()->count());
+
+            // ✅ 4. Nettoyage tokens invalides
+            foreach ($response->failures()->getItems() as $failure) {
+                $invalidToken = $failure->target()->value();
+
+                DB::table('fcm_token')
+                    ->where('token', $invalidToken)
+                    ->delete();
+
+                Log::warning("Token supprimé: " . $invalidToken);
+            }
+
+        } catch (\Throwable $e) {
+            Log::error("Erreur FCM: " . $e->getMessage());
         }
 
         return back()->with('succes', "La période de garde a été mise à jour");

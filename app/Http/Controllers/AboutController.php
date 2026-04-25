@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
+use function Symfony\Component\Clock\now;
+
 class AboutController extends Controller
 {
     /**
@@ -41,33 +43,25 @@ class AboutController extends Controller
             return redirect()->intended('logout');
         }
 
-        $roles = [
-            'contenu' => 'required',
-        ];
-        $customMessages = [
-            'contenu.required' => "Veuillez saisir au moins un mot.",
-        ];
-
-        $request->validate($roles, $customMessages);
-
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(env('API_BASE_URL_PHARMA') . '/pharma/parametres-generaux/create', [
-            'libelle' => 'APROPOS',
-            'contenu' => $request->contenu,
-            'type' => 'APROPOS',
+        $request->validate([
+            'contenu' => 'required'
+        ], [
+            'contenu.required' => "Veuillez saisir au moins un mot."
         ]);
 
+        $data = [
+            'contenu' => $request->contenu,
+            'type' => 'APROPOS',
+            'date_create' => now(),
+        ];
 
-        if ($response->status() == 201 || $response->status() == 200) {
-            return back()->with('succes',  "Ajout avec succès.");
-        } else {
-            return back()->withErrors(["Impossible d'ajouter. Veuillez réessayer!!"]);
-        }
+        // 🔥 UPDATE si existe, sinon INSERT
+        ParametresGeneraux::updateOrCreate(
+            ['libelle' => 'APROPOS'], // condition
+            $data                      // valeurs
+        );
+
+        return back()->with('succes', "Le contenu APROPOS a été enregistré avec succès.");
     }
 
     /**
@@ -95,38 +89,24 @@ class AboutController extends Controller
             return redirect()->intended('logout');
         }
 
-        $roles = [
-            'contenu' => 'required',
-        ];
-        $customMessages = [
-            'contenu.required' => "Veuillez saisir au moins un mot.",
-        ];
-
-        $request->validate($roles, $customMessages);
-
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->put(env('API_BASE_URL_PHARMA') . '/pharma/parametres-generaux/update/' . $id, [
-            'libelle' => 'APROPOS',
-            'contenu' => $request->contenu,
-            'type' => 'APROPOS',
+        $request->validate([
+            'contenu' => 'required'
+        ], [
+            'contenu.required' => "Veuillez saisir au moins un mot."
         ]);
 
-        /* dd(
-            $response->status() . ' </br>' .
-                $response->body() . ' </br>' .
-                json_encode($response->json(), JSON_PRETTY_PRINT)
-        ); */
+        $data = [
+            'contenu' => $request->contenu,
+            'type' => 'APROPOS',
+        ];
 
-        if ($response->status() == 201 || $response->status() == 200) {
-            return back()->with('succes',  "Mise a jour avec succès.");
-        } else {
-            return back()->withErrors(["Impossible de mettre a jour. Veuillez réessayer!!"]);
-        }
+        // 🔥 UPDATE si existe, sinon INSERT
+        ParametresGeneraux::updateOrCreate(
+            ['libelle' => 'APROPOS'], // condition
+            $data                      // valeurs
+        );
+
+        return back()->with('succes', "Le contenu APROPOS a été modifié avec succès.");
     }
 
     /**

@@ -68,7 +68,7 @@ class PublicitesController extends Controller
             $name = 'publicite_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('publicites'), $name);
 
-            $imagePath = url('pharma/public/publicites/' . $name);
+            $imagePath = url('admin/public/publicites/' . $name);
         }
 
         $publicite = new Publicite();
@@ -150,7 +150,7 @@ class PublicitesController extends Controller
             $file = $request->file('image');
             $name = 'publicite_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('publicites'), $name);
-            $diplomePath = url('pharma/public/publicites/' . $name);
+            $diplomePath = url('admin/public/publicites/' . $name);
 
             $publicite->image = $diplomePath;
         }

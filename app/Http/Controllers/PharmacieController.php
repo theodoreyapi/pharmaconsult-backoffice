@@ -75,7 +75,7 @@ class PharmacieController extends Controller
             $name = 'pharmacy_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('pharmacys'), $name);
 
-            $imagePath = url('pharma/public/pharmacys/' . $name);
+            $imagePath = url('admin/public/pharmacys/' . $name);
         }
 
         $pharmacy = new Pharmacy();
@@ -170,7 +170,7 @@ class PharmacieController extends Controller
             $file = $request->file('photo');
             $name = 'pharmacy_' . $timestamp . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('pharmacys'), $name);
-            $diplomePath = url('pharma/public/pharmacys/' . $name);
+            $diplomePath = url('admin/public/pharmacys/' . $name);
 
             $pharmacy->facade_image = $diplomePath;
         }

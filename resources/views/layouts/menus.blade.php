@@ -297,12 +297,12 @@
                             <li class="{{ Route::is('company') ? 'active-page' : '' }}">
                                 <a href="company" class="{{ Route::is('company') ? 'active-page' : '' }}"><i
                                         class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
-                                    Utilisateurs Admin</a>
+                                Admin</a>
                             </li>
                             <li class="{{ Route::is('user-pharma') ? 'active-page' : '' }}">
                                 <a href="user-pharma" class="{{ Route::is('user-pharma') ? 'active-page' : '' }}"><i
                                         class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
-                                    Utilisateurs Pharmacien</a>
+                                Pharmacien</a>
                             </li>
                         @endif
                         @if (Auth::user()->role == 'PHARMACIEN')
