@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pharmacien;
+use App\Models\User;
+use App\Models\UsersPharma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -167,7 +169,7 @@ class PharmacienController extends Controller
 
         $request->validate($roles, $customMessages);
 
-        $pharmacien = Pharmacien::findOrFail(Auth::user()->id);
+        $pharmacien = User::findOrFail(Auth::user()->id);
 
         // Vérifier ancien mot de passe
         if (!password_verify($request->password, $pharmacien->password)) {

@@ -88,8 +88,8 @@ class ApiWavePaymentController extends Controller
             $payload = [
                 'amount' => (string) $request->deposit_amount,
                 'currency' => 'XOF',
-                'success_url' => 'https://new-version.sodalite-consulting.com/payment/wave/success/' . $rechargement->id_rechargement,
-                'error_url'   => 'https://new-version.sodalite-consulting.com/payment/wave/error/' . $rechargement->id_rechargement,
+                'success_url' => 'https://admin.pharma-consults.com/payment/wave/success/' . $rechargement->id_rechargement,
+                'error_url'   => 'https://admin.pharma-consults.com/payment/wave/error/' . $rechargement->id_rechargement,
                 'client_reference' => (string) $user->phone_number,
             ];
 

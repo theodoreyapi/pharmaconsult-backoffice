@@ -12,9 +12,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Contract\Messaging;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class ApiTransfertController extends Controller
 {
+
+    protected $messaging;
+
+    public function __construct(Messaging $messaging)
+    {
+        $this->messaging = $messaging;
+    }
+
     /**
      * POST /api/process
      *
@@ -152,12 +162,26 @@ class ApiTransfertController extends Controller
         });
 
         // ── Envoyer notification Firebase au destinataire ─────────────────
-        $senderName = trim(($sender->first_name ?? '') . ' ' . ($sender->last_name ?? ''));
-        (new FcmService())->sendToUser(
+        // ── Récupérer les soldes mis à jour ───────────────────────────────
+        $updatedSender   = DB::table($senderTable)->where('username', $senderUsername)->first();
+        $updatedReceiver = DB::table($receiverTable)->where('username', $receiverUsername)->first();
+
+        $senderName   = trim(($sender->first_name ?? '') . ' ' . ($sender->last_name ?? ''));
+        $receiverName = trim(($receiver->first_name ?? '') . ' ' . ($receiver->last_name ?? ''));
+
+        // ── Notifications FCM ─────────────────────────────────────────────
+        $this->sendTransferNotification(
             $receiverUsername,
             '💰 Transfert reçu',
-            "$senderName vous a envoyé " . number_format($amount, 0, ',', ' ') . " FCFA",
-            ['type' => 'TRANSFERT', 'amount' => (string) $amount, 'sender' => $senderUsername]
+            "Vous avez reçu " . number_format($amount, 0, ',', ' ') . " FCFA de " . ($senderName ?: $senderUsername) . ". Solde : " . number_format($updatedReceiver->amount, 0, ',', ' ') . " FCFA.",
+            ['type' => 'TRANSFERT_RECU', 'amount' => (string) $amount, 'from' => $senderUsername]
+        );
+
+        $this->sendTransferNotification(
+            $senderUsername,
+            '📤 Transfert effectué',
+            "Vous avez envoyé " . number_format($amount, 0, ',', ' ') . " FCFA à " . ($receiverName ?: $receiverUsername) . ".",
+            ['type' => 'TRANSFERT_ENVOYE', 'amount' => (string) $amount, 'to' => $receiverUsername]
         );
 
         // ── Si nouveau compte créé → envoyer identifiants par WhatsApp ────
@@ -167,6 +191,39 @@ class ApiTransfertController extends Controller
 
         return response()->json(['message' => 'Transfert effectué avec succès.'], 201);
     }
+
+    /**
+     * Envoie une notification FCM à tous les tokens d'un username
+     * et supprime les tokens invalides
+     */
+    private function sendTransferNotification(string $username, string $title, string $body, array $data = []): void
+    {
+        $tokens = DB::table('fcm_token')
+            ->where('username', $username)
+            ->whereNotNull('token')
+            ->pluck('token')
+            ->toArray();
+
+        if (empty($tokens)) return;
+
+        try {
+            $message = CloudMessage::new()
+                ->withNotification(['title' => $title, 'body' => $body])
+                ->withData(array_merge($data, ['click_action' => 'FLUTTER_NOTIFICATION_CLICK']));
+
+            $response = $this->messaging->sendMulticast($message, $tokens);
+
+            // Supprimer les tokens invalides
+            foreach ($response->failures()->getItems() as $failure) {
+                DB::table('fcm_token')
+                    ->where('token', $failure->target()->value())
+                    ->delete();
+            }
+        } catch (\Throwable $e) {
+            Log::error("FCM Error [$username]: " . $e->getMessage());
+        }
+    }
+
 
     /**
      * Envoie les identifiants du nouveau compte par WhatsApp

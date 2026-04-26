@@ -263,18 +263,7 @@ Route::get('add-condition', function () {
 Route::resource('company', AdminController::class);
 Route::resource('user-pharma', PharmacienController::class);
 Route::post('profile', [PharmacienController::class, 'profile']);
-Route::get('notification', function () {
-    return view('layouts.master');
-});
-Route::get('notification-alert', function () {
-    return view('layouts.master');
-});
-Route::get('payment-gateway', function () {
-    return view('layouts.master');
-});
-Route::get('view-profile', function () {
-    return view('users.profile');
-});
+
 Route::get('add-admin', function () {
 
     $communes = Commune::orderBy('name', 'ASC')->get();
