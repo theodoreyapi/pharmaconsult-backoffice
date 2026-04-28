@@ -107,8 +107,12 @@
         </div>
 
         <!-- Retry via app -->
-        <a href="pharmaconsults://payment/error" class="btn">
-            Réessayer dans l’application
+        <a href="pharmaconsults://payment/error"
+            onclick="setTimeout(function(){
+       window.location.href='https://www.pharma-consults.com';
+   }, 2000);"
+            class="btn">
+            Retourner dans l’application
         </a>
 
         <!-- Retour site

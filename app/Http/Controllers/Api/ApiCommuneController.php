@@ -32,4 +32,20 @@ class ApiCommuneController extends Controller
         ], 200);
     }
 
+    /**
+     * GET /api/commune/search
+     *
+     * Sans paramètre  → all premières communes (ordre alphabétique)
+     */
+    public function getCommune()
+    {
+        $communes = Commune::orderBy('name', 'asc')
+            ->select('id_commune as id', 'name', 'description')
+            ->get();
+
+        return response()->json([
+            'content' => $communes,
+        ], 200);
+    }
+
 }

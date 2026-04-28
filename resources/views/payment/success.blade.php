@@ -113,7 +113,11 @@
         </div>
 
         <!-- Retour app mobile -->
-        <a href="pharmaconsults://payment/success" class="btn">
+        <a href="pharmaconsults://payment/success"
+            onclick="setTimeout(function(){
+       window.location.href='https://www.pharma-consults.com';
+   }, 2000);"
+            class="btn">
             Retourner dans l’application
         </a>
 

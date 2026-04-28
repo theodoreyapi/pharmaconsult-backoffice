@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\FcmToken;
+use App\Models\Pharmacien;
 use App\Models\Rechargements;
 use App\Models\RequestMedicament;
 use App\Models\ReservationMedicament;
@@ -12,6 +13,7 @@ use App\Models\Subscriptions;
 use App\Models\Transfert;
 use App\Models\UsersPharma;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -210,6 +212,7 @@ class ApiUsersPharmaController extends Controller
                 'otp_verified'  => true,
                 'otp_code'      => null,
                 'otp_expire_at' => null,
+                'active'        => 'ACTIVE',
                 'updated_at'    => now(),
             ]);
 
@@ -251,7 +254,7 @@ class ApiUsersPharmaController extends Controller
             $message
                 ->to($email)
                 ->from(
-                    env('MAIL_FROM_ADDRESS', 'contact.pharmaconsults@gmail.com'),
+                    env('MAIL_FROM_ADDRESS', 'pharmaconsultsexpertise@gmail.com'),
                     env('MAIL_FROM_NAME', 'PharmaConsults')
                 )
                 ->subject('Votre code de vérification PharmaConsults')
@@ -259,7 +262,7 @@ class ApiUsersPharmaController extends Controller
                     <div style='font-family: Arial, sans-serif; max-width: 500px; margin: auto;'>
                         <h2 style='color: #115010;'>Code de vérification</h2>
                         <p>Bonjour <strong>$firstName</strong>,</p>
-                        <p>Votre code de vérification PharmaConso est :</p>
+                        <p>Votre code de vérification PharmaConsults est :</p>
                         <div style='font-size: 36px; font-weight: bold; letter-spacing: 10px;
                                     background: #41BA3E; padding: 20px; text-align: center;
                                     border-radius: 8px; color: #115010;'>
@@ -558,7 +561,7 @@ class ApiUsersPharmaController extends Controller
                 'active'      => $user->active,
                 'amount'     => $user->amount,
                 'lastAmount' => $user->last_amount,
-                'profilePicture' => $user->profile_picture,
+                'profilePicture' => $user->profile_picture ?? '',
                 'subscriptions' => $formattedSubscriptions,
             ],
         ], 200);
@@ -587,5 +590,53 @@ class ApiUsersPharmaController extends Controller
         ]));
         $signature = hash_hmac('sha256', "$header.$payload", config('app.key'));
         return "$header.$payload.$signature";
+    }
+
+    public function getByUsername(string $username): JsonResponse
+    {
+        // Chercher dans users_pharma (email, phone_number, username)
+        $user = UsersPharma::where('email', $username)
+            ->orWhere('phone_number', $username)
+            ->orWhere('username', $username)
+            ->first();
+
+        if ($user) {
+            return response()->json([
+                'firstName'   => $user->first_name,
+                'lastName'    => $user->last_name,
+                'email'       => $user->email,
+                'phoneNumber' => $user->phone_number,
+                'role'        => $user->role ?? 'user',
+                'photo'       => $user->profile_picture,
+                'username'    => $user->username,
+                'active'      => $user->active,
+                'source'      => 'users_pharma',
+            ]);
+        }
+
+        // Chercher dans pharmacien
+        $pharmacien = Pharmacien::where('email', $username)
+            ->orWhere('phone_number', $username)
+            ->orWhere('username', $username)
+            ->first();
+
+        if ($pharmacien) {
+            return response()->json([
+                'firstName'   => $pharmacien->first_name,
+                'lastName'    => $pharmacien->last_name,
+                'email'       => $pharmacien->email,
+                'phoneNumber' => $pharmacien->phone_number,
+                'role'        => $pharmacien->role ?? 'pharmacien',
+                'photo'       => $pharmacien->profile_picture,
+                'username'    => $pharmacien->username,
+                'active'      => $pharmacien->active,
+                'source'      => 'pharmacien',
+            ]);
+        }
+
+        return response()->json(
+            ['message' => 'Utilisateur introuvable'],
+            404
+        );
     }
 }

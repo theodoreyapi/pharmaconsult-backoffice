@@ -214,11 +214,11 @@ class ApiTransfertController extends Controller
             $response = $this->messaging->sendMulticast($message, $tokens);
 
             // Supprimer les tokens invalides
-            foreach ($response->failures()->getItems() as $failure) {
-                DB::table('fcm_token')
-                    ->where('token', $failure->target()->value())
-                    ->delete();
-            }
+            // foreach ($response->failures()->getItems() as $failure) {
+            //     DB::table('fcm_token')
+            //         ->where('token', $failure->target()->value())
+            //         ->delete();
+            // }
         } catch (\Throwable $e) {
             Log::error("FCM Error [$username]: " . $e->getMessage());
         }

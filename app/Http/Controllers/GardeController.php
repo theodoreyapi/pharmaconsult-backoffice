@@ -200,16 +200,16 @@ class GardeController extends Controller
             Log::info("FCM Success: " . $response->successes()->count());
             Log::info("FCM Failures: " . $response->failures()->count());
 
-            // ✅ 4. Nettoyage tokens invalides
-            foreach ($response->failures()->getItems() as $failure) {
-                $invalidToken = $failure->target()->value();
+            // // ✅ 4. Nettoyage tokens invalides
+            // foreach ($response->failures()->getItems() as $failure) {
+            //     $invalidToken = $failure->target()->value();
 
-                DB::table('fcm_token')
-                    ->where('token', $invalidToken)
-                    ->delete();
+            //     DB::table('fcm_token')
+            //         ->where('token', $invalidToken)
+            //         ->delete();
 
-                Log::warning("Token supprimé: " . $invalidToken);
-            }
+            //     Log::warning("Token supprimé: " . $invalidToken);
+            // }
 
         } catch (\Throwable $e) {
             Log::error("Erreur FCM: " . $e->getMessage());

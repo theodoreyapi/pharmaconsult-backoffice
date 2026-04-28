@@ -154,7 +154,7 @@ Route::get('index', function () {
         $souscriptions[] = [
             'mois'       => $label,
             'cumulTotal' => isset($souscriptionsIndexed[$num])
-                ? (float) $souscriptionsIndexed[$num]->cumulTotal
+                ? (float) $souscriptionsIndexed[$num]['cumulTotal']
                 : 0,
         ];
     }

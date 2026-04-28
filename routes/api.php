@@ -39,7 +39,7 @@ Route::prefix('internal/v1')->group(function () {
         Route::post('otp/validate', [ApiUsersPharmaController::class, 'validateOtp']);
         Route::post('otp/generate', [ApiUsersPharmaController::class, 'generateOtp']);
         Route::post('reinitialiser/password', [ApiUsersPharmaController::class, 'resetPassword']);
-        Route::delete('delete/{username}', [ApiUsersPharmaController::class, 'deleteAccount']);
+        Route::get('delete/{username}', [ApiUsersPharmaController::class, 'deleteAccount']);
         Route::put('update', [ApiUsersPharmaController::class, 'update']);
         Route::put('updateProfilePicture', [ApiUsersPharmaController::class, 'updatePicture']);
         Route::post('changePassword', [ApiUsersPharmaController::class, 'changePassword']);
@@ -51,6 +51,7 @@ Route::prefix('internal/v1')->group(function () {
     // -----------------------
     Route::prefix('pharma')->group(function () {
         Route::get('communes/search', [ApiCommuneController::class, 'getCommunes']);
+        Route::get('communes', [ApiCommuneController::class, 'getCommune']);
         Route::get('pharmacies/gardeIntervalByCommune', [ApiPharmacyController::class, 'getByCommune']);
         Route::get('pharmacies/{id}/pharmacies', [ApiPharmacyController::class, 'getById']);
         Route::get('assurances/getAll', [ApiAssuranceController::class, 'getAssurance']);
