@@ -78,6 +78,7 @@ class PublicitesController extends Controller
         $publicite->start_date = $request->debut;
         $publicite->name = $request->libelle;
         $publicite->image = $imagePath;
+        $publicite->status = $request->statut ?? 'INACTIVE';
         if ($publicite->save()) {
             return back()->with('succes',  "La publicité " . $request->libelle . " a été ajoutée avec succès.");
         } else {
@@ -161,7 +162,7 @@ class PublicitesController extends Controller
         $publicite->price = $request->price ?? 0;
         $publicite->start_date = $request->debut;
         $publicite->name = $request->libelle;
-
+        $publicite->status = $request->statut ?? 'INACTIVE';
         if ($publicite->save()) {
             return back()->with('succes',  "Modification éffectuée ");
         } else {

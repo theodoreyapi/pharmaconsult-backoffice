@@ -94,7 +94,7 @@ class ApiWavePaymentController extends Controller
             ];
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer wave_ci_prod_rn721NIiORE7q7DvV924gboV_AoatbI6b-3NdfYjLr9RHOXeut3zmM0Cb-I643im7sENfaZBiho1eTkwbf5od5FTKymxOvgnCA',
+                'Authorization' => 'Bearer wave_ci_prod_tIc5B0OlAxjucp29W83a2YLvua7Z7FOTmAFYtQlONucpqcNHU0TklALECuBP-nf5HL8HkGgopw0UzPFz2aXld43qhMcAwXINng',
                 'Content-Type'  => 'application/json',
             ])->post('https://api.wave.com/v1/checkout/sessions', $payload);
 

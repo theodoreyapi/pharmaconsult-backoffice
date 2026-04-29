@@ -17,7 +17,7 @@ class ApiPubliciteController extends Controller
     {
         $now = Carbon::now();
 
-        $publicites = Publicite::where('status', 'active')
+        $publicites = Publicite::where('status', 'ACTIVE')
             ->where('start_date', '<=', $now)
             ->where('end_date', '>=', $now)
             ->orderBy('start_date', 'desc')

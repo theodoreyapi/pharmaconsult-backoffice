@@ -96,7 +96,7 @@ class PharmacienController extends Controller
             $message
                 ->to($email)
                 ->from(
-                    env('MAIL_FROM_ADDRESS', 'pharmaconsultsexpertise@gmail.com'),
+                    env('MAIL_FROM_ADDRESS', 'no-reply@pharma-consults.com'),
                     env('MAIL_FROM_NAME', 'PharmaConsults')
                 )
                 ->subject('Vos paramètres de connexion - PharmaConsults')

@@ -101,6 +101,18 @@
                                         <input type="date" name="fin" required class="form-control radius-8"
                                             id="name">
                                     </div>
+                                    <div class="col-6 mb-20">
+                                        <label for="country"
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">Statut
+                                        </label>
+                                        <select required name="statut" class="form-control radius-8 form-select"
+                                            id="country">
+                                            <option value="">Sélectionne
+                                            </option>
+                                            <option value="ACTIVE">ACTIVE</option>
+                                            <option value="INACTIVE">INACTIVE</option>
+                                        </select>
+                                    </div>
                                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
                                         <button type="reset" data-bs-dismiss="modal" aria-label="Close"
                                             class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
@@ -237,7 +249,7 @@
                                                                         Coût
                                                                     </label>
                                                                     <input value="{{ $item->price }}" type="text"
-                                                                        name="lien" required
+                                                                        name="price" required
                                                                         class="form-control radius-8" id="name"
                                                                         placeholder="Entrer le coût">
                                                                 </div>
@@ -266,10 +278,12 @@
                                                                     <select required name="statut"
                                                                         class="form-control radius-8 form-select"
                                                                         id="country">
-                                                                        <option value="{{ $item->status }}">Sélectionne
-                                                                        </option>
-                                                                        <option value="ACTIVE">ACTIVE</option>
-                                                                        <option value="INACTIVE">INACTIVE</option>
+                                                                        <option
+                                                                            @if ($item->status == 'ACTIVE') selected @endif
+                                                                            value="ACTIVE">ACTIVE</option>
+                                                                        <option
+                                                                            @if ($item->status == 'INACTIVE') selected @endif
+                                                                            value="INACTIVE">INACTIVE</option>
                                                                     </select>
                                                                 </div>
                                                                 <div
