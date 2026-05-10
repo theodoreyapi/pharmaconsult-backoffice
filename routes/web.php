@@ -25,7 +25,6 @@ use App\Http\Controllers\RequetesController;
 use App\Http\Controllers\ReservationsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserPharmacienController;
 use App\Models\Commune;
 use App\Models\Medicamants;
 use App\Models\Pharmacy;
@@ -38,17 +37,23 @@ use App\Models\Transfert;
 use App\Models\UsersPharma;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 Route::get('index', [CustomAuthController::class, 'dashboard'])->middleware('auth');;
 Route::post('custom-login', [CustomAuthController::class, 'customLogin']);
 Route::get('logout', [CustomAuthController::class, 'signOut'])->name('logout');
 
+// Wave rechargement
 Route::get('/payment/wave/success/{id}', [PaymentWaveController::class, 'success'])
     ->name('wave.success');
 Route::get('/payment/wave/error/{id}', [PaymentWaveController::class, 'error'])
     ->name('wave.error');
+
+// Wave vaccination
+Route::get('/payment/wave/success/profile/{id}', [PaymentWaveController::class, 'successVacci'])
+    ->name('wave.success.profile');
+Route::get('/payment/wave/error/profile/{id}', [PaymentWaveController::class, 'errorVacci'])
+    ->name('wave.error.profile');
 
 Route::get('/', function () {
     if (Auth::check()) {

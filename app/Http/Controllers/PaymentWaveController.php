@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HealthProfile;
+use App\Models\ProfileSubscription;
 use App\Models\Rechargements;
 use App\Models\UsersPharma;
-use App\Services\FcmService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -155,6 +156,90 @@ class PaymentWaveController extends Controller
         return view('payment.error', [
             'amount' => 0,
             'message' => 'Rechargement annulé ou échoué',
+            'rechargement_id' => $id,
+        ]);
+    }
+
+
+    /**
+     * ✅ PAGE SUCCESS
+     */
+    public function successVacci($id)
+    {
+
+        // ✅ Récupère l'objet complet, puis accède à l'attribut
+        $payment = ProfileSubscription::where('id_subscription', $id)->first();
+
+        if (!$payment) {
+            return view('payment.error-vacci', ['message' => 'Paiement introuvable']);
+        }
+
+        $checkoutId = $payment->checkout_session_id; // ✅ string correcte
+
+        // Vérification réelle chez Wave (source de vérité)
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer wave_ci_prod_tIc5B0OlAxjucp29W83a2YLvua7Z7FOTmAFYtQlONucpqcNHU0TklALECuBP-nf5HL8HkGgopw0UzPFz2aXld43qhMcAwXINng',
+            'Content-Type'  => 'application/json',
+        ])->get("https://api.wave.com/v1/checkout/sessions/$checkoutId");
+
+        if (!$response->successful()) {
+            return view('payment.error-vacci', [
+                'message' => 'Impossible de vérifier le paiement',
+            ]);
+        }
+
+        $session = $response->json();
+
+        if ($session['payment_status'] !== 'succeeded') {
+            return view('payment.error-vacci', [
+                'message' => 'Paiement non confirmé',
+            ]);
+        }
+
+        // ── Traitement idempotent (eviter double crédit) ──────────────────
+        if ($payment->status !== 'paid') {
+            DB::transaction(function () use ($payment, $session) {
+
+                // CORRECTION : récupérer le user DANS la transaction avec un lock
+                $user = HealthProfile::where('id_profile', $payment->profile_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$user) {
+                    throw new \Exception("Profile introuvable pour le paiement {$payment->id_subscription}");
+                }
+
+                // Mettre à jour le rechargement
+                $payment->update([
+                    'status'         => 'paid',
+                    'payment_reference' => $session['transaction_id'] ?? null,
+                    'paid_at'     => Carbon::now(),
+                    'updated_at'     => Carbon::now(),
+                ]);
+
+                // CORRECTION : profile le statut fais depuis la DB (lockForUpdate)
+                $user->update([
+                    'is_active' => true,
+                    'updated_at'  => Carbon::now(),
+                ]);
+            });
+        }
+
+        return view('payment.success-vacci', [
+            'amount'    => $session['amount'],
+            'reference' => $session['transaction_id'] ?? 'N/A',
+            'business'  => $session['business_name'] ?? 'PharmaConsults',
+        ]);
+    }
+
+    /**
+     * ❌ PAGE ERROR
+     */
+    public function errorVacci($id)
+    {
+        return view('payment.error-vacci', [
+            'amount' => 0,
+            'message' => 'Paiement annulé ou échoué',
             'rechargement_id' => $id,
         ]);
     }

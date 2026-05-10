@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Controllers\Api\ApiAppointmentController;
 use App\Http\Controllers\Api\ApiAssuranceController;
+use App\Http\Controllers\Api\ApiCategoryController;
 use App\Http\Controllers\Api\ApiCommuneController;
+use App\Http\Controllers\Api\ApiHealthProfileController;
 use App\Http\Controllers\Api\ApiMedicamentController;
 use App\Http\Controllers\Api\ApiParametreGenerauxController;
 use App\Http\Controllers\Api\ApiPharmacyController;
 use App\Http\Controllers\Api\ApiPharmacyRequestController;
+use App\Http\Controllers\Api\ApiProfileSubscriptionController;
+use App\Http\Controllers\Api\ApiProfileVaccinationController;
 use App\Http\Controllers\Api\ApiPubliciteController;
 use App\Http\Controllers\Api\ApiPushNotifController;
 use App\Http\Controllers\Api\ApiReservationMedicamentController;
@@ -13,6 +18,7 @@ use App\Http\Controllers\Api\ApiReviewController;
 use App\Http\Controllers\Api\ApiSubscriptionController;
 use App\Http\Controllers\Api\ApiTransfertController;
 use App\Http\Controllers\Api\ApiUsersPharmaController;
+use App\Http\Controllers\Api\ApiVaccineController;
 use App\Http\Controllers\Api\ApiWavePaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -151,4 +157,67 @@ Route::prefix('internal/v1')->group(function () {
     Route::prefix('periodes-garde')->group(function () {
         Route::get('/', [ApiPharmacyController::class, 'getPeriodeGarde']);
     });
+
+    // -----------------------
+    // VACCINS
+    // -----------------------
+    Route::prefix('vaccins')->group(function () {
+        Route::get('/', [ApiVaccineController::class, 'index']); // GET /api/vaccins?search=...&category=...
+
+        // Catégories
+        Route::get('categories', [ApiCategoryController::class, 'index']);   // GET /api/categories
+
+        // Créer un RDV (sans auth obligatoire)
+        Route::post('appointments', [ApiAppointmentController::class, 'store']); // POST /api/appointments
+
+        // Rendez-vous du patient connecté
+        Route::get('appointments/{id}', [ApiAppointmentController::class, 'index']);   // GET /api/appointments
+    });
+
+    // ── Profils santé ─────────────────────────────────────────────────────
+    Route::prefix('health-profiles')->group(function () {
+
+        // GET    /api/health-profiles              → liste des profils
+        // POST   /api/health-profiles              → créer un profil + abonnement pending
+        // GET    /api/health-profiles/{id}         → détail d'un profil
+        // PUT    /api/health-profiles/{id}         → modifier un profil
+        // DELETE /api/health-profiles/{id}         → désactiver un profil
+        Route::get('/{id}', [ApiHealthProfileController::class, 'index']);
+        Route::post('/', [ApiHealthProfileController::class, 'store']);
+        Route::get('show/{id}', [ApiHealthProfileController::class, 'show']);
+        Route::put('/{id}', [ApiHealthProfileController::class, 'update']);
+        Route::delete('/{id}', [ApiHealthProfileController::class, 'destroy']);
+
+        // GET /api/health-profiles/reminders       → rappels dans les 30 jours
+        Route::get('/reminders', [ApiHealthProfileController::class, 'reminders']);
+    });
+    // ── Vaccinations (imbriquées dans un profil) ──────────────────────────
+
+    // GET    /api/health-profiles/{profileId}/vaccinations         → liste
+    // POST   /api/health-profiles/{profileId}/vaccinations         → ajouter (multipart)
+    // GET    /api/health-profiles/{profileId}/vaccinations/{id}    → détail
+    // POST   /api/health-profiles/{profileId}/vaccinations/{id}    → modifier (multipart + _method=PUT)
+    // DELETE /api/health-profiles/{profileId}/vaccinations/{id}    → supprimer
+    Route::prefix('health-profiles/{profileId}/vaccinations')->group(function () {
+        Route::get('/',     [ApiProfileVaccinationController::class, 'index']);
+        Route::post('/',    [ApiProfileVaccinationController::class, 'store']);
+        Route::get('/{id}', [ApiProfileVaccinationController::class, 'show']);
+        Route::post('/{id}', [ApiProfileVaccinationController::class, 'update']);   // POST + _method=PUT
+        Route::delete('/{id}', [ApiProfileVaccinationController::class, 'destroy']);
+
+        // DELETE /api/health-profiles/{profileId}/vaccinations/{id}/certificate
+        Route::delete('/{id}/certificate', [ApiProfileVaccinationController::class, 'deleteCertificate']);
+    });
+
+    // ── Abonnements ───────────────────────────────────────────────────────
+
+    // GET  /api/health-profiles/{profileId}/subscription       → abonnement courant
+    // POST /api/health-profiles/{profileId}/subscription/pay   → confirmer paiement
+    Route::prefix('health-profiles/{profileId}/subscription')->group(function () {
+        Route::get('/',    [ApiProfileSubscriptionController::class, 'show']);
+        Route::post('/pay', [ApiProfileSubscriptionController::class, 'pay']);
+    });
+
+    // GET /api/subscriptions/summary → résumé tous les abonnements
+    Route::get('subscriptions/summary', [ApiProfileSubscriptionController::class, 'summary']);
 });
