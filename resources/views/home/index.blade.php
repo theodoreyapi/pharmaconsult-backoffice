@@ -1,379 +1,503 @@
 @extends('layouts.master', ['title' => 'Tableau de bord'])
 
 @section('content')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <div class="dashboard-main-body">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-            <h6 class="fw-semibold mb-0">Tableau de bord</h6>
-            <ul class="d-flex align-items-center gap-2">
-                <li class="fw-medium">
-                    <a href="#" class="d-flex align-items-center gap-1 hover-text-primary">
-                        <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
-                        Tableau de bord
-                    </a>
-                </li>
-                <li>-</li>
-                <li class="fw-medium">Accueil</li>
-            </ul>
-        </div>
+<div class="dashboard-main-body">
 
-        <div class="row row-cols-xxxl-5 row-cols-lg-3 row-cols-sm-2 row-cols-1 gy-4">
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-1 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Nombre total d'utilisateurs</p>
-                                <h6 class="mb-0">{{ $statistiques['totalUsers'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-cyan rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="gridicons:multiple-users"
-                                    class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Souscriptions totales</p>
-                                <h6 class="mb-0">{{ $statistiques['totalSubscriptions'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Operations totales</p>
-                                <h6 class="mb-0">{{ $statistiques['totalOperations'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Reservations totales</p>
-                                <h6 class="mb-0">{{ $statistiques['totalReservations'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Requetes totales</p>
-                                <h6 class="mb-0">{{ $statistiques['totalRequests'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Requetes totales Utilisateurs</p>
-                                <h6 class="mb-0">{{ $statistiques['totalRequestsUsers'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Rechargement total</p>
-                                <h6 class="mb-0">{{ $statistiques['totalRechargements'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-2 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Transfert total</p>
-                                <h6 class="mb-0">{{ $statistiques['totalTransferts'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-3 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Nbre total utilisateurs souscrits</p>
-                                <h6 class="mb-0">{{ $statistiques['totalActifSubscriptions'] }}</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-info rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="fluent:people-20-filled"
-                                    class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-            <div class="col">
-                <div class="card shadow-none border bg-gradient-start-4 h-100">
-                    <div class="card-body p-20">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <div>
-                                <p class="fw-medium text-primary-light mb-1">Revenu total</p>
-                                <h6 class="mb-0">{{ number_format($statistiques['totalSubscriptionAmount'], 0, ',', ' ') }} FCFA</h6>
-                            </div>
-                            <div
-                                class="w-50-px h-50-px bg-success-main rounded-circle d-flex justify-content-center align-items-center">
-                                <iconify-icon icon="solar:wallet-bold" class="text-white text-2xl mb-0"></iconify-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- card end -->
-            </div>
-        </div>
-
-        <div class="row gy-4 mt-1">
-            <div class="col-xxl-12 col-xl-12">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between">
-                            <h6 class="text-lg mb-0">Statistiques des souscriptions {{ date('Y') }}</h6>
-                        </div>
-                        <div class="d-flex flex-wrap align-items-center gap-2 mt-8">
-                            @php
-                                $total = array_sum(array_column($souscriptions, 'cumulTotal'));
-                            @endphp
-                            <h6 class="mb-0 text-primary">{{ number_format($total, 0, ',', ' ') }} FCFA</h6>
-                            <br>
-                        </div>
-                        <br>
-
-                        <canvas id="statistiquesChart"></canvas>
-
-                        <script>
-                            const statistiques = @json($souscriptions);
-
-                            const labels = statistiques.map(item => item.mois);
-                            const dataValues = statistiques.map(item => item.cumulTotal);
-
-                            const ctx = document.getElementById('statistiquesChart').getContext('2d');
-
-                            new Chart(ctx, {
-                                type: 'line', // type de graphique
-                                data: {
-                                    labels: labels, // Mois
-                                    datasets: [{
-                                        label: 'Cumul des abonnements',
-                                        data: dataValues, // Valeurs
-                                        borderColor: 'green',
-                                        backgroundColor: 'rgba(0, 200, 83, 0.2)',
-                                        fill: true,
-                                        tension: 0.4 // rend la courbe fluide
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: {
-                                        legend: {
-                                            display: false
-                                        }
-                                    },
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true,
-                                            ticks: {
-                                                callback: function(value) {
-                                                    return value.toLocaleString() + ' FCFA'; // formatage en FCFA
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        </script>
-                    </div>
-                </div>
-            </div>
-            {{-- <div class="col-xxl-6 col-xl-6">
-                <div class="card h-100 radius-8 border">
-                    <div class="card-body p-24">
-                        <h6 class="mb-12 fw-semibold text-lg mb-16">Nombre total d'abonnés</h6>
-                        <div class="d-flex align-items-center gap-2 mb-20">
-                            <h6 class="fw-semibold mb-0">5,000</h6>
-                            <p class="text-sm mb-0">
-                                <span
-                                    class="bg-danger-focus border br-danger px-8 py-2 rounded-pill fw-semibold text-danger-main text-sm d-inline-flex align-items-center gap-1">
-                                    10%
-                                    <iconify-icon icon="iconamoon:arrow-down-2-fill" class="icon"></iconify-icon>
-                                </span>
-                                - 20 Per Day
-                            </p>
-                        </div>
-
-                        <div id="barChart"></div>
-
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-9 col-xl-12">
-                <div class="card h-100">
-                    <div class="card-body p-24">
-                        <div class="" role="tabpanel" aria-labelledby="pills-recent-leads-tab" tabindex="0">
-                            <div class="table-responsive scroll-sm">
-                                <table class="table bordered-table sm-table mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Users </th>
-                                            <th scope="col">Registered On</th>
-                                            <th scope="col">Plan</th>
-                                            <th scope="col" class="text-center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="{{ URL::asset('') }}assets/images/users/user1.png"
-                                                        alt=""
-                                                        class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="text-md mb-0 fw-medium">Dianne Russell</h6>
-                                                        <span
-                                                            class="text-sm text-secondary-light fw-medium">redaniel@gmail.com</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>27 Mar 2024</td>
-                                            <td>Free</td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-3 col-xl-12">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                            <h6 class="mb-2 fw-bold text-lg mb-0">Top Performer</h6>
-                            <a href="javascript:void(0)"
-                                class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
-                                View All
-                                <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
-                            </a>
-                        </div>
-
-                        <div class="mt-32">
-
-                            <div class="d-flex align-items-center justify-content-between gap-3 mb-24">
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ URL::asset('') }}assets/images/users/user1.png" alt=""
-                                        class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                    <div class="flex-grow-1">
-                                        <h6 class="text-md mb-0 fw-medium">Dianne Russell</h6>
-                                        <span class="text-sm text-secondary-light fw-medium">Agent ID: 36254</span>
-                                    </div>
-                                </div>
-                                <span class="text-primary-light text-md fw-medium">$20</span>
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-12">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                            <h6 class="mb-2 fw-bold text-lg mb-0">Generated Content</h6>
-                            <select class="form-select form-select-sm w-auto bg-base border text-secondary-light">
-                                <option>Today</option>
-                                <option>Weekly</option>
-                                <option>Monthly</option>
-                                <option>Yearly</option>
-                            </select>
-                        </div>
-
-                        <ul class="d-flex flex-wrap align-items-center mt-3 gap-3">
-                            <li class="d-flex align-items-center gap-2">
-                                <span class="w-12-px h-12-px rounded-circle bg-primary-600"></span>
-                                <span class="text-secondary-light text-sm fw-semibold">Word:
-                                    <span class="text-primary-light fw-bold">500</span>
-                                </span>
-                            </li>
-                            <li class="d-flex align-items-center gap-2">
-                                <span class="w-12-px h-12-px rounded-circle bg-yellow"></span>
-                                <span class="text-secondary-light text-sm fw-semibold">Image:
-                                    <span class="text-primary-light fw-bold">300</span>
-                                </span>
-                            </li>
-                        </ul>
-
-                        <div class="mt-40">
-                            <div id="paymentStatusChart" class="margin-16-minus"></div>
-                        </div>
-
-                    </div>
-                </div>
-            </div> --}}
-        </div>
+    {{-- ── Fil d'Ariane ─────────────────────────────────────────────────────── --}}
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+        <h6 class="fw-semibold mb-0">Tableau de bord</h6>
+        <ul class="d-flex align-items-center gap-2">
+            <li class="fw-medium">
+                <a href="#" class="d-flex align-items-center gap-1 hover-text-primary">
+                    <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
+                    Tableau de bord
+                </a>
+            </li>
+            <li>-</li>
+            <li class="fw-medium">Accueil</li>
+        </ul>
     </div>
+
+    {{-- ══════════════════════════════════════════════════════════════════════
+         SECTION 1 — Statistiques générales (existantes)
+    ══════════════════════════════════════════════════════════════════════ --}}
+    <p class="text-xs text-secondary-light fw-semibold text-uppercase mb-12 mt-4">
+        <iconify-icon icon="solar:chart-2-outline" class="me-1"></iconify-icon>
+        Statistiques générales
+    </p>
+
+    <div class="row row-cols-xxxl-5 row-cols-lg-3 row-cols-sm-2 row-cols-1 gy-4">
+
+        {{-- Utilisateurs --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-1 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Utilisateurs</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalUsers']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-cyan rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="gridicons:multiple-users" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Souscriptions --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Souscriptions totales</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalSubscriptions']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="fa-solid:award" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Opérations --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Opérations totales</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalOperations']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:transfer-horizontal-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Réservations --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Réservations</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalReservations']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:calendar-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Requêtes pharmacies --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Requêtes pharmacies</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalRequests']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:question-circle-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Requêtes utilisateurs --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Requêtes utilisateurs</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalRequestsUsers']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:user-speak-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Rechargements --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Rechargements réussis</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalRechargements']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:battery-charge-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Transferts --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-2 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Transferts (Débit)</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalTransferts']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-purple rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:card-send-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Abonnés actifs --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-3 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Abonnés actifs</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalActifSubscriptions']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-info rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="fluent:people-20-filled" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Revenu rechargements --}}
+        <div class="col">
+            <div class="card shadow-none border bg-gradient-start-4 h-100">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Revenu total (rechargements)</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalSubscriptionAmount'], 0, ',', ' ') }} FCFA</h6>
+                        </div>
+                        <div class="w-50-px h-50-px bg-success-main rounded-circle d-flex justify-content-center align-items-center">
+                            <iconify-icon icon="solar:wallet-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>{{-- /row statistiques générales --}}
+
+    {{-- ══════════════════════════════════════════════════════════════════════
+         SECTION 2 — Profils Santé & Vaccins (nouvelles cards)
+    ══════════════════════════════════════════════════════════════════════ --}}
+    <p class="text-xs text-secondary-light fw-semibold text-uppercase mb-12 mt-32">
+        <iconify-icon icon="solar:health-outline" class="me-1"></iconify-icon>
+        Profils Santé &amp; Vaccins
+    </p>
+
+    <div class="row row-cols-xxxl-5 row-cols-lg-3 row-cols-sm-2 row-cols-1 gy-4">
+
+        {{-- Profils santé créés --}}
+        <div class="col">
+            <div class="card shadow-none border h-100" style="border-left: 4px solid #2E7D32 !important;">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Profils santé créés</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalHealthProfiles']) }}</h6>
+                            <small class="text-secondary-light">
+                                dont {{ number_format($statistiques['totalActiveHealthProfiles']) }} actifs
+                            </small>
+                        </div>
+                        <div class="w-50-px h-50-px rounded-circle d-flex justify-content-center align-items-center"
+                            style="background-color: #2E7D32;">
+                            <iconify-icon icon="solar:user-heart-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Abonnements profils — payés --}}
+        <div class="col">
+            <div class="card shadow-none border h-100" style="border-left: 4px solid #1565C0 !important;">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Abonnements profils actifs</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalPaidProfileSubscriptions']) }}</h6>
+                            <small class="text-secondary-light">
+                                {{ number_format($statistiques['totalPendingProfileSubscriptions']) }} en attente
+                            </small>
+                        </div>
+                        <div class="w-50-px h-50-px rounded-circle d-flex justify-content-center align-items-center"
+                            style="background-color: #1565C0;">
+                            <iconify-icon icon="solar:shield-check-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Revenu abonnements profils --}}
+        <div class="col">
+            <div class="card shadow-none border h-100" style="border-left: 4px solid #00695C !important;">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Revenu abonnements profils</p>
+                            <h6 class="mb-0">
+                                {{ number_format($statistiques['totalProfileSubscriptionRevenue'], 0, ',', ' ') }} FCFA
+                            </h6>
+                            <small class="text-secondary-light">
+                                Ce mois :
+                                {{ number_format($statistiques['totalProfileRevenueThisMonth'], 0, ',', ' ') }} FCFA
+                            </small>
+                        </div>
+                        <div class="w-50-px h-50-px rounded-circle d-flex justify-content-center align-items-center"
+                            style="background-color: #00695C;">
+                            <iconify-icon icon="solar:wallet-money-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Vaccinations enregistrées --}}
+        <div class="col">
+            <div class="card shadow-none border h-100" style="border-left: 4px solid #6A1B9A !important;">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Vaccinations enregistrées</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalVaccinations']) }}</h6>
+                        </div>
+                        <div class="w-50-px h-50-px rounded-circle d-flex justify-content-center align-items-center"
+                            style="background-color: #6A1B9A;">
+                            <iconify-icon icon="solar:syringe-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Réservations vaccins --}}
+        <div class="col">
+            <div class="card shadow-none border h-100" style="border-left: 4px solid #E65100 !important;">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <p class="fw-medium text-primary-light mb-1">Réservations vaccins</p>
+                            <h6 class="mb-0">{{ number_format($statistiques['totalVaccinAppointments']) }}</h6>
+                            <small class="text-secondary-light">
+                                {{ number_format($statistiques['totalPendingVaccinAppointments']) }} en attente
+                            </small>
+                        </div>
+                        <div class="w-50-px h-50-px rounded-circle d-flex justify-content-center align-items-center"
+                            style="background-color: #E65100;">
+                            <iconify-icon icon="solar:calendar-add-bold" class="text-white text-2xl mb-0"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>{{-- /row profils santé --}}
+
+    {{-- ══════════════════════════════════════════════════════════════════════
+         SECTION 3 — Graphiques
+    ══════════════════════════════════════════════════════════════════════ --}}
+    <div class="row gy-4 mt-4">
+
+        {{-- Graphique 1 : Rechargements par mois --}}
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-lg mb-0">Rechargements {{ date('Y') }}</h6>
+                            <p class="text-sm text-secondary-light mt-1">Cumul mensuel des rechargements réussis</p>
+                        </div>
+                        <span class="badge bg-success-focus text-success-main px-12 py-6 rounded-pill fw-semibold">
+                            {{ number_format(array_sum(array_column($souscriptions, 'cumulTotal')), 0, ',', ' ') }} FCFA
+                        </span>
+                    </div>
+                    <br>
+                    <canvas id="rechargementsChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- Graphique 2 : Abonnements profils par mois --}}
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-lg mb-0">Abonnements Profils {{ date('Y') }}</h6>
+                            <p class="text-sm text-secondary-light mt-1">Revenu mensuel des abonnements profils santé</p>
+                        </div>
+                        <span class="badge text-white px-12 py-6 rounded-pill fw-semibold"
+                            style="background-color: #2E7D32;">
+                            {{ number_format(array_sum(array_column($profileSubscriptions, 'cumulTotal')), 0, ',', ' ') }} FCFA
+                        </span>
+                    </div>
+                    <br>
+                    <canvas id="profileSubsChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>{{-- /row graphiques --}}
+
+</div>{{-- /dashboard-main-body --}}
+
+{{-- ── Scripts graphiques ──────────────────────────────────────────────────── --}}
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const fcfaFormatter = value => value.toLocaleString('fr-FR') + ' FCFA';
+
+// ── Graphique rechargements ───────────────────────────────────────────────────
+(function () {
+    const data   = @json($souscriptions);
+    const labels = data.map(d => d.mois);
+    const values = data.map(d => d.cumulTotal);
+
+    new Chart(document.getElementById('rechargementsChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label          : 'Rechargements (FCFA)',
+                data           : values,
+                borderColor    : '#16A34A',
+                backgroundColor: 'rgba(22, 163, 74, 0.12)',
+                fill           : true,
+                tension        : 0.4,
+                pointBackgroundColor: '#16A34A',
+                pointRadius    : 4,
+                borderWidth    : 2,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' ' + fcfaFormatter(ctx.parsed.y),
+                    },
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: fcfaFormatter },
+                    grid: { color: 'rgba(0,0,0,0.04)' },
+                },
+                x: {
+                    grid: { display: false },
+                },
+            },
+        },
+    });
+})();
+
+// ── Graphique abonnements profils ─────────────────────────────────────────────
+(function () {
+    const data    = @json($profileSubscriptions);
+    const labels  = data.map(d => d.mois);
+    const revenue = data.map(d => d.cumulTotal);
+    const counts  = data.map(d => d.nbr);
+
+    new Chart(document.getElementById('profileSubsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label          : 'Revenu (FCFA)',
+                    data           : revenue,
+                    backgroundColor: 'rgba(46, 125, 50, 0.75)',
+                    borderColor    : '#2E7D32',
+                    borderWidth    : 1,
+                    borderRadius   : 4,
+                    yAxisID        : 'yRevenu',
+                },
+                {
+                    label          : 'Nombre d\'abonnements',
+                    data           : counts,
+                    type           : 'line',
+                    borderColor    : '#1565C0',
+                    backgroundColor: 'rgba(21, 101, 192, 0.1)',
+                    fill           : false,
+                    tension        : 0.3,
+                    pointBackgroundColor: '#1565C0',
+                    pointRadius    : 4,
+                    borderWidth    : 2,
+                    yAxisID        : 'yCount',
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode : 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display : true,
+                    position: 'top',
+                    labels  : { boxWidth: 12, font: { size: 11 } },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.datasetIndex === 0
+                            ? ' Revenu : ' + fcfaFormatter(ctx.parsed.y)
+                            : ' Abonnements : ' + ctx.parsed.y,
+                    },
+                },
+            },
+            scales: {
+                yRevenu: {
+                    type       : 'linear',
+                    position   : 'left',
+                    beginAtZero: true,
+                    ticks      : { callback: fcfaFormatter, font: { size: 10 } },
+                    grid       : { color: 'rgba(0,0,0,0.04)' },
+                    title      : { display: true, text: 'Revenu (FCFA)', font: { size: 11 } },
+                },
+                yCount: {
+                    type       : 'linear',
+                    position   : 'right',
+                    beginAtZero: true,
+                    ticks      : { stepSize: 1, font: { size: 10 } },
+                    grid       : { drawOnChartArea: false },
+                    title      : { display: true, text: 'Nb abonnements', font: { size: 11 } },
+                },
+                x: {
+                    grid: { display: false },
+                },
+            },
+        },
+    });
+})();
+</script>
+
 @endsection

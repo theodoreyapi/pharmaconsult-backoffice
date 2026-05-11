@@ -163,6 +163,7 @@ Route::prefix('internal/v1')->group(function () {
     // -----------------------
     Route::prefix('vaccins')->group(function () {
         Route::get('/', [ApiVaccineController::class, 'index']); // GET /api/vaccins?search=...&category=...
+        Route::get('type/{type}', [ApiVaccineController::class, 'type']); // GET /api/vaccins/type/{type}
 
         // Catégories
         Route::get('categories', [ApiCategoryController::class, 'index']);   // GET /api/categories

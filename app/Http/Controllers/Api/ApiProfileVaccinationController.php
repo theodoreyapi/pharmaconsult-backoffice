@@ -8,6 +8,7 @@ use App\Models\ProfileVaccination;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ApiProfileVaccinationController extends Controller
 {
@@ -39,33 +40,19 @@ class ApiProfileVaccinationController extends Controller
         /**
          * Récupérer les vaccinations
          */
-        $vaccinations = ProfileVaccination::where([
-            'profile_id' => $profileId,
-        ])
-
-            /**
-             * Charger les infos du vaccin
-             */
-            ->with([
-
-                'vaccine' => function ($query) {
-
-                    $query->select(
-                        'id_vaccine',
-                        'name',
-                        'description',
-                        'recommended_age',
-                        'recall_period'
-                    );
-                }
-            ])
-
-            /**
-             * Trier du plus récent
-             * au plus ancien
-             */
-            ->orderBy('vaccination_date', 'DESC')
-
+        $vaccinations = ProfileVaccination::query()
+            ->select(
+                'profile_vaccinations.*',
+                'vaccines.name as vaccine_name',
+                'vaccines.description as vaccine_description',
+                'vaccines.short_name',
+                'vaccines.public_price',
+                'vaccines.vaccine_type',
+                'vaccines.important_info'
+            )
+            ->leftJoin('vaccines', 'vaccines.id_vaccine', '=', 'profile_vaccinations.vaccine_id')
+            ->where('profile_vaccinations.profile_id', $profileId)
+            ->orderByDesc('profile_vaccinations.vaccination_date')
             ->get();
 
         return response()->json([
@@ -180,9 +167,9 @@ class ApiProfileVaccinationController extends Controller
         }
 
         /**
-         * Validation
+         * Validation API propre
          */
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'vaccine_id' => 'nullable|exists:vaccines,id_vaccine',
             'vaccine_name_free' => 'nullable|string|max:150',
             'vaccination_date' => 'required|date|before_or_equal:today',
@@ -192,6 +179,17 @@ class ApiProfileVaccinationController extends Controller
             'certificate_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'notes' => 'nullable|string|max:500',
         ]);
+
+        if ($validator->fails()) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
 
         /**
          * Vérifier qu'au moins un vaccin est renseigné
@@ -235,13 +233,6 @@ class ApiProfileVaccinationController extends Controller
             'center_name' => $validated['center_name'] ?? null,
             'certificate_image' => $imagePath,
             'notes' => $validated['notes'] ?? null,
-        ]);
-
-        /**
-         * Charger les données vaccin
-         */
-        $vaccination->load([
-            'vaccine'
         ]);
 
         return response()->json([
@@ -297,30 +288,14 @@ class ApiProfileVaccinationController extends Controller
          * Validation
          */
         $validated = $request->validate([
-
-            'vaccine_id' =>
-            'nullable|exists:vaccines,id_vaccine',
-
-            'vaccine_name_free' =>
-            'nullable|string|max:150',
-
-            'vaccination_date' =>
-            'nullable|date|before_or_equal:today',
-
-            'next_reminder_date' =>
-            'nullable|date',
-
-            'center_type' =>
-            'nullable|in:public,private',
-
-            'center_name' =>
-            'nullable|string|max:200',
-
-            'certificate_image' =>
-            'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-
-            'notes' =>
-            'nullable|string|max:500',
+            'vaccine_id' => 'nullable|exists:vaccines,id_vaccine',
+            'vaccine_name_free' => 'nullable|string|max:150',
+            'vaccination_date' => 'nullable|date|before_or_equal:today',
+            'next_reminder_date' => 'nullable|date',
+            'center_type' => 'nullable|in:public,private',
+            'center_name' => 'nullable|string|max:200',
+            'certificate_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         /**

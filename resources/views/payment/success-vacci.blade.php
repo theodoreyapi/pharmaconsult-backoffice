@@ -113,7 +113,7 @@
         </div>
 
         <!-- Retour app mobile -->
-        <a href="pharmaconsults://payment/success"
+        <a href="pharmaconsults://payment/successvacci"
             onclick="setTimeout(function(){
        window.location.href='https://www.pharma-consults.com';
    }, 2000);"

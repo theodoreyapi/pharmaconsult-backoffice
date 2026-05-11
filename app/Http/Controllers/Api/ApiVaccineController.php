@@ -99,4 +99,24 @@ class ApiVaccineController extends Controller
             $groupedVaccines
         );
     }
+
+    /**
+     * GET /api/vaccines/type/{type}
+     * Liste tous les vaccins actifs d'un type donné.
+     *
+     */
+    public function type($type)
+    {
+        $vaccines = Vaccine::where('is_active', true)
+            ->where('vaccine_type', $type)
+            ->select(
+                'id_vaccine',
+                'name',
+            )
+            ->get();
+
+        return response()->json(
+            $vaccines
+        );
+    }
 }

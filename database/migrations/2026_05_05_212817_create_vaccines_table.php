@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('private_price_min', 10, 2)->nullable();
             $table->decimal('private_price_max', 10, 2)->nullable();
             $table->string('currency', 10)->default('FCFA');
+            $table->enum('vaccine_type', ['human', 'animal'])->default('human');
             $table->text('important_info')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

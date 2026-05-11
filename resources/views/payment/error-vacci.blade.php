@@ -107,7 +107,7 @@
         </div>
 
         <!-- Retry via app -->
-        <a href="pharmaconsults://payment/error"
+        <a href="pharmaconsults://payment/errorvacci"
             onclick="setTimeout(function(){
        window.location.href='https://www.pharma-consults.com';
    }, 2000);"
