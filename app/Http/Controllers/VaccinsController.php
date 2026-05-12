@@ -104,6 +104,7 @@ class VaccinsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+
             'name' => 'required|string|max:150',
             'slug' => 'nullable|string|max:150|unique:vaccines,slug',
             'short_name' => 'nullable|string|max:50',
@@ -118,70 +119,169 @@ class VaccinsController extends Controller
 
             'important_info' => 'nullable|string',
 
-            'is_active' => 'nullable',
-
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id_categorie',
+
+            // schedule
+            'min_age_months' => 'nullable|integer|min:0',
+            'max_age_months' => 'nullable|integer|min:0',
+            'age_label' => 'nullable|string|max:100',
+
+            'gender' => 'nullable|in:all,masculin,feminin',
+
+            'dose_number' => 'nullable|integer|min:1',
+
+            'priority' => 'nullable|integer|min:0',
+
+            'booster_every_months' => 'nullable|integer|min:0',
+
+            'important_note' => 'nullable|string',
         ]);
 
-        /**
-         * Générer slug si vide
-         */
-        $slug = $validated['slug']
-            ?? Str::slug($validated['name']);
+        DB::beginTransaction();
 
-        /**
-         * Vérifier unicité slug auto
-         */
-        if (Vaccine::where('slug', $slug)->exists()) {
+        try {
 
-            $slug .= '-' . time();
-        }
+            $slug = $validated['slug']
+                ?? Str::slug($validated['name']);
 
-        /**
-         * Création
-         */
-        $vaccine = Vaccine::create([
-            'name' => $validated['name'],
+            if (Vaccine::where('slug', $slug)->exists()) {
+                $slug .= '-' . time();
+            }
 
-            'slug' => $slug,
+            /**
+             * VACCIN
+             */
+            $vaccine = Vaccine::create([
 
-            'short_name' => $validated['short_name'] ?? null,
+                'name' => $validated['name'],
 
-            'description' => $validated['description'] ?? null,
+                'slug' => $slug,
 
-            'public_price' => $validated['public_price'] ?? 0,
+                'short_name' => $validated['short_name'] ?? null,
 
-            'private_price_min' => $validated['private_price_min'] ?? null,
+                'description' => $validated['description'] ?? null,
 
-            'private_price_max' => $validated['private_price_max'] ?? null,
+                'public_price' => $validated['public_price'] ?? 0,
 
-            'vaccine_type' => $validated['vaccine_type'],
+                'private_price_min' => $validated['private_price_min'] ?? null,
 
-            'important_info' => $validated['important_info'] ?? null,
+                'private_price_max' => $validated['private_price_max'] ?? null,
 
-            'is_active' => $request->has('is_active'),
-        ]);
+                'vaccine_type' => $validated['vaccine_type'],
 
-        /**
-         * Catégories
-         */
-        if ($request->categories) {
+                'important_info' => $validated['important_info'] ?? null,
 
-            foreach ($request->categories as $categoryId) {
+                'is_active' => $request->has('is_active'),
+            ]);
 
-                DB::table('vaccine_category')->insert([
+            /**
+             * CATEGORIES
+             */
+            if ($request->categories) {
+
+                foreach ($request->categories as $categoryId) {
+
+                    DB::table('vaccine_category')->insert([
+
+                        'vaccine_id' => $vaccine->id_vaccine,
+
+                        'category_id' => $categoryId,
+
+                        'created_at' => now(),
+
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            /**
+             * SCHEDULE
+             */
+            DB::table('vaccine_schedules')->insert([
+
+                'vaccine_id' => $vaccine->id_vaccine,
+
+                'min_age_months' => $request->min_age_months ?? 0,
+
+                'max_age_months' => $request->max_age_months,
+
+                'age_label' => $request->age_label,
+
+                'gender' => $request->gender ?? 'all',
+
+                'is_booster' => $request->has('is_booster'),
+
+                'booster_every_months' => $request->booster_every_months,
+
+                'dose_number' => $request->dose_number,
+
+                'important_note' => $request->important_note,
+
+                'priority' => $request->priority ?? 0,
+
+                'created_at' => now(),
+
+                'updated_at' => now(),
+            ]);
+
+            /**
+             * RESTRICTIONS
+             */
+
+            if ($request->has('restriction_pregnancy')) {
+
+                DB::table('vaccine_restrictions')->insert([
+
                     'vaccine_id' => $vaccine->id_vaccine,
-                    'category_id' => $categoryId,
+
+                    'restriction_type' => 'pregnancy',
+
                     'created_at' => now(),
+
                     'updated_at' => now(),
                 ]);
             }
-        }
 
-        return redirect()
-            ->route('vaccins.vaccins')
-            ->with('success', 'Vaccin ajouté avec succès.');
+            if ($request->has('restriction_immunocompromised')) {
+
+                DB::table('vaccine_restrictions')->insert([
+
+                    'vaccine_id' => $vaccine->id_vaccine,
+
+                    'restriction_type' => 'immunocompromised',
+
+                    'created_at' => now(),
+
+                    'updated_at' => now(),
+                ]);
+            }
+
+            if ($request->has('restriction_allergy')) {
+
+                DB::table('vaccine_restrictions')->insert([
+
+                    'vaccine_id' => $vaccine->id_vaccine,
+
+                    'restriction_type' => 'allergy',
+
+                    'created_at' => now(),
+
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('vaccins.index')
+                ->with('success', 'Vaccin ajouté avec succès.');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -296,12 +396,12 @@ class VaccinsController extends Controller
         ]);
 
         return redirect()
-        ->back()
-        ->with(
-            'success',
-            $vaccine->is_active
-                ? 'Vaccin activé avec succès.'
-                : 'Vaccin désactivé avec succès.'
-        );
+            ->back()
+            ->with(
+                'success',
+                $vaccine->is_active
+                    ? 'Vaccin activé avec succès.'
+                    : 'Vaccin désactivé avec succès.'
+            );
     }
 }

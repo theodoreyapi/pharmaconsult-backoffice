@@ -15,16 +15,16 @@ return new class extends Migration
             $table->id('id_profile')->primary();
             $table->unsignedBigInteger('user_id');
 
-             $table->string('name', 150);
+            $table->string('name', 150);
             $table->enum('profile_type', ['human', 'animal'])->default('human');
 
             // Champs humain
             $table->string('relation', 100)->nullable()
-                  ->comment('Moi-même, Parent, Enfant, Frère, Sœur, Conjoint, Ami…');
+                ->comment('Moi-même, Parent, Enfant, Frère, Sœur, Conjoint, Ami…');
 
             // Champs animal
             $table->string('animal_type', 100)->nullable()
-                  ->comment('Chien, Chat, Cheval, Lapin, Oiseau…');
+                ->comment('Chien, Chat, Cheval, Lapin, Oiseau…');
 
             $table->enum('gender', ['masculin', 'feminin'])->nullable();
             $table->date('birth_date')->nullable();
@@ -34,6 +34,12 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')->references('id_user')->on('users_pharma')->onDelete('cascade');
+
+            $table->boolean('is_pregnant')->default(false);
+            $table->boolean('is_traveler')->default(false);
+            $table->string('travel_destination')->nullable();
+            $table->boolean('is_health_worker')->default(false);
+            $table->boolean('is_immunocompromised')->default(false);
         });
     }
 

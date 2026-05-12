@@ -21,6 +21,7 @@ class Pharmacy extends Model
         'commune_id',
         'whats_app_phone_number',
         'closing_hours',
+        'is_active',
     ];
 
     protected $primaryKey = 'id_pharmacy';

@@ -28,6 +28,7 @@ return new class extends Migration
 
             $table->string('whats_app_phone_number')->nullable();
             $table->string('closing_hours')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
 

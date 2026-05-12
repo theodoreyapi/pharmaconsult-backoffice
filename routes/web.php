@@ -41,8 +41,10 @@ use App\Models\ReservationMedicament;
 use App\Models\Subscriptions;
 use App\Models\Transfert;
 use App\Models\UsersPharma;
+use App\Models\Vaccine;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('index', [CustomAuthController::class, 'dashboard'])->middleware('auth');;
@@ -92,112 +94,261 @@ Route::get('index', function () {
 
     $currentYear = date('Y');
 
-    // ── Statistiques générales ────────────────────────────────────────────────
+    /*
+    |--------------------------------------------------------------------------
+    | STATISTIQUES GÉNÉRALES
+    |--------------------------------------------------------------------------
+    */
+
     $statistiques = [
 
-        // Utilisateurs
+        /*
+        |--------------------------------------------------------------------------
+        | Utilisateurs & Activité
+        |--------------------------------------------------------------------------
+        */
+
         'totalUsers' => UsersPharma::count(),
 
-        // Souscriptions (table subscriptions existante)
+        'totalUsersThisMonth' => UsersPharma::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count(),
+
         'totalSubscriptions' => Subscriptions::count(),
 
-        // Opérations / transferts
         'totalOperations' => Transfert::count(),
 
-        // Réservations
         'totalReservations' => ReservationMedicament::count(),
 
-        // Requêtes pharmacies
         'totalRequests' => PharmacyRequest::count(),
 
-        // Requêtes utilisateurs
         'totalRequestsUsers' => RequestMedicament::count(),
 
-        // Rechargements réussis
+        /*
+        |--------------------------------------------------------------------------
+        | Rechargements
+        |--------------------------------------------------------------------------
+        */
+
         'totalRechargements' => Rechargements::where('status', 'success')->count(),
 
-        // Transferts DEBIT uniquement
         'totalTransferts' => Transfert::where('type_operation', 'DEBIT')->count(),
 
-        // Abonnements actifs (table subscriptions)
+        'totalSubscriptionAmount' => Rechargements::where('status', 'success')
+            ->sum('montant'),
+
+        'rechargementThisMonth' => Rechargements::where('status', 'success')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('montant'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Abonnements classiques
+        |--------------------------------------------------------------------------
+        */
+
         'totalActifSubscriptions' => Subscriptions::where('status', 'active')
             ->where('valid_until', '>', Carbon::now())
             ->distinct('username')
             ->count('username'),
 
-        // Revenu rechargements réussis
-        'totalSubscriptionAmount' => Rechargements::where('status', 'success')
-            ->sum('montant'),
+        /*
+        |--------------------------------------------------------------------------
+        | Profils santé
+        |--------------------------------------------------------------------------
+        */
 
-        // ── Profils santé ─────────────────────────────────────────────────────
-
-        // Nombre total de profils santé créés (actifs + désactivés)
         'totalHealthProfiles' => HealthProfile::count(),
 
-        // Profils actifs uniquement
-        'totalActiveHealthProfiles' => HealthProfile::where('is_active', true)->count(),
+        'totalActiveHealthProfiles' => HealthProfile::where('is_active', true)
+            ->count(),
 
-        // Abonnements profils — total
+        // Profils humains
+        'totalHumanProfiles' => HealthProfile::where('profile_type', 'human')
+            ->count(),
+
+        // Profils animaux
+        'totalAnimalProfiles' => HealthProfile::where('profile_type', 'animal')
+            ->count(),
+
+        // Hommes
+        'totalMaleProfiles' => HealthProfile::where('gender', 'masculin')
+            ->count(),
+
+        // Femmes
+        'totalFemaleProfiles' => HealthProfile::where('gender', 'feminin')
+            ->count(),
+
+        // Voyageurs
+        'totalTravelerProfiles' => HealthProfile::where('is_frequent_traveler', true)
+            ->count(),
+
+        // Enfants (moins de 18 ans)
+        'totalChildrenProfiles' => HealthProfile::whereDate(
+            'birth_date',
+            '>',
+            now()->subYears(18)
+        )->count(),
+
+        // Adultes
+        'totalAdultProfiles' => HealthProfile::whereDate(
+            'birth_date',
+            '<=',
+            now()->subYears(18)
+        )->count(),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Abonnements profils santé
+        |--------------------------------------------------------------------------
+        */
+
         'totalProfileSubscriptions' => ProfileSubscription::count(),
 
-        // Abonnements profils — payés et non expirés
         'totalPaidProfileSubscriptions' => ProfileSubscription::where('status', 'paid')
             ->where('end_date', '>', Carbon::today())
             ->count(),
 
-        // Abonnements profils — en attente
+        'totalExpiredProfileSubscriptions' => ProfileSubscription::where('end_date', '<', Carbon::today())
+            ->count(),
+
         'totalPendingProfileSubscriptions' => ProfileSubscription::where('status', 'pending')
             ->count(),
 
-        // Revenu total des abonnements profils payés
         'totalProfileSubscriptionRevenue' => ProfileSubscription::where('status', 'paid')
             ->sum('amount'),
 
-        // Revenu du mois courant (profils)
         'totalProfileRevenueThisMonth' => ProfileSubscription::where('status', 'paid')
             ->whereMonth('paid_at', date('m'))
             ->whereYear('paid_at', $currentYear)
             ->sum('amount'),
 
-        // Vaccinations enregistrées
+        /*
+        |--------------------------------------------------------------------------
+        | Vaccinations
+        |--------------------------------------------------------------------------
+        */
+
         'totalVaccinations' => ProfileVaccination::count(),
 
-        // Réservations vaccins
+        // Vaccinations ce mois
+        'totalVaccinationsThisMonth' => ProfileVaccination::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count(),
+
+        // Vaccins disponibles
+        'totalVaccines' => Vaccine::count(),
+
+        // Vaccins actifs
+        'totalActiveVaccines' => Vaccine::where('is_active', true)
+            ->count(),
+
+        // Vaccins gratuits
+        'totalFreeVaccines' => Vaccine::where('public_price', 0)
+            ->count(),
+
+        // Vaccins payants
+        'totalPaidVaccines' => Vaccine::where('public_price', '>', 0)
+            ->count(),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Rendez-vous vaccins
+        |--------------------------------------------------------------------------
+        */
+
         'totalVaccinAppointments' => Appointment::count(),
 
-        // Réservations vaccins en attente
         'totalPendingVaccinAppointments' => Appointment::where('status', 'pending')
             ->count(),
+
+        'totalConfirmedVaccinAppointments' => Appointment::where('status', 'confirmed')
+            ->count(),
+
+        'totalCompletedVaccinAppointments' => Appointment::where('status', 'completed')
+            ->count(),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pharmacies
+        |--------------------------------------------------------------------------
+        */
+
+        'totalPharmacies' => Pharmacy::count(),
+
+        'totalActivePharmacies' => Pharmacy::where('is_active', true)
+            ->count(),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Revenus globaux
+        |--------------------------------------------------------------------------
+        */
+
+        'totalGlobalRevenue' =>
+            Rechargements::where('status', 'success')->sum('montant')
+            +
+            ProfileSubscription::where('status', 'paid')->sum('amount'),
     ];
 
-    // ── Graphique rechargements par mois ──────────────────────────────────────
-    $souscriptionsParMois = Rechargements::selectRaw(
-        "DATE_FORMAT(created_at, '%m') as mois_num,
-         DATE_FORMAT(created_at, '%b') as mois,
-         SUM(montant) as cumulTotal"
-    )
+    /*
+    |--------------------------------------------------------------------------
+    | RECHARGEMENTS PAR MOIS
+    |--------------------------------------------------------------------------
+    */
+
+    $souscriptionsParMois = Rechargements::selectRaw("
+            DATE_FORMAT(created_at, '%m') as mois_num,
+            SUM(montant) as cumulTotal
+        ")
         ->where('status', 'success')
         ->whereYear('created_at', $currentYear)
-        ->groupByRaw("DATE_FORMAT(created_at, '%m'), DATE_FORMAT(created_at, '%b')")
+        ->groupByRaw("DATE_FORMAT(created_at, '%m')")
         ->orderByRaw("DATE_FORMAT(created_at, '%m')")
         ->get()
         ->toArray();
 
-    // ── Graphique abonnements profils par mois ────────────────────────────────
-    $profileSubsParMois = ProfileSubscription::selectRaw(
-        "DATE_FORMAT(paid_at, '%m') as mois_num,
-         DATE_FORMAT(paid_at, '%b') as mois,
-         SUM(amount) as cumulTotal,
-         COUNT(*) as nbr"
-    )
+    /*
+    |--------------------------------------------------------------------------
+    | ABONNEMENTS PROFILS PAR MOIS
+    |--------------------------------------------------------------------------
+    */
+
+    $profileSubsParMois = ProfileSubscription::selectRaw("
+            DATE_FORMAT(paid_at, '%m') as mois_num,
+            SUM(amount) as cumulTotal,
+            COUNT(*) as nbr
+        ")
         ->where('status', 'paid')
         ->whereYear('paid_at', $currentYear)
-        ->groupByRaw("DATE_FORMAT(paid_at, '%m'), DATE_FORMAT(paid_at, '%b')")
+        ->groupByRaw("DATE_FORMAT(paid_at, '%m')")
         ->orderByRaw("DATE_FORMAT(paid_at, '%m')")
         ->get()
         ->toArray();
 
-    // ── Remplissage des 12 mois ───────────────────────────────────────────────
+    /*
+    |--------------------------------------------------------------------------
+    | VACCINATIONS PAR MOIS
+    |--------------------------------------------------------------------------
+    */
+
+    $vaccinationsParMois = ProfileVaccination::selectRaw("
+            DATE_FORMAT(created_at, '%m') as mois_num,
+            COUNT(*) as total
+        ")
+        ->whereYear('created_at', $currentYear)
+        ->groupByRaw("DATE_FORMAT(created_at, '%m')")
+        ->orderByRaw("DATE_FORMAT(created_at, '%m')")
+        ->get()
+        ->toArray();
+
+    /*
+    |--------------------------------------------------------------------------
+    | MOIS FR
+    |--------------------------------------------------------------------------
+    */
+
     $moisFr = [
         '01' => 'Jan',
         '02' => 'Fév',
@@ -213,37 +364,122 @@ Route::get('index', function () {
         '12' => 'Déc',
     ];
 
-    // Rechargements — 12 mois
-    $souscriptionsIndexed = collect($souscriptionsParMois)->keyBy('mois_num')->toArray();
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT RECHARGEMENTS
+    |--------------------------------------------------------------------------
+    */
+
+    $souscriptionsIndexed = collect($souscriptionsParMois)
+        ->keyBy('mois_num')
+        ->toArray();
+
     $souscriptions = [];
+
     foreach ($moisFr as $num => $label) {
+
         $souscriptions[] = [
-            'mois'       => $label,
+            'mois' => $label,
             'cumulTotal' => isset($souscriptionsIndexed[$num])
                 ? (float) $souscriptionsIndexed[$num]['cumulTotal']
                 : 0,
         ];
     }
 
-    // Abonnements profils — 12 mois
-    $profileSubsIndexed = collect($profileSubsParMois)->keyBy('mois_num')->toArray();
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT ABONNEMENTS PROFILS
+    |--------------------------------------------------------------------------
+    */
+
+    $profileSubsIndexed = collect($profileSubsParMois)
+        ->keyBy('mois_num')
+        ->toArray();
+
     $profileSubscriptions = [];
+
     foreach ($moisFr as $num => $label) {
+
         $profileSubscriptions[] = [
-            'mois'       => $label,
+            'mois' => $label,
+
             'cumulTotal' => isset($profileSubsIndexed[$num])
                 ? (float) $profileSubsIndexed[$num]['cumulTotal']
                 : 0,
-            'nbr'        => isset($profileSubsIndexed[$num])
+
+            'nbr' => isset($profileSubsIndexed[$num])
                 ? (int) $profileSubsIndexed[$num]['nbr']
                 : 0,
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT VACCINATIONS
+    |--------------------------------------------------------------------------
+    */
+
+    $vaccinationsIndexed = collect($vaccinationsParMois)
+        ->keyBy('mois_num')
+        ->toArray();
+
+    $vaccinationsStats = [];
+
+    foreach ($moisFr as $num => $label) {
+
+        $vaccinationsStats[] = [
+            'mois' => $label,
+
+            'total' => isset($vaccinationsIndexed[$num])
+                ? (int) $vaccinationsIndexed[$num]['total']
+                : 0,
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOP VACCINS LES PLUS UTILISÉS
+    |--------------------------------------------------------------------------
+    */
+
+    $topVaccines = Vaccine::select(
+            'vaccines.name',
+            DB::raw('COUNT(profile_vaccinations.id_vaccination) as total')
+        )
+        ->leftJoin(
+            'profile_vaccinations',
+            'vaccines.id_vaccine',
+            '=',
+            'profile_vaccinations.vaccine_id'
+        )
+        ->groupBy('vaccines.id_vaccine', 'vaccines.name')
+        ->orderByDesc('total')
+        ->limit(5)
+        ->get();
+
+    /*
+    |--------------------------------------------------------------------------
+    | DERNIERS PROFILS
+    |--------------------------------------------------------------------------
+    */
+
+    $latestProfiles = HealthProfile::latest()
+        ->take(5)
+        ->get();
+
+    /*
+    |--------------------------------------------------------------------------
+    | RETURN VIEW
+    |--------------------------------------------------------------------------
+    */
+
     return view('home.index', compact(
         'statistiques',
         'souscriptions',
-        'profileSubscriptions'
+        'profileSubscriptions',
+        'vaccinationsStats',
+        'topVaccines',
+        'latestProfiles'
     ));
 });
 

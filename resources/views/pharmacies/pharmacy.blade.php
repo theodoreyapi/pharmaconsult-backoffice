@@ -36,102 +36,129 @@
                     Ajouter une pharmacie
                 </a>
             </div>
+
+            <form method="GET" class="row g-2 mb-3">
+
+                {{-- SEARCH --}}
+                <div class="col-md-4">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                        placeholder="Rechercher pharmacie, téléphone, commune...">
+                </div>
+
+                {{-- COMMUNE --}}
+                <div class="col-md-3">
+                    <select name="commune" class="form-control">
+                        <option value="">Toutes les communes</option>
+                        @foreach ($communes as $com)
+                            <option value="{{ $com->id_commune }}"
+                                {{ request('commune') == $com->id_commune ? 'selected' : '' }}>
+                                {{ $com->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- STATUS --}}
+                <div class="col-md-2">
+                    <select name="status" class="form-control">
+                        <option value="">Status</option>
+                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+
+                {{-- BUTTON --}}
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary w-100">Filtrer</button>
+
+                    <a href="{{ route('pharmacy.index') }}" class="btn btn-light w-100">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
-                    <table class="table bordered-table mb-0" id="dataTable" data-page-length='10'>
-                        <thead>
-                            <tr>
-                                <th scope="col" style="font-size: 13px">Nom</th>
-                                <th scope="col" style="font-size: 13px">Commune</th>
-                                <th scope="col" style="font-size: 13px">Responsable</th>
-                                <th scope="col" style="font-size: 13px">Garde</th>
-                                <th scope="col" style="font-size: 13px">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($pharmacys as $item)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img height="50" width="50"
-                                                src="{{ $item->facade_image ?? URL::asset('assets/images/user-list/user-list1.png') }}"
-                                                alt="" class="flex-shrink-0 me-12 radius-8">
-                                            <strong style="font-size: 13px">
-                                                {!! wordwrap($item->name, 20, '<br>') !!}
-                                                <br>
-                                                <span style="color: blue">Téléphone : {{ $item->phone_number }}</span>
-                                                <br>
-                                                <span style="color: green">Whatsapp : {{ $item->whats_app_phone_number }}</span>
-                                            </strong>
-                                        </div>
-                                    </td>
-                                    <td style="font-size: 13px">
-                                        {!! wordwrap($item->commune, 20, '<br>') !!}
-                                    </td>
-                                    <td style="font-size: 13px">
-                                        {!! wordwrap($item->owner_name, 20, '<br>') !!}
-                                    </td>
-                                    <td style="font-size: 13px">
-                                        du
-                                        {{ \Carbon\Carbon::parse($item->start_garde_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
-                                        <br> au
-                                        {{ \Carbon\Carbon::parse($item->end_garde_date)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('pharmacy.showAllGet', $item->id_pharmacy) }}"
-                                            class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                            <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
-                                        </a>
-                                        @if (Auth::user()->role == 'SUPERADMIN')
-                                            <a href="javascript:void(0)"
-                                                class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                data-bs-toggle="modal" data-bs-target="#delete{{ $item->id_pharmacy }}">
-                                                <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                <div class="row">
+
+                    @foreach ($pharmacys as $item)
+                        <div class="col-md-6 col-lg-4 mb-3">
+
+                            <div class="card shadow-sm border-0 h-100">
+
+                                {{-- IMAGE --}}
+                                <img src="{{ $item->facade_image ?? 'https://via.placeholder.com/400x200' }}"
+                                    class="card-img-top" style="height:180px; object-fit:cover;">
+
+                                <div class="card-body">
+
+                                    {{-- NAME --}}
+                                    <h5 class="mb-1">{{ $item->name }}</h5>
+                                    <small class="text-muted">{{ $item->address ?? '' }}</small>
+                                    <br>
+
+                                    <span class="badge bg-info mb-2">
+                                        {{ $item->commune_name }}
+                                    </span>
+
+                                    {{-- RESPONSABLE --}}
+                                    <p class="mb-1">
+                                        👤 <b>Responsable:</b> {{ $item->owner_name ?? 'N/A' }}
+                                    </p>
+
+                                    {{-- GARDE --}}
+                                    <p class="mb-1">
+                                        🕒 <b>Garde :</b>
+                                        {{ \Carbon\Carbon::parse($item->start_garde_date)->translatedFormat('d F Y') }}
+                                        →
+                                        {{ \Carbon\Carbon::parse($item->end_garde_date)->translatedFormat('d F Y') }}
+                                    </p>
+
+                                    {{-- CONTACTS --}}
+                                    <p class="mb-1">
+                                        📞 {{ $item->phone_number ?? 'N/A' }}
+                                    </p>
+
+                                    @if ($item->whats_app_phone_number)
+                                        <p class="mb-2">
+                                            💬
+                                            <a href="https://wa.me/{{ $item->whats_app_phone_number }}" target="_blank">
+                                                WhatsApp
                                             </a>
-                                        @endif
-                                        <div class="modal fade" id="delete{{ $item->id_pharmacy }}" tabindex="-1"
-                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg modal-dialog modal-dialog-centered">
-                                                <div class="modal-content radius-16 bg-base">
-                                                    <div
-                                                        class="modal-header bg-danger py-16 px-24 border border-top-0 border-start-0 border-end-0">
-                                                        <h1 class="modal-title fs-5 text-white" id="exampleModalLabel">
-                                                            Suppression
-                                                        </h1>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body p-24">
-                                                        <form action="{{ route('pharmacy.destroy', $item->id_pharmacy) }}"
-                                                            method="post" role="form">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <div class="row">
-                                                                <label for="">Êtes-vous sûr de vouloir
-                                                                    supprimer?</label>
-                                                                <div
-                                                                    class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                                                                    <button type="reset" data-bs-dismiss="modal"
-                                                                        aria-label="Close"
-                                                                        class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                                                                        Annuler
-                                                                    </button>
-                                                                    <button type="submit"
-                                                                        class="btn btn-danger border border-danger-600 text-md px-50 py-12 radius-8">
-                                                                        Supprimer
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                        </p>
+                                    @endif
+
+                                    {{-- STATUS --}}
+                                    @if ($item->is_active == 1)
+                                        <span class="badge bg-success">Active</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark">Inactive</span>
+                                    @endif
+
+                                </div>
+
+                                {{-- FOOTER ACTION --}}
+                                <div class="card-footer bg-white border-0 d-flex justify-content-between">
+
+                                    <a href="{{ url('view-pharmacy', $item->id_pharmacy) }}"
+                                        class="btn btn-sm btn-primary">
+                                        Voir détails
+                                    </a>
+
+                                    <a href="tel:{{ $item->phone_number }}" class="btn btn-sm btn-outline-secondary">
+                                        Appeler
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    @endforeach
+
+                </div>
+                <div class="mt-3 d-flex justify-content-center">
+                    {{ $pharmacys->links() }}
                 </div>
             </div>
         </div>

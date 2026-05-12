@@ -482,6 +482,123 @@
                                 <textarea name="important_info" class="form-control" rows="2" placeholder="Ex: Série de 3 doses nécessaires"></textarea>
                             </div>
 
+                            <hr class="my-4">
+
+                            <h6 class="fw-bold mb-16 text-success">
+                                Calendrier vaccinal
+                            </h6>
+
+                            <div class="row gy-16">
+
+                                <div class="col-sm-4">
+                                    <label class="form-label">Âge minimum (mois)</label>
+                                    <input type="number" name="schedule[min_age_months]" class="form-control"
+                                        min="0" value="0">
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <label class="form-label">Âge maximum (mois)</label>
+                                    <input type="number" name="schedule[max_age_months]" class="form-control"
+                                        min="0">
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <label class="form-label">Libellé âge</label>
+                                    <input type="text" name="schedule[age_label]" class="form-control"
+                                        placeholder="Ex: Dès la naissance">
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <label class="form-label">Sexe</label>
+                                    <select name="schedule[gender]" class="form-select">
+                                        <option value="all">Tous</option>
+                                        <option value="masculin">Masculin</option>
+                                        <option value="feminin">Féminin</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <label class="form-label">Numéro de dose</label>
+                                    <input type="number" name="schedule[dose_number]" class="form-control"
+                                        min="1">
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <label class="form-label">Priorité</label>
+                                    <input type="number" name="schedule[priority]" class="form-control" value="0">
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="schedule[is_booster]"
+                                            value="1">
+                                        <label class="form-check-label">
+                                            Vaccin de rappel
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label class="form-label">
+                                        Rappel tous les X mois
+                                    </label>
+
+                                    <input type="number" name="schedule[booster_every_months]" class="form-control">
+                                </div>
+
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h6 class="fw-bold mb-16 text-danger">
+                                Restrictions
+                            </h6>
+
+                            <div class="row gy-16">
+
+                                <div class="col-sm-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="restrictions[]"
+                                            value="pregnancy" id="pregnancy">
+
+                                        <label class="form-check-label" for="pregnancy">
+                                            Grossesse
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="restrictions[]"
+                                            value="immunocompromised" id="immuno">
+
+                                        <label class="form-check-label" for="immuno">
+                                            Immunodéprimés
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="restrictions[]"
+                                            value="allergy" id="allergy">
+
+                                        <label class="form-check-label" for="allergy">
+                                            Allergies
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">
+                                        Motif / explication
+                                    </label>
+
+                                    <textarea name="restriction_reason" class="form-control" rows="2"></textarea>
+                                </div>
+
+                            </div>
+
                             <div class="col-12">
                                 <label class="form-label fw-semibold text-sm mb-8">Catégories</label>
                                 <div class="d-flex flex-wrap gap-2 p-12 rounded-8"

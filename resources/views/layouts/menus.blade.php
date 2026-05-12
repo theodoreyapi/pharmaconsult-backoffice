@@ -12,7 +12,7 @@
 
     <div class="sidebar-menu-area">
         <ul class="sidebar-menu" id="sidebar-menu">
-            @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN' || Auth::user()->role == 'PHARMACIEN')
+            @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                 <li
                     class="dropdown {{ Route::is('index') ? 'open' : '' }}{{ Route::is('pharma-index') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
@@ -24,16 +24,6 @@
                             <li class="{{ Route::is('index') ? 'active-page' : '' }}">
                                 <a href="{{ url('index') }}" class="{{ Route::is('index') ? 'active-page' : '' }}">
                                     <i class="ri-circle-fill circle-icon text-primary-600"></i>
-                                    Tableau de bord</a>
-                            </li>
-                        </ul>
-                    @endif
-                    @if (Auth::user()->role == 'PHARMACIEN')
-                        <ul class="sidebar-submenu {{ Route::is('pharma-index') ? 'show' : '' }}">
-                            <li class="{{ Route::is('index') ? 'active-page' : '' }}">
-                                <a href="{{ url('pharma-index') }}"
-                                    class="{{ Route::is('pharma-index') ? 'active-page' : '' }}"><i
-                                        class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
                                     Tableau de bord</a>
                             </li>
                         </ul>
@@ -191,37 +181,6 @@
                         </li>
                     </ul>
                 </li>
-
-                {{--  <li
-                    class="dropdown {{ Route::is('transaction', 'abonnement', 'utilisateur', 'pharmacies') ? 'open' : '' }}">
-                    <a href="javascript:void(0)">
-                        <iconify-icon icon="fe:vector" class="menu-icon"></iconify-icon>
-                        <span>Rapports</span>
-                    </a>
-                    <ul
-                        class="sidebar-submenu {{ Route::is('transaction', 'abonnement', 'utilisateur', 'pharmacies') ? 'show' : '' }}">
-                        <li class="{{ Route::is('transaction') ? 'active-page' : '' }}">
-                            <a href="transaction" class="{{ Route::is('transaction') ? 'active-page' : '' }}"><i
-                                    class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
-                                Transactions</a>
-                        </li>
-                        <li class="{{ Route::is('abonnement') ? 'active-page' : '' }}">
-                            <a href="abonnement" class="{{ Route::is('abonnement') ? 'active-page' : '' }}"><i
-                                    class="ri-circle-fill circle-icon text-warning-main w-auto"></i>
-                                Abonnements</a>
-                        </li>
-                        <li class="{{ Route::is('utilisateur') ? 'active-page' : '' }}">
-                            <a href="utilisateur" class="{{ Route::is('utilisateur') ? 'active-page' : '' }}"><i
-                                    class="ri-circle-fill circle-icon text-info-main w-auto"></i>
-                                Utilisateurs</a>
-                        </li>
-                        <li class="{{ Route::is('pharmacies') ? 'active-page' : '' }}">
-                            <a href="pharmacies" class="{{ Route::is('pharmacies') ? 'active-page' : '' }}"><i
-                                    class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
-                                Pharmacies</a>
-                        </li>
-                    </ul>
-                </li> --}}
             @endif
             @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                 <li class="sidebar-menu-group-title">Paramètres</li>
@@ -237,12 +196,6 @@
                         <span>Forfaits</span>
                     </a>
                 </li>
-                {{-- <li>
-                <a href="faq">
-                    <iconify-icon icon="mage:message-question-mark-round" class="menu-icon"></iconify-icon>
-                    <span>FAQs.</span>
-                </a>
-            </li> --}}
                 <li class="{{ Route::is('terms-about', 'add-about', 'edit-about') ? 'active-page' : '' }}">
                     <a href="{{ url('terms-about') }}"
                         class="{{ Route::is('terms-about', 'add-about', 'edit-about') ? 'active-page' : '' }}">
@@ -321,23 +274,6 @@
                                     Utilisateurs</a>
                             </li>
                         @endif
-                        {{--  <li class="{{ Route::is('notification') ? 'active-page' : '' }}">
-                        <a href="notification" class="{{ Route::is('notification') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-warning-main w-auto"></i>
-                            Notification</a>
-                    </li>
-                    <li class="{{ Route::is('notification-alert') ? 'active-page' : '' }}">
-                        <a href="notification-alert"
-                            class="{{ Route::is('notification-alert') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-info-main w-auto"></i>
-                            Notification
-                            Alert</a>
-                    </li>
-                    <li class="{{ Route::is('payment-gateway') ? 'active-page' : '' }}">
-                        <a href="payment-gateway" class="{{ Route::is('payment-gateway') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-info-main w-auto"></i>
-                            Moyens de paiement</a>
-                    </li> --}}
                     </ul>
                 </li>
             @endif

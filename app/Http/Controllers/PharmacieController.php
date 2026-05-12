@@ -18,18 +18,49 @@ class PharmacieController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
-        $pharmacys = Pharmacy::join('commune', 'pharmacy.commune_id', '=', 'commune.id_commune')
-            ->select('pharmacy.*', 'commune.id_commune', 'commune.name as commune')
-            ->distinct()
-            ->get();
+        $query = Pharmacy::join('commune', 'pharmacy.commune_id', '=', 'commune.id_commune')
+            ->select(
+                'pharmacy.*',
+                'commune.name as commune_name'
+            );
 
-        return view('pharmacies.pharmacy', compact('pharmacys'));
+        // 🔍 SEARCH (nom pharmacie / téléphone / commune)
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('pharmacy.name', 'like', "%$search%")
+                    ->orWhere('pharmacy.phone_number', 'like', "%$search%")
+                    ->orWhere('pharmacy.owner_name', 'like', "%$search%")
+                    ->orWhere('commune.name', 'like', "%$search%");
+            });
+        }
+
+        // 📍 FILTRE COMMUNE
+        if ($request->filled('commune')) {
+            $query->where('pharmacy.commune_id', $request->commune);
+        }
+
+        // 📊 STATUS
+        if ($request->filled('status')) {
+            $query->where('pharmacy.is_active', $request->status);
+        }
+
+        $pharmacys = $query
+            ->orderBy('pharmacy.created_at', 'desc')
+            ->paginate(12)
+            ->appends($request->all());
+
+        // pour dropdown communes
+        $communes = Commune::all();
+
+        return view('pharmacies.pharmacy', compact('pharmacys', 'communes'));
     }
 
     /**
@@ -209,12 +240,14 @@ class PharmacieController extends Controller
             return redirect()->intended('logout');
         }
 
-        // Récupérer les pharmacies liées à l'assurance donnée
         $pharmacys = Pharmacy::join('commune', 'pharmacy.commune_id', '=', 'commune.id_commune')
             ->where('pharmacy.id_pharmacy', $id)
-            ->select('pharmacy.*', 'commune.id_commune', 'commune.name as commune_name')
-            ->first();
+            ->select('pharmacy.*', 'commune.name as commune_name')
+            ->firstOrFail();
 
+            $communes = Commune::orderBy('name', 'ASC')->get();
+
+        // REVIEWS
         $reviews = Review::leftJoin('users_pharma', 'review.username', '=', 'users_pharma.username')
             ->where('review.pharmacy_id', $pharmacys->id_pharmacy)
             ->select(
@@ -222,53 +255,40 @@ class PharmacieController extends Controller
                 'review.evaluation as note',
                 'review.username as userName',
                 'users_pharma.profile_picture as userPicture',
+                'users_pharma.first_name as nom',
                 'review.created_at as dateNotice',
-                'review.commentaire as details',
-                'review.pharmacy_id as pharmacyId'
+                'review.commentaire as details'
             )
+            ->orderBy('review.created_at', 'desc')
             ->get();
 
-        $counter      = $reviews->count();
-        $average      = $counter > 0 ? round($reviews->avg('note'), 2) : 0;
-        $counterFive  = $reviews->where('note', 5)->count();
-        $counterFour  = $reviews->where('note', 4)->count();
-        $counterThree = $reviews->where('note', 3)->count();
-        $counterTwo   = $reviews->where('note', 2)->count();
-        $counterOne   = $reviews->where('note', 1)->count();
+        $counter = $reviews->count();
+        $average = $counter ? round($reviews->avg('note'), 1) : 0;
+
+        // stats ratings
+        $ratings = collect([5, 4, 3, 2, 1])->mapWithKeys(function ($star) use ($reviews) {
+            return [$star => $reviews->where('note', $star)->count()];
+        });
 
         $paymentMethods = PharmacyPaymentMethods::join('moyens_paiement', 'pharmacy_payment_methods.payment_method_id', '=', 'moyens_paiement.id_moyen_payment')
             ->where('pharmacy_payment_methods.pharmacy_id', $pharmacys->id_pharmacy)
-            ->select(
-                'moyens_paiement.id_moyen_payment as id',
-                'moyens_paiement.name',
-                'moyens_paiement.payment_method_picture as paymentMethodPicture'
-            )
+            ->select('moyens_paiement.name', 'moyens_paiement.payment_method_picture')
             ->get();
 
         $assurances = PharmacyAssurances::join('assurances', 'pharmacy_assurances.assurance_id', '=', 'assurances.id_assurance')
             ->where('pharmacy_assurances.pharmacy_id', $pharmacys->id_pharmacy)
-            ->select(
-                'assurances.id_assurance as id',
-                'assurances.name',
-                'assurances.assurance_picture as assurancePicture'
-            )
+            ->select('assurances.name', 'assurances.assurance_picture')
             ->get();
-
-        $communes = Commune::orderBy('name', 'ASC')->get();
 
         return view('pharmacies.view-pharmacy', compact(
             'pharmacys',
-            'communes',
             'reviews',
             'counter',
             'average',
-            'counterFive',
-            'counterFour',
-            'counterThree',
-            'counterTwo',
-            'counterOne',
+            'ratings',
             'paymentMethods',
-            'assurances'
+            'assurances',
+            'communes'
         ));
     }
 
