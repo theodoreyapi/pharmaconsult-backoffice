@@ -125,7 +125,7 @@ class CategorieController extends Controller
         ]);
 
         return redirect()
-            ->route('vaccins.categories')
+            ->route('categories.index')
             ->with('success', 'Catégorie créée avec succès.');
     }
 
@@ -138,7 +138,7 @@ class CategorieController extends Controller
             'vaccines'
         ])->findOrFail($id);
 
-        return view('vaccins.categories.show', compact('category'));
+        return view('categories.index', compact('category'));
     }
 
     /**
@@ -187,7 +187,7 @@ class CategorieController extends Controller
         ]);
 
         return redirect()
-            ->route('vaccins.categories')
+            ->route('categories.index')
             ->with('success', 'Catégorie mise à jour avec succès.');
     }
 
@@ -215,7 +215,7 @@ class CategorieController extends Controller
         $category->delete();
 
         return redirect()
-            ->route('vaccins.categories')
+            ->route('categories.index')
             ->with(
                 'success',
                 'Catégorie supprimée avec succès.'

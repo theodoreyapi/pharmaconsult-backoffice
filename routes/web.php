@@ -493,6 +493,8 @@ Route::get('conditions', function () {
     return view('conditions.condition');
 });
 
+Route::get('/users-pharma/export', [UserController::class, 'export'])->name('users-pharma.export');
+
 // Publicites
 Route::resource('publicites', PublicitesController::class);
 

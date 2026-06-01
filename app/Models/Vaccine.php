@@ -20,6 +20,14 @@ class Vaccine extends Model
         'currency',
         'important_info',
         'is_active',
+        'target_species',
+        'targeted_disease',
+        'administration_mode',
+        'scientific_type',
+        'protected_against',
+        'target_public',
+        'source_url',
+        'validation_status',
     ];
 
     protected $primaryKey = 'id_vaccine';

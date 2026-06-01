@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UsersPharmaExport;
 use App\Models\Appointment;
 use App\Models\HealthProfile;
 use App\Models\ProfileSubscription;
@@ -11,7 +12,12 @@ use App\Models\Transfert;
 use App\Models\UsersPharma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
@@ -59,6 +65,12 @@ class UserController extends Controller
         $patients->appends($request->all());
 
         return view('users.users-list', compact('patients'));
+    }
+
+
+    public function export()
+    {
+        return Excel::download(new UsersPharmaExport, 'users_pharma.xlsx');
     }
 
     /**

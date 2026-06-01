@@ -46,6 +46,7 @@ Route::prefix('internal/v1')->group(function () {
         Route::post('otp/generate', [ApiUsersPharmaController::class, 'generateOtp']);
         Route::post('reinitialiser/password', [ApiUsersPharmaController::class, 'resetPassword']);
         Route::get('delete/{username}', [ApiUsersPharmaController::class, 'deleteAccount']);
+        Route::get('delete/status/{username}', [ApiUsersPharmaController::class, 'deleteAccountStatus']);
         Route::put('update', [ApiUsersPharmaController::class, 'update']);
         Route::put('updateProfilePicture', [ApiUsersPharmaController::class, 'updatePicture']);
         Route::post('changePassword', [ApiUsersPharmaController::class, 'changePassword']);

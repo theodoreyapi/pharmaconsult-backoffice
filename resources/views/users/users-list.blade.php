@@ -26,8 +26,8 @@
             <div class="card-header bg-base py-16 px-24 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Liste des utilisateurs</h6>
 
-                <a href="#" class="btn btn-primary btn-sm radius-8">
-                    Exporter
+                <a href="{{ route('users-pharma.export') }}" class="btn btn-primary btn-sm radius-8">
+                    <i class="ri-file-excel-line me-1"></i> Exporter
                 </a>
             </div>
 

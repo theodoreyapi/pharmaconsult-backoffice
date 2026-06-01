@@ -25,6 +25,9 @@ class VaccineSchedule extends Model
         'dose_number',
         'important_note',
         'priority',
+        'phase_name',
+        'in_community',
+        'exposed_to_vectors',
     ];
 
     protected $table = 'vaccine_schedules';

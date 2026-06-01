@@ -98,8 +98,10 @@ class ApiUsersPharmaController extends Controller
             'newPassword' => 'required|string|min:6',
         ]);
 
-        $username = $request->input('username');
-        $user     = DB::table('users_pharma')->where('username', $username)->first();
+        $username = $request->username;
+        $user     = DB::table('users_pharma')->where('username', $username)
+            ->orWhere('email', $username)
+            ->first();
 
         if (!$user) {
             return response()->json(['message' => 'Utilisateur introuvable.'], 404);
@@ -113,9 +115,9 @@ class ApiUsersPharmaController extends Controller
         }
 
         DB::table('users_pharma')
-            ->where('username', $username)
+            ->where('username', $user->username)
             ->update([
-                'password'     => password_hash($request->input('newPassword'), PASSWORD_BCRYPT, ['cost' => 10]),
+                'password'     => password_hash($request->newPassword, PASSWORD_BCRYPT, ['cost' => 10]),
                 'otp_verified' => false,
                 'updated_at'   => now(),
             ]);
@@ -222,91 +224,91 @@ class ApiUsersPharmaController extends Controller
     /**
      * Envoie le code OTP par WhatsApp via Meta Cloud API
      */
-   private function sendWhatsApp(string $phoneNumber, int $otpCode, string $firstName): void
-{
-    $baseUrl    = "https://graph.facebook.com/v25.0/";
-    $token      = "EAAUTxrzGDCYBRRLeZB61ZBanwJOu8bEHXQXQhSR8V1h9vFsU7ZBonIxPnAl4hEOS9tSFVVtpe78v3LJhEBuoWEzNDBw80AyZBLet4o0VL22QobhAa1MGdMs0TEjNXIaYrxtexGvAyxHCdJkWQLknh0JVxlTGLuoKQyMnmr7j9v2gAmoZAZBax0ptRzVENgkdp4aAZDZD";
-    $expediteur = "666101623244809";
+    private function sendWhatsApp(string $phoneNumber, int $otpCode, string $firstName): void
+    {
+        $baseUrl    = "https://graph.facebook.com/v25.0/";
+        $token      = "EAAUTxrzGDCYBRRLeZB61ZBanwJOu8bEHXQXQhSR8V1h9vFsU7ZBonIxPnAl4hEOS9tSFVVtpe78v3LJhEBuoWEzNDBw80AyZBLet4o0VL22QobhAa1MGdMs0TEjNXIaYrxtexGvAyxHCdJkWQLknh0JVxlTGLuoKQyMnmr7j9v2gAmoZAZBax0ptRzVENgkdp4aAZDZD";
+        $expediteur = "666101623244809";
 
-    // ==========================================
-    // 1. NORMALISATION (Logique formatage CI)
-    // ==========================================
-    $phone = preg_replace('/[^0-9]/', '', $phoneNumber);
+        // ==========================================
+        // 1. NORMALISATION (Logique formatage CI)
+        // ==========================================
+        $phone = preg_replace('/[^0-9]/', '', $phoneNumber);
 
-    // Retirer le préfixe 00 ou + (déjà géré par preg_replace)
-    if (str_starts_with($phone, '00')) {
-        $phone = substr($phone, 2);
-    }
-
-    // Gestion du 225 : On s'assure d'avoir le bloc local après 225
-    if (str_starts_with($phone, '225')) {
-        $localPart = substr($phone, 3);
-        // Si après 225 il y a un '0', on le retire (ex: 22505... -> 2255...)
-        if (str_starts_with($localPart, '0')) {
-            $phone = '225' . substr($localPart, 1);
+        // Retirer le préfixe 00 ou + (déjà géré par preg_replace)
+        if (str_starts_with($phone, '00')) {
+            $phone = substr($phone, 2);
         }
-    } elseif (str_starts_with($phone, '0')) {
-        // Si c'est un numéro local (ex: 05...), on ajoute 225 et on retire le 0
-        $phone = '225' . substr($phone, 1);
-    }
 
-    // ==========================================
-    // 2. PAYLOAD (Identique à getBody en Java)
-    // ==========================================
-    $payload = [
-        "messaging_product" => "whatsapp",
-        "to" => $phone,
-        "type" => "template",
-        "template" => [
-            "name" => "message_validation_otp",
-            "language" => ["code" => "fr"],
-            "components" => [
-                [
-                    "type" => "body",
-                    "parameters" => [
-                        ["type" => "text", "text" => (string)$otpCode]
-                    ]
-                ],
-                [
-                    "type" => "button",
-                    "sub_type" => "url",
-                    "index" => 0,
-                    "parameters" => [
-                        ["type" => "text", "text" => (string)$otpCode]
+        // Gestion du 225 : On s'assure d'avoir le bloc local après 225
+        if (str_starts_with($phone, '225')) {
+            $localPart = substr($phone, 3);
+            // Si après 225 il y a un '0', on le retire (ex: 22505... -> 2255...)
+            if (str_starts_with($localPart, '0')) {
+                $phone = '225' . substr($localPart, 1);
+            }
+        } elseif (str_starts_with($phone, '0')) {
+            // Si c'est un numéro local (ex: 05...), on ajoute 225 et on retire le 0
+            $phone = '225' . substr($phone, 1);
+        }
+
+        // ==========================================
+        // 2. PAYLOAD (Identique à getBody en Java)
+        // ==========================================
+        $payload = [
+            "messaging_product" => "whatsapp",
+            "to" => $phone,
+            "type" => "template",
+            "template" => [
+                "name" => "message_validation_otp",
+                "language" => ["code" => "fr"],
+                "components" => [
+                    [
+                        "type" => "body",
+                        "parameters" => [
+                            ["type" => "text", "text" => (string)$otpCode]
+                        ]
+                    ],
+                    [
+                        "type" => "button",
+                        "sub_type" => "url",
+                        "index" => 0,
+                        "parameters" => [
+                            ["type" => "text", "text" => (string)$otpCode]
+                        ]
                     ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    // ==========================================
-    // 3. APPEL HTTP & LOGS (Gestion d'erreur)
-    // ==========================================
-    $response = Http::withToken($token)
-        ->withHeaders(['Content-Type' => 'application/json'])
-        ->post("{$baseUrl}{$expediteur}/messages", $payload);
+        // ==========================================
+        // 3. APPEL HTTP & LOGS (Gestion d'erreur)
+        // ==========================================
+        $response = Http::withToken($token)
+            ->withHeaders(['Content-Type' => 'application/json'])
+            ->post("{$baseUrl}{$expediteur}/messages", $payload);
 
-    if ($response->failed()) {
-        Log::error('WhatsApp error', [
-            'status' => $response->status(),
-            'body'   => $response->body(),
-            'target' => $phone
+        if ($response->failed()) {
+            Log::error('WhatsApp error', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+                'target' => $phone
+            ]);
+
+            // En développement, on affiche l'erreur
+            dd($response->json());
+        }
+
+        Log::info('WhatsApp success', [
+            'target' => $phone,
+            'response' => $response->json()
         ]);
 
-        // En développement, on affiche l'erreur
-        dd($response->json());
+        dd('WhatsApp success', [
+            'target' => $phone,
+            'response' => $response->json()
+        ]);
     }
-
-    Log::info('WhatsApp success', [
-        'target' => $phone,
-        'response' => $response->json()
-    ]);
-
-    dd('WhatsApp success', [
-        'target' => $phone,
-        'response' => $response->json()
-    ]);
-}
 
     /**
      * Envoie le code OTP par Email via SMTP Gmail
@@ -396,6 +398,19 @@ class ApiUsersPharmaController extends Controller
 
         return response()->json([
             'message' => 'Votre compte a été supprimé définitivement.',
+            'deleted' => true,
+        ], 200);
+    }
+    /**
+     * DELETE /api/delete/{username}
+     * Si l'utilisateur a des transactions ou rechargements → désactive (status = DELETE)
+     * Sinon → supprime définitivement
+     */
+    public function deleteAccountStatus(string $username)
+    {
+        return response()->json([
+            'message' => 'Votre compte a été supprimé définitivement.',
+            'username' => $username,
             'deleted' => true,
         ], 200);
     }
