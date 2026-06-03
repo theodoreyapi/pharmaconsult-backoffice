@@ -144,7 +144,7 @@
             @if (Auth::user()->role == 'SUPERADMIN')
                 <li class="dropdown {{ Route::is('publicites') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
-                        <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
+                        <i class="ri-megaphone-fill"></i>
                         <span>Publicites</span>
                     </a>
                     <ul class="sidebar-submenu {{ Route::is('publicites') ? 'show' : '' }}">
@@ -182,6 +182,25 @@
                     </ul>
                 </li>
             @endif
+
+            @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
+                <li class="dropdown {{ Route::is('rechargements') ? 'open' : '' }}">
+                    <a href="javascript:void(0)">
+                        <i class="ri-wallet-3-fill"></i>
+                        <span>Rechargements</span>
+                    </a>
+                    <ul class="sidebar-submenu {{ Route::is('rechargements') ? 'show' : '' }}">
+                        <li class="{{ Route::is('rechargements') ? 'active-page' : '' }}">
+                            <a href="{{ url('rechargements') }}"
+                                class="{{ Route::is('rechargements') ? 'active-page' : '' }}">
+                                <i class="ri-time-fill text-warning"></i>
+                                En attente
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
+
             @if (Auth::user()->role == 'ADMIN' || Auth::user()->role == 'SUPERADMIN')
                 <li class="sidebar-menu-group-title">Paramètres</li>
                 <li class="{{ Route::is('qrcode') ? 'active-page' : '' }}">
@@ -236,7 +255,8 @@
                 </li>
 
 
-                <li class="{{ Route::is('terms-condition', 'add-condition', 'edit-condition') ? 'active-page' : '' }}">
+                <li
+                    class="{{ Route::is('terms-condition', 'add-condition', 'edit-condition') ? 'active-page' : '' }}">
                     <a href="{{ url('terms-condition') }}"
                         class="{{ Route::is('terms-condition', 'add-condition', 'edit-condition') ? 'active-page' : '' }}">
 

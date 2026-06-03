@@ -85,6 +85,27 @@
             background: linear-gradient(90deg, #db2777, #f472b6);
         }
 
+        /* NOUVEAUX GRADIENTS POUR LES CARTES AJOUTÉES */
+        .gradient-cyan::before {
+            background: linear-gradient(90deg, #0891b2, #22d3ee);
+        }
+
+        .gradient-indigo::before {
+            background: linear-gradient(90deg, #4f46e5, #818cf8);
+        }
+
+        .gradient-dark::before {
+            background: linear-gradient(90deg, #1e293b, #64748b);
+        }
+
+        .gradient-red::before {
+            background: linear-gradient(90deg, #dc2626, #f87171);
+        }
+
+        .gradient-gold::before {
+            background: linear-gradient(90deg, #d97706, #fbbf24);
+        }
+
         .stat-icon {
             width: 60px;
             height: 60px;
@@ -114,6 +135,27 @@
 
         .bg-pink-soft {
             background: linear-gradient(135deg, #db2777, #f472b6);
+        }
+
+        /* NOUVEAUX FONDS SOFT POUR LES ICÔNES ACCORDÉES */
+        .bg-cyan-soft {
+            background: linear-gradient(135deg, #0891b2, #22d3ee);
+        }
+
+        .bg-indigo-soft {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+        }
+
+        .bg-dark-soft {
+            background: linear-gradient(135deg, #1e293b, #64748b);
+        }
+
+        .bg-red-soft {
+            background: linear-gradient(135deg, #dc2626, #f87171);
+        }
+
+        .bg-gold-soft {
+            background: linear-gradient(135deg, #d97706, #fbbf24);
         }
 
         .section-title {
@@ -157,38 +199,36 @@
             justify-content: center;
             font-weight: bold;
         }
+
+        .dashboard-section-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
     </style>
 
     <div class="dashboard-main-body">
 
         {{-- HERO --}}
         <div class="dashboard-hero mb-28">
-
             <div class="row align-items-center gy-4 position-relative">
-
                 <div class="col-lg-8">
-
                     <div class="d-inline-flex align-items-center gap-2 hero-badge mb-20">
                         <iconify-icon icon="solar:shield-check-bold"></iconify-icon>
                         <span>Plateforme Pharmaceutique Intelligente</span>
                     </div>
-
                     <h2 class="text-white fw-bold mb-14">
                         Bienvenue sur votre tableau de bord Pharmaconsults
                     </h2>
-
                     <p class="text-white opacity-75 mb-0 fs-6">
                         Analysez vos statistiques, surveillez vos vaccinations,
                         gérez vos pharmacies et suivez l’évolution globale
                         de votre plateforme en temps réel.
                     </p>
-
                 </div>
 
                 <div class="col-lg-4">
-
                     <div class="row gy-3">
-
                         <div class="col-6">
                             <div class="hero-badge text-center">
                                 <h3 class="text-white mb-1">
@@ -197,7 +237,6 @@
                                 <small>Utilisateurs</small>
                             </div>
                         </div>
-
                         <div class="col-6">
                             <div class="hero-badge text-center">
                                 <h3 class="text-white mb-1">
@@ -206,13 +245,9 @@
                                 <small>Profils santé</small>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
 
         {{-- SECTION GENERAL --}}
@@ -223,9 +258,7 @@
 
         <div class="row gy-4">
 
-            {{-- ═══════════════════════════════════════
-        SECTION — UTILISATEURS & ACTIVITÉ
-    ═══════════════════════════════════════ --}}
+            {{-- SECTION — UTILISATEURS & ACTIVITÉ --}}
             <div class="col-12">
                 <div class="d-flex align-items-center gap-2 mb-2 mt-2">
                     <div class="dashboard-section-dot bg-primary"></div>
@@ -237,30 +270,20 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-blue h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Utilisateurs
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Utilisateurs</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalUsers']) }}
                                 </h3>
-
                                 <span class="text-success-main text-sm">
-                                    +{{ number_format($statistiques['totalUsersThisMonth']) }}
-                                    ce mois
+                                    +{{ number_format($statistiques['totalUsersThisMonth']) }} ce mois
                                 </span>
                             </div>
-
                             <div class="stat-icon bg-blue-soft">
                                 <iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -269,29 +292,18 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-cyan h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Abonnés actifs
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Abonnés actifs</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalActifSubscriptions']) }}
                                 </h3>
-
-                                <span class="text-info-main text-sm">
-                                    comptes premium
-                                </span>
+                                <span class="text-info-main text-sm">comptes premium</span>
                             </div>
-
                             <div class="stat-icon bg-cyan-soft">
                                 <iconify-icon icon="fluent:people-20-filled"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -300,29 +312,18 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-indigo h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Requêtes pharmacies
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Requêtes pharmacies</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalRequests']) }}
                                 </h3>
-
-                                <span class="text-primary-main text-sm">
-                                    demandes envoyées
-                                </span>
+                                <span class="text-primary-main text-sm">demandes envoyées</span>
                             </div>
-
                             <div class="stat-icon bg-indigo-soft">
                                 <iconify-icon icon="solar:question-circle-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -331,37 +332,24 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-dark h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Requêtes utilisateurs
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Requêtes utilisateurs</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalRequestsUsers']) }}
                                 </h3>
-
-                                <span class="text-warning-main text-sm">
-                                    interactions utilisateurs
-                                </span>
+                                <span class="text-warning-main text-sm">interactions utilisateurs</span>
                             </div>
-
                             <div class="stat-icon bg-dark-soft">
                                 <iconify-icon icon="solar:user-speak-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
 
 
-            {{-- ═══════════════════════════════════════
-        SECTION — TRANSACTIONS & FINANCE
-    ═══════════════════════════════════════ --}}
+            {{-- SECTION — TRANSACTIONS & FINANCE --}}
             <div class="col-12">
                 <div class="d-flex align-items-center gap-2 mb-2 mt-3">
                     <div class="dashboard-section-dot bg-success"></div>
@@ -373,29 +361,18 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-purple h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Souscriptions
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Souscriptions</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalSubscriptions']) }}
                                 </h3>
-
-                                <span class="text-success-main text-sm">
-                                    abonnements totaux
-                                </span>
+                                <span class="text-success-main text-sm">abonnements totaux</span>
                             </div>
-
                             <div class="stat-icon bg-purple-soft">
                                 <iconify-icon icon="fa-solid:award"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -404,29 +381,18 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-orange h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Opérations
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Opérations</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalOperations']) }}
                                 </h3>
-
-                                <span class="text-warning-main text-sm">
-                                    transactions effectuées
-                                </span>
+                                <span class="text-warning-main text-sm">transactions effectuées</span>
                             </div>
-
                             <div class="stat-icon bg-orange-soft">
                                 <iconify-icon icon="solar:transfer-horizontal-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -435,29 +401,18 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-red h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Transferts Débit
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Transferts Débit</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalTransferts']) }}
                                 </h3>
-
-                                <span class="text-danger-main text-sm">
-                                    transferts réalisés
-                                </span>
+                                <span class="text-danger-main text-sm">transferts réalisés</span>
                             </div>
-
                             <div class="stat-icon bg-red-soft">
                                 <iconify-icon icon="solar:card-send-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -466,29 +421,18 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-green h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Rechargements
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Rechargements</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalRechargements']) }}
                                 </h3>
-
-                                <span class="text-success-main text-sm">
-                                    réussis
-                                </span>
+                                <span class="text-success-main text-sm">réussis</span>
                             </div>
-
                             <div class="stat-icon bg-green-soft">
                                 <iconify-icon icon="solar:battery-charge-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -497,73 +441,54 @@
             <div class="col-xxl-6 col-lg-6 col-sm-12">
                 <div class="card dashboard-card gradient-gold h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Revenus Globaux
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Revenus Globaux</p>
                                 <h2 class="fw-bold mb-6">
-                                    {{ number_format($statistiques['totalGlobalRevenue'], 0, ',', ' ') }}
-                                    FCFA
+                                    {{ number_format($statistiques['totalGlobalRevenue'], 0, ',', ' ') }} FCFA
                                 </h2>
-
-                                <span class="text-success-main text-sm">
-                                    revenus plateforme
-                                </span>
+                                <span class="text-success-main text-sm">revenus plateforme</span>
                             </div>
-
                             <div class="stat-icon bg-gold-soft">
                                 <iconify-icon icon="solar:wallet-money-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
 
+        </div>
 
-            {{-- ═══════════════════════════════════════
-        SECTION — SANTÉ & VACCINS
-    ═══════════════════════════════════════ --}}
-            <div class="col-12">
-                <div class="d-flex align-items-center gap-2 mb-2 mt-3">
-                    <div class="dashboard-section-dot bg-danger"></div>
-                    <h6 class="mb-0 fw-bold">Santé & Vaccination</h6>
-                </div>
+        {{-- ═══════════════════════════════════════
+                SECTION — SANTÉ & VACCINS
+            ═══════════════════════════════════════ --}}
+        <div class="col-12">
+            <div class="d-flex align-items-center gap-2 mb-2 mt-3">
+                <div class="dashboard-section-dot bg-danger"></div>
+                <h6 class="mb-0 fw-bold">Santé & Vaccination</h6>
             </div>
+        </div>
+        <div class="row gy-4">
+
 
             {{-- PROFILS --}}
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-green h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Profils Santé
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Profils Santé</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalHealthProfiles']) }}
                                 </h3>
-
                                 <span class="text-success-main text-sm">
-                                    {{ number_format($statistiques['totalActiveHealthProfiles']) }}
-                                    actifs
+                                    {{ number_format($statistiques['totalActiveHealthProfiles']) }} actifs
                                 </span>
                             </div>
-
                             <div class="stat-icon bg-green-soft">
                                 <iconify-icon icon="solar:heart-pulse-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -572,30 +497,20 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-purple h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Vaccinations
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Vaccinations</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalVaccinations']) }}
                                 </h3>
-
                                 <span class="text-success-main text-sm">
-                                    +{{ number_format($statistiques['totalVaccinationsThisMonth']) }}
-                                    ce mois
+                                    +{{ number_format($statistiques['totalVaccinationsThisMonth']) }} ce mois
                                 </span>
                             </div>
-
                             <div class="stat-icon bg-purple-soft">
                                 <iconify-icon icon="solar:syringe-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -604,30 +519,20 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-orange h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    RDV Vaccins
-                                </p>
-
+                                <p class="text-secondary-light mb-8">RDV Vaccins</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalVaccinAppointments']) }}
                                 </h3>
-
                                 <span class="text-warning-main text-sm">
-                                    {{ number_format($statistiques['totalPendingVaccinAppointments']) }}
-                                    en attente
+                                    {{ number_format($statistiques['totalPendingVaccinAppointments']) }} en attente
                                 </span>
                             </div>
-
                             <div class="stat-icon bg-orange-soft">
                                 <iconify-icon icon="solar:calendar-add-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -636,33 +541,21 @@
             <div class="col-xxl-3 col-lg-4 col-sm-6">
                 <div class="card dashboard-card gradient-cyan h-100">
                     <div class="card-body p-24">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-                                <p class="text-secondary-light mb-8">
-                                    Abonnements Profils
-                                </p>
-
+                                <p class="text-secondary-light mb-8">Abonnements Profils</p>
                                 <h3 class="fw-bold mb-6">
                                     {{ number_format($statistiques['totalPaidProfileSubscriptions']) }}
                                 </h3>
-
-                                <span class="text-info-main text-sm">
-                                    actifs payés
-                                </span>
+                                <span class="text-info-main text-sm">actifs payés</span>
                             </div>
-
                             <div class="stat-icon bg-cyan-soft">
                                 <iconify-icon icon="solar:shield-check-bold"></iconify-icon>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
-
         </div>
 
         {{-- SECTION PROFILS --}}
@@ -1026,7 +919,7 @@
         <div class="row gy-4 mt-4">
 
             {{-- RECHARGEMENTS --}}
-            <div class="col-xxl-4 col-xl-6">
+            <div class="col-xxl-6 col-xl-6">
 
                 <div class="card dashboard-chart-card h-100 border-0">
 
@@ -1068,8 +961,8 @@
 
             </div>
 
-            {{-- VACCINATIONS --}}
-            <div class="col-xxl-4 col-xl-6">
+            {{-- ABONNEMENTS PROFILS --}}
+            <div class="col-xxl-6 col-xl-6">
 
                 <div class="card dashboard-chart-card h-100 border-0">
 
@@ -1078,7 +971,50 @@
                         <div class="d-flex justify-content-between align-items-start mb-24">
 
                             <div>
-                                <span class="dashboard-chart-label bg-purple-soft text-purple">
+                                <span class="dashboard-chart-label text-primary">
+                                    Abonnements
+                                </span>
+
+                                <h5 class="fw-bold mt-14 mb-8">
+                                    Profils Santé {{ date('Y') }}
+                                </h5>
+
+                                <p class="text-secondary-light mb-0">
+                                    Revenus & nombre d'abonnements
+                                </p>
+                            </div>
+
+                            <div class="chart-total-box blue">
+
+                                <h6 class="mb-4">
+                                    {{ number_format(array_sum(array_column($profileSubscriptions, 'cumulTotal')), 0, ',', ' ') }}
+                                </h6>
+
+                                <span>FCFA</span>
+
+                            </div>
+
+                        </div>
+
+                        <canvas id="profileSubsChart" height="140"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {{-- VACCINATIONS --}}
+            <div class="col-xxl-6 col-xl-6">
+
+                <div class="card dashboard-chart-card h-100 border-0">
+
+                    <div class="card-body p-28">
+
+                        <div class="d-flex justify-content-between align-items-start mb-24">
+
+                            <div>
+                                <span class="dashboard-chart-label text-purple">
                                     Santé
                                 </span>
 
@@ -1111,42 +1047,63 @@
 
             </div>
 
-            {{-- ABONNEMENTS PROFILS --}}
-            <div class="col-xxl-4 col-xl-12">
+            {{-- TOP VACCINS --}}
+            <div class="col-xl-6">
 
-                <div class="card dashboard-chart-card h-100 border-0">
+                <div class="card chart-card h-100">
 
                     <div class="card-body p-28">
 
-                        <div class="d-flex justify-content-between align-items-start mb-24">
+                        <div class="d-flex justify-content-between align-items-center mb-20">
 
                             <div>
-                                <span class="dashboard-chart-label bg-blue-soft text-primary">
-                                    Abonnements
-                                </span>
-
-                                <h5 class="fw-bold mt-14 mb-8">
-                                    Profils Santé {{ date('Y') }}
+                                <h5 class="fw-bold mb-0">
+                                    Vaccins populaires
                                 </h5>
-
-                                <p class="text-secondary-light mb-0">
-                                    Revenus & nombre d'abonnements
-                                </p>
                             </div>
 
-                            <div class="chart-total-box blue">
-
-                                <h6 class="mb-4">
-                                    {{ number_format(array_sum(array_column($profileSubscriptions, 'cumulTotal')), 0, ',', ' ') }}
-                                </h6>
-
-                                <span>FCFA</span>
-
-                            </div>
+                            <span class="mini-badge bg-warning-focus text-warning-main">
+                                Top 5
+                            </span>
 
                         </div>
 
-                        <canvas id="profileSubsChart" height="140"></canvas>
+                        @forelse($topVaccines as $vaccine)
+                            <div class="top-vaccine-item">
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div>
+
+                                        <h6 class="mb-4">
+                                            {{ $vaccine->name }}
+                                        </h6>
+
+                                        <small class="text-secondary-light">
+                                            Vaccinations enregistrées
+                                        </small>
+
+                                    </div>
+
+                                    <span class="fw-bold text-primary-600">
+                                        {{ number_format($vaccine->total) }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        @empty
+
+                            <div class="text-center py-5">
+                                <iconify-icon icon="solar:syringe-outline" class="text-5xl text-secondary-light mb-3">
+                                </iconify-icon>
+
+                                <p class="mb-0 text-secondary-light">
+                                    Aucun vaccin enregistré
+                                </p>
+                            </div>
+                        @endforelse
 
                     </div>
 
@@ -1487,72 +1444,8 @@
         {{-- TABLEAUX --}}
         <div class="row gy-4 mt-10">
 
-            {{-- TOP VACCINS --}}
-            <div class="col-xl-6">
-
-                <div class="card chart-card h-100">
-
-                    <div class="card-body p-28">
-
-                        <div class="d-flex justify-content-between align-items-center mb-20">
-
-                            <div>
-                                <h5 class="fw-bold mb-0">
-                                    Vaccins populaires
-                                </h5>
-                            </div>
-
-                            <span class="mini-badge bg-warning-focus text-warning-main">
-                                Top 5
-                            </span>
-
-                        </div>
-
-                        @forelse($topVaccines as $vaccine)
-                            <div class="top-vaccine-item">
-
-                                <div class="d-flex justify-content-between align-items-center">
-
-                                    <div>
-
-                                        <h6 class="mb-4">
-                                            {{ $vaccine->name }}
-                                        </h6>
-
-                                        <small class="text-secondary-light">
-                                            Vaccinations enregistrées
-                                        </small>
-
-                                    </div>
-
-                                    <span class="fw-bold text-primary-600">
-                                        {{ number_format($vaccine->total) }}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        @empty
-
-                            <div class="text-center py-5">
-                                <iconify-icon icon="solar:syringe-outline" class="text-5xl text-secondary-light mb-3">
-                                </iconify-icon>
-
-                                <p class="mb-0 text-secondary-light">
-                                    Aucun vaccin enregistré
-                                </p>
-                            </div>
-                        @endforelse
-
-                    </div>
-
-                </div>
-
-            </div>
-
             {{-- DERNIERS PROFILS --}}
-            <div class="col-xl-6">
+            <div class="col-xl-12">
 
                 <div class="card chart-card h-100">
 

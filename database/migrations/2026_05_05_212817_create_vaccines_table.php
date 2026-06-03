@@ -20,8 +20,6 @@ return new class extends Migration
 
             // Tarification (Adaptée au contexte de Côte d'Ivoire INHP / Vétos privés)
             $table->decimal('public_price', 10, 2)->default(0)->comment('0 = GRATUIT');
-            $table->decimal('private_price_min', 10, 2)->nullable();
-            $table->decimal('private_price_max', 10, 2)->nullable();
             $table->string('currency', 10)->default('FCFA');
 
             // Typologie et Cible

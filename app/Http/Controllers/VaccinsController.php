@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Categorie;
 use App\Models\Vaccine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -15,6 +16,10 @@ class VaccinsController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect()->intended('logout');
+        }
+
         $vaccines = DB::table('vaccines')
 
             ->when($request->search, function ($q) use ($request) {
@@ -103,6 +108,14 @@ class VaccinsController extends Controller
             ->groupBy('vaccine_id');
 
         /**
+         * Equivalents
+         */
+        $equivalents = DB::table('vaccine_equivalents')
+            ->whereIn('vaccine_id', $ids)
+            ->get()
+            ->groupBy('vaccine_id');
+
+        /**
          * Injection dans chaque vaccin
          */
         foreach ($vaccines as $vaccine) {
@@ -115,6 +128,9 @@ class VaccinsController extends Controller
 
             $vaccine->restrictions =
                 $restrictions[$vaccine->id_vaccine] ?? collect();
+
+            $vaccine->equivalents =
+                $equivalents[$vaccine->id_vaccine] ?? collect();
         }
 
         /**
@@ -135,6 +151,8 @@ class VaccinsController extends Controller
             'animal' => DB::table('vaccines')
                 ->where('vaccine_type', 'animal')
                 ->count(),
+
+            'equivalents' => DB::table('vaccine_equivalents')->count(),
         ];
 
         $allCategories = DB::table('categories')
@@ -198,6 +216,12 @@ class VaccinsController extends Controller
             'restrictions'                => 'nullable|array',
             'restrictions.*'              => 'in:pregnancy,immunocompromised,allergy',
             'restriction_reason'          => 'nullable|string',
+
+            // équivalent
+            'equivalents' => 'nullable|array',
+            'equivalents.*.name' => 'required_with:equivalents|string|max:255',
+            'equivalents.*.description' => 'nullable|string',
+            'equivalents.*.price' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -227,6 +251,24 @@ class VaccinsController extends Controller
                 'validation_status'    => $validated['validation_status'] ?? null,
                 'is_active'         => $request->boolean('is_active'),
             ]);
+
+            foreach ($request->equivalents ?? [] as $equivalent) {
+
+                DB::table('vaccine_equivalents')->insert([
+
+                    'vaccine_id' => $vaccine->id_vaccine,
+
+                    'name' => $equivalent['name'],
+
+                    'description' => $equivalent['description'] ?? null,
+
+                    'price' => $equivalent['price'] ?? 0,
+
+                    'created_at' => now(),
+                    'updated_at' => now(),
+
+                ]);
+            }
 
             // Catégories
             foreach ($request->input('categories', []) as $categoryId) {
@@ -334,6 +376,11 @@ class VaccinsController extends Controller
             'restrictions'      => 'nullable|array',
             'restrictions.*'    => 'in:pregnancy,immunocompromised,allergy',
             'restriction_reason' => 'nullable|string',
+
+            'equivalents_edit'            => 'nullable|array',
+            'equivalents_edit.*.name'     => 'required|string|max:150',
+            'equivalents_edit.*.description' => 'nullable|string',
+            'equivalents_edit.*.price'    => 'nullable|numeric|min:0',
         ]);
 
         $vaccine->update([
@@ -415,6 +462,20 @@ class VaccinsController extends Controller
             ]);
         }
 
+        // Sync équivalents
+        DB::table('vaccine_equivalents')->where('vaccine_id', $vaccine->id_vaccine)->delete();
+        foreach ($request->input('equivalents_edit', []) as $eq) {
+            if (empty($eq['name'])) continue;
+            DB::table('vaccine_equivalents')->insert([
+                'vaccine_id'  => $vaccine->id_vaccine,
+                'name'        => $eq['name'],
+                'description' => $eq['description'] ?? null,
+                'price'       => $eq['price'] ?? 0,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+        }
+
         return redirect()->route('vaccins.index')->with('success', 'Vaccin mis à jour avec succès.');
     }
 
@@ -434,6 +495,10 @@ class VaccinsController extends Controller
             ->delete();
 
         DB::table('vaccine_restrictions')
+            ->where('vaccine_id', $vaccine->id_vaccine)
+            ->delete();
+
+        DB::table('vaccine_equivalents')
             ->where('vaccine_id', $vaccine->id_vaccine)
             ->delete();
 

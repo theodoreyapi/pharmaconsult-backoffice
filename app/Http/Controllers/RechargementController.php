@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Rechargements;
+use App\Models\UsersPharma;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class RechargementController extends Controller
@@ -12,88 +15,100 @@ class RechargementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->intended('logout');
         }
 
-        $responses = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL') . '/pharma/' . session('user_data')['wallet']['pharmacyId'] . '/wallet-balance');
+        $query = Rechargements::query()
+            ->where('status', 'pending');
 
-        $wallets = $responses->json();
+        // Recherche username ou transaction
+        if ($request->filled('search')) {
 
-        $response = Http::withOptions([
-            'verify' => false
-        ])->withHeaders([
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->get(env('API_BASE_URL_PHARMA') . '/pharma/operations/byPharmacy/' . session('user_data')['wallet']['pharmacyId']);
+            $search = $request->search;
 
-        if ($response->status() == 200 || $response->status() == 204) {
-            $requetes = collect($response->json())->where('designation', '==', 'RECHARGEMENT')->values();
+            $query->where(function ($q) use ($search) {
 
-            return view('pharmacies.rechargement', compact('requetes', 'wallets'));
-        } else {
-            // Gérer l'erreur
-            return abort(500, 'Erreur lors du chargement des données.');
+                $q->where('username', 'like', "%{$search}%")
+                    ->orWhere('transaction_id', 'like', "%{$search}%");
+            });
         }
+
+        // Méthode de paiement
+        if ($request->filled('payment_method')) {
+
+            $query->where(
+                'payment_method',
+                $request->payment_method
+            );
+        }
+
+        // Montant minimum
+        if ($request->filled('min')) {
+
+            $query->where(
+                'montant',
+                '>=',
+                $request->min
+            );
+        }
+
+        // Montant maximum
+        if ($request->filled('max')) {
+
+            $query->where(
+                'montant',
+                '<=',
+                $request->max
+            );
+        }
+
+        $rechargements = $query
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+
+        return view('wallet.rechargement', compact('rechargements'));
     }
 
-    public function init(Request $request)
+    public function valider($id)
     {
-        if (!Auth::check()) {
-            return redirect()->intended('logout');
-        }
+        DB::beginTransaction();
 
         try {
-            //Génération du transactionId équivalent à Flutter
-            $now = Carbon::now(); // équivaut à DateTime.now()
-            $random = random_int(0, 9999); // équivaut à Random().nextInt(9999)
-            $transactionId = $now->format('dmYHisv') . $random;
-            //(jour/mois/année/heure/minute/seconde/millisecondes + random)
 
+            $rechargement = Rechargements::findOrFail($id);
 
-            $response = Http::withOptions([
-                'verify' => false
-            ])->withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDIyNTA1ODU4MzE2NDciLCJpc3MiOiJQQVRJRU5UIiwiaWF0IjoxNzQ3MDg0NzgzLCJleHAiOjE3NDcwODgzODN9.S0sMywcFkT8xnvqqCurUPkIEe_Os8m2iSnt8-h60mXk',
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])->post(env('API_BASE_URL_PHARMA') . '/pharma/cinetpay/payment', [
-                'username' => session('user_data')['email'],
-                'amount' => $request->money,
-                'channels' => 'ALL',
-                'description' => 'Rechargement de compte Pharmacie',
-                'transaction_id' => $transactionId,
-                'currency' => 'XOF',
-            ]);
-
-            if ($response->status() == 200 || $response->status() == 201) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Rechargement initialisé avec succès',
-                    'url' => $response->body() // ou json_decode($response->body()) si c’est du JSON
-                ]);
+            if ($rechargement->status != 'pending') {
+                return back()->with('error', 'Ce rechargement a déjà été traité.');
             }
 
-            return response()->json([
-                'status' => false,
-                'message' => 'Erreur lors de l’initialisation du rechargement',
-                'error' => $response->body()
-            ], $response->status());
+            $user = UsersPharma::where(
+                'username',
+                $rechargement->username
+            )->firstOrFail();
+
+            $user->amount += $rechargement->montant;
+            $user->last_amount = $rechargement->montant;
+            $user->save();
+
+            $rechargement->status = 'success';
+            $rechargement->save();
+
+            DB::commit();
+
+            return back()->with(
+                'succes',
+                'Rechargement validé avec succès.'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Erreur serveur',
-                'error' => $e->getMessage()
-            ], 500);
+
+            DB::rollBack();
+
+            return back()->withErrors([$e->getMessage()]);
         }
     }
 
@@ -142,6 +157,13 @@ class RechargementController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $rechargement = Rechargements::findOrFail($id);
+
+        $rechargement->delete();
+
+        return back()->with(
+            'succes',
+            'Rechargement supprimé.'
+        );
     }
 }

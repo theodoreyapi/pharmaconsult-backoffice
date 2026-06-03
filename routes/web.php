@@ -287,7 +287,7 @@ Route::get('index', function () {
         */
 
         'totalGlobalRevenue' =>
-            Rechargements::where('status', 'success')->sum('montant')
+        Rechargements::where('status', 'success')->sum('montant')
             +
             ProfileSubscription::where('status', 'paid')->sum('amount'),
     ];
@@ -443,9 +443,9 @@ Route::get('index', function () {
     */
 
     $topVaccines = Vaccine::select(
-            'vaccines.name',
-            DB::raw('COUNT(profile_vaccinations.id_vaccination) as total')
-        )
+        'vaccines.name',
+        DB::raw('COUNT(profile_vaccinations.id_vaccination) as total')
+    )
         ->leftJoin(
             'profile_vaccinations',
             'vaccines.id_vaccine',
@@ -512,13 +512,16 @@ Route::resource('medicament', PriceFicheController::class);
 Route::resource('requete', RequetesController::class);
 Route::resource('reservation', ReservationsController::class);
 Route::resource('transactions', TransactionController::class);
-Route::resource('rechargement', RechargementController::class);
+
+Route::resource('rechargements', RechargementController::class);
+Route::post('/rechargements/{id}/valider', [RechargementController::class, 'valider'])->name('rechargements.valider');
+Route::delete('/rechargements/{id}', [RechargementController::class, 'destroy'])->name('rechargements.destroy');
+
 Route::resource('qrcode', QrCodeController::class);
 Route::resource('reponse', ReponsesController::class);
 
 Route::post('asso-assurance/{id}', [PharmacieController::class, 'assoAssurance']);
 Route::post('asso-paiement/{id}', [PharmacieController::class, 'assoPaiement']);
-Route::post('rechargement/init', [RechargementController::class, 'init'])->name('rechargement.init');
 
 Route::post('/save-fcm-token', [NotificationController::class, 'storeToken']);
 

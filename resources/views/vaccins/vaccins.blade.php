@@ -2,6 +2,9 @@
 
 @section('content')
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Votre script après -->
+
     <div class="dashboard-main-body">
 
         {{-- ── Fil d'Ariane ─────────────────────────────────────────────────────── --}}
@@ -36,7 +39,7 @@
         @endif
 
         {{-- ── Stats rapides ────────────────────────────────────────────────────── --}}
-        <div class="row row-cols-lg-4 row-cols-sm-2 row-cols-1 gy-4 mb-24">
+        <div class="row row-cols-lg-5 row-cols-sm-2 row-cols-1 gy-4 mb-24">
 
             <div class="col">
                 <div class="card shadow-none border h-100" style="border-left:4px solid #2E7D32!important">
@@ -98,6 +101,21 @@
                 </div>
             </div>
 
+            <div class="col">
+                <div class="card shadow-none border h-100" style="border-left:4px solid #e69d00!important">
+                    <div class="card-body p-20 d-flex align-items-center gap-3">
+                        <div class="w-48-px h-48-px rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
+                            style="background:#e69d00">
+                            <iconify-icon icon="solar:syringe-bold" class="text-white text-xl"></iconify-icon>
+                        </div>
+                        <div>
+                            <p class="text-secondary-light fw-medium mb-1 text-sm">Equivalents</p>
+                            <h5 class="fw-bold mb-0">{{ $stats['equivalents'] }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         {{-- ── Card principale ──────────────────────────────────────────────────── --}}
@@ -144,8 +162,8 @@
                         @endif
                     </form>
 
-                    <button type="button" class="btn btn-sm text-white" style="background:#2E7D32" data-bs-toggle="modal"
-                        data-bs-target="#modalCreate">
+                    <button type="button" class="btn btn-sm text-white" style="background:#2E7D32"
+                        data-bs-toggle="modal" data-bs-target="#modalCreate">
                         {{-- <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> --}}
                         Nouveau vaccin
                     </button>
@@ -161,7 +179,7 @@
                                 <th>Nom</th>
                                 <th>Type</th>
                                 <th>Prix public</th>
-                                <th>Prix privé</th>
+                                <th>Équivalents</th>
                                 <th>Catégories</th>
                                 <th class="text-center">Statut</th>
                                 <th>Créé le</th>
@@ -192,40 +210,49 @@
 
                                     <td>
                                         @if ($vaccine->vaccine_type === 'human')
-                                            <span class="badge px-10 py-5 fw-semibold"
-                                                style="background:rgba(21,101,192,.1);color:#1565C0;border-radius:20px">
-                                                <iconify-icon icon="solar:person-bold" class="me-1"></iconify-icon>
-                                                Humain
+                                            <span class="badge fw-semibold"
+                                                style="background:rgba(21,101,192,.1);color:#1565C0;">
+                                                👤 Humain
                                             </span>
                                         @else
-                                            <span class="badge px-10 py-5 fw-semibold"
-                                                style="background:rgba(230,81,0,.1);color:#E65100;border-radius:20px">
-                                                <iconify-icon icon="solar:pet-bold" class="me-1"></iconify-icon>
-                                                Animal
+                                            <span class="badge fw-semibold"
+                                                style="background:rgba(230,81,0,.1);color:#E65100;">
+                                                🐾 Animal
                                             </span>
                                         @endif
                                     </td>
 
                                     <td>
+
                                         @if ($vaccine->public_price == 0)
-                                            <span class="text-success-main fw-bold">GRATUIT</span>
+                                            <span class="badge bg-success">
+                                                Gratuit
+                                            </span>
                                         @else
-                                            <span class="fw-semibold">
+                                            <span class="fw-bold text-success">
                                                 {{ number_format($vaccine->public_price, 0, ',', ' ') }}
-                                                {{ $vaccine->currency }}
+                                                FCFA
                                             </span>
                                         @endif
+
                                     </td>
 
-                                    <td class="text-secondary-light text-sm">
-                                        @if ($vaccine->private_price_min || $vaccine->private_price_max)
-                                            {{ number_format($vaccine->private_price_min, 0, ',', ' ') }}
-                                            –
-                                            {{ number_format($vaccine->private_price_max, 0, ',', ' ') }}
-                                            {{ $vaccine->currency }}
+                                    <td>
+
+                                        @if ($vaccine->equivalents->count())
+                                            <span class="badge bg-primary">
+
+                                                {{ $vaccine->equivalents->count() }}
+
+                                                équivalent(s)
+
+                                            </span>
                                         @else
-                                            <span class="text-secondary-light">—</span>
+                                            <span class="text-muted">
+                                                —
+                                            </span>
                                         @endif
+
                                     </td>
 
                                     <td>
@@ -272,9 +299,13 @@
                                             {{-- Modifier --}}
                                             <button
                                                 class="w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle bg-primary-focus text-primary-600 btn-edit"
-                                                title="Modifier" data-vaccine="{{ json_encode($vaccine) }}"
-                                                data-categories="{{ json_encode($vaccine->categories->pluck('id_categorie')) }}"
-                                                data-bs-toggle="modal" data-bs-target="#modalEdit">
+                                                title="Modifier" data-bs-toggle="modal" data-bs-target="#modalEdit"
+                                                data-vaccine='{!! json_encode((array) $vaccine, JSON_HEX_APOS | JSON_HEX_QUOT) !!}'
+                                                data-categories='{!! json_encode($vaccine->categories->pluck('id_categorie')->values()->toArray()) !!}'
+                                                data-schedule='{!! json_encode($vaccine->schedule ? (array) $vaccine->schedule : null) !!}'
+                                                data-restrictions='{!! json_encode($vaccine->restrictions->pluck('restriction_type')->values()->toArray()) !!}'
+                                                data-restriction-reason='{!! $vaccine->restrictions->first()?->reason ?? '' !!}'
+                                                data-equivalents='{!! json_encode($vaccine->equivalents->map(fn($e) => (array) $e)->values()->toArray()) !!}'>
                                                 <iconify-icon icon="lucide:edit"></iconify-icon>
                                             </button>
                                             {{-- Toggle statut --}}
@@ -493,21 +524,61 @@
 
                                                                     </div>
                                                                 </div>
+                                                                <div class="card border radius-10 mb-4">
 
-                                                                <div class="mb-3">
-                                                                    <small class="text-secondary">
-                                                                        Prix privé
-                                                                    </small>
+                                                                    <div class="card-body">
 
-                                                                    <div class="fw-semibold">
+                                                                        <h6 class="fw-bold mb-3">
 
-                                                                        {{ $vaccine->private_price_min ?: 0 }}
-                                                                        -
-                                                                        {{ $vaccine->private_price_max ?: 0 }}
+                                                                            Vaccins équivalents
 
-                                                                        {{ $vaccine->currency }}
+                                                                        </h6>
+
+                                                                        @forelse($vaccine->equivalents as $eq)
+                                                                            <div class="border rounded p-3 mb-2">
+
+                                                                                <div
+                                                                                    class="d-flex justify-content-between">
+
+                                                                                    <div>
+
+                                                                                        <div class="fw-semibold">
+
+                                                                                            {{ $eq->name }}
+
+                                                                                        </div>
+
+                                                                                        <small class="text-muted">
+
+                                                                                            {{ $eq->description }}
+
+                                                                                        </small>
+
+                                                                                    </div>
+
+                                                                                    <div class="text-success fw-bold">
+
+                                                                                        {{ number_format($eq->price, 0, ',', ' ') }}
+
+                                                                                        FCFA
+
+                                                                                    </div>
+
+                                                                                </div>
+
+                                                                            </div>
+
+                                                                        @empty
+
+                                                                            <div class="text-muted">
+
+                                                                                Aucun vaccin équivalent enregistré.
+
+                                                                            </div>
+                                                                        @endforelse
 
                                                                     </div>
+
                                                                 </div>
 
                                                             </div>
@@ -849,7 +920,7 @@
                             </div>
 
                             <div class="row gy-16">
-                                <div class="col-sm-4">
+                                <div class="col-sm-12">
                                     <label class="form-label fw-semibold text-sm mb-8">
                                         Prix public (FCFA)
                                         <span class="text-secondary-light text-xs fw-normal">0 = GRATUIT</span>
@@ -857,15 +928,51 @@
                                     <input type="number" name="public_price" class="form-control" value="0"
                                         min="0" step="1" placeholder="0">
                                 </div>
-                                <div class="col-sm-4">
-                                    <label class="form-label fw-semibold text-sm mb-8">Prix privé min (FCFA)</label>
-                                    <input type="number" name="private_price_min" class="form-control" min="0"
-                                        step="1" placeholder="Ex : 2 000">
-                                </div>
-                                <div class="col-sm-4">
-                                    <label class="form-label fw-semibold text-sm mb-8">Prix privé max (FCFA)</label>
-                                    <input type="number" name="private_price_max" class="form-control" min="0"
-                                        step="1" placeholder="Ex : 3 500">
+
+                                <div class="col-12">
+                                    <br>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                        <label class="form-label fw-semibold mb-0">
+                                            Vaccins équivalents
+                                        </label>
+
+                                        <button type="button" class="btn btn-sm btn-success" id="addEquivalent">
+                                            <i class="ri-add-line"></i>
+                                            Ajouter
+                                        </button>
+
+                                    </div>
+
+                                    <div id="equivalentsWrapper">
+
+                                        <div class="row gy-2 equivalent-item mb-3">
+
+                                            <div class="col-md-4">
+                                                <input type="text" name="equivalents[0][name]" class="form-control"
+                                                    placeholder="Nom du vaccin équivalent">
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input type="text" name="equivalents[0][description]"
+                                                    class="form-control" placeholder="Description">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <input type="number" name="equivalents[0][price]" class="form-control"
+                                                    placeholder="Prix">
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <button type="button" class="btn btn-danger removeEquivalent">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -1210,15 +1317,18 @@
                                     <input type="number" name="public_price" id="editPublicPrice" class="form-control"
                                         min="0" step="1">
                                 </div>
-                                <div class="col-sm-4">
-                                    <label class="form-label fw-semibold text-sm mb-8">Prix privé min (FCFA)</label>
-                                    <input type="number" name="private_price_min" id="editPriceMin"
-                                        class="form-control" min="0" step="1">
-                                </div>
-                                <div class="col-sm-4">
-                                    <label class="form-label fw-semibold text-sm mb-8">Prix privé max (FCFA)</label>
-                                    <input type="number" name="private_price_max" id="editPriceMax"
-                                        class="form-control" min="0" step="1">
+
+                                <div class="col-12">
+                                    <br>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <label class="form-label fw-semibold mb-0">Vaccins équivalents</label>
+                                        <button type="button" class="btn btn-sm btn-success" id="addEquivalentEdit">
+                                            <i class="ri-add-line"></i> Ajouter
+                                        </button>
+                                    </div>
+                                    <div id="equivalentsWrapperEdit">
+                                        {{-- rempli dynamiquement par JS --}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1413,7 +1523,8 @@
                     </div>{{-- /modal-body --}}
 
                     <div class="modal-footer border-top px-24" style="padding: inherit;">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Annuler</button>
                         <button type="submit" class="btn btn-primary px-24">
                             {{-- <iconify-icon icon="solar:diskette-bold" class="me-1"></iconify-icon> --}}
                             Mettre à jour
@@ -1424,7 +1535,6 @@
         </div>
     </div>
 
-
     {{-- ══════════════════════════════════════════════════════════════════════════
      JAVASCRIPT
      • Pré-remplissage complet du modal Modifier
@@ -1432,78 +1542,157 @@
      • Affichage conditionnel espèce (animal) + zone voyage
 ══════════════════════════════════════════════════════════════════════════ --}}
     <script>
-        // ── Helpers ────────────────────────────────────────────────────────────────
-        function setVal(id, val) {
-            const el = document.getElementById(id);
-            if (el) el.value = val ?? '';
-        }
+        $(document).ready(function() {
 
-        function setChecked(id, bool) {
-            const el = document.getElementById(id);
-            if (el) el.checked = !!bool;
-        }
+            // ── Helpers ──────────────────────────────────────────────────────────────
+            function setVal(id, val) {
+                const el = document.getElementById(id);
+                if (el) el.value = val ?? '';
+            }
 
-        // ── Affichage conditionnel : espèce (animal) ──────────────────────────────
-        function toggleSpecies(typeSelectId, wrapId) {
-            const sel = document.getElementById(typeSelectId);
-            const wrap = document.getElementById(wrapId);
-            if (!sel || !wrap) return;
-            const update = () => wrap.style.display = sel.value === 'animal' ? '' : 'none';
-            sel.addEventListener('change', update);
-            update();
-        }
-        toggleSpecies('createType', 'wrapSpeciesCreate');
-        toggleSpecies('editType', 'wrapSpeciesEdit');
+            function setChecked(id, bool) {
+                const el = document.getElementById(id);
+                if (el) el.checked = !!bool;
+            }
 
-        // ── Affichage conditionnel : zone de voyage ───────────────────────────────
-        function toggleTravelZone(checkboxId, wrapId) {
-            const cb = document.getElementById(checkboxId);
-            const wrap = document.getElementById(wrapId);
-            if (!cb || !wrap) return;
-            const update = () => wrap.style.display = cb.checked ? '' : 'none';
-            cb.addEventListener('change', update);
-            update();
-        }
-        toggleTravelZone('c_travelers', 'wrapTravelZoneCreate');
-        toggleTravelZone('e_travelers', 'wrapTravelZoneEdit');
+            // ── Affichage conditionnel : espèce (animal) ──────────────────────────
+            function toggleSpecies(typeSelectId, wrapId) {
+                const sel = document.getElementById(typeSelectId);
+                const wrap = document.getElementById(wrapId);
+                if (!sel || !wrap) return;
+                const update = () => wrap.style.display = sel.value === 'animal' ? '' : 'none';
+                sel.addEventListener('change', update);
+                update();
+            }
+            toggleSpecies('createType', 'wrapSpeciesCreate');
+            toggleSpecies('editType', 'wrapSpeciesEdit');
 
-        // ── Auto-slug (modal Créer) ───────────────────────────────────────────────
-        document.getElementById('createName')?.addEventListener('input', function() {
-            const slug = document.getElementById('createSlug');
-            if (!slug || slug.dataset.manual) return;
-            slug.value = this.value
-                .toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-        });
-        document.getElementById('createSlug')?.addEventListener('input', function() {
-            this.dataset.manual = this.value ? '1' : '';
-        });
+            // ── Affichage conditionnel : zone de voyage ───────────────────────────
+            function toggleTravelZone(checkboxId, wrapId) {
+                const cb = document.getElementById(checkboxId);
+                const wrap = document.getElementById(wrapId);
+                if (!cb || !wrap) return;
+                const update = () => wrap.style.display = cb.checked ? '' : 'none';
+                cb.addEventListener('change', update);
+                update();
+            }
+            toggleTravelZone('c_travelers', 'wrapTravelZoneCreate');
+            toggleTravelZone('e_travelers', 'wrapTravelZoneEdit');
 
-        // ── Pré-remplir le modal Modifier ─────────────────────────────────────────
-        document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', () => {
+            // ── Auto-slug (modal Créer) ───────────────────────────────────────────
+            document.getElementById('createName')?.addEventListener('input', function() {
+                const slug = document.getElementById('createSlug');
+                if (!slug || slug.dataset.manual) return;
+                slug.value = this.value
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            });
+            document.getElementById('createSlug')?.addEventListener('input', function() {
+                this.dataset.manual = this.value ? '1' : '';
+            });
 
-                const v = JSON.parse(btn.dataset.vaccine || '{}');
-                console.log('Données du vaccin à éditer :', v);
-                const cats = JSON.parse(btn.dataset.categories || '[]');
-                const s = JSON.parse(btn.dataset.schedule || '{}');
-                const restr = JSON.parse(btn.dataset.restrictions || '[]');
-                const rstReason = btn.dataset.restrictionReason || '';
+            // ── Équivalents : modal CRÉER ─────────────────────────────────────────
+            let equivalentIndexCreate = 1;
 
-                // Action du formulaire
+            $(document).on('click', '#addEquivalent', function() {
+                $('#equivalentsWrapper').append(buildEquivalentRow(equivalentIndexCreate, 'equivalents',
+                    true));
+                equivalentIndexCreate++;
+            });
+
+            // ── Équivalents : modal MODIFIER ──────────────────────────────────────
+            let equivalentIndexEdit = 0;
+
+            $(document).on('click', '#addEquivalentEdit', function() {
+                $('#equivalentsWrapperEdit').append(buildEquivalentRow(equivalentIndexEdit,
+                    'equivalents_edit', true));
+                equivalentIndexEdit++;
+            });
+
+            // ── Suppression d'un équivalent (les deux modals) ─────────────────────
+            $(document).on('click', '.removeEquivalent', function() {
+                $(this).closest('.equivalent-item').remove();
+            });
+
+            // ── Builder d'une ligne équivalent ────────────────────────────────────
+            function buildEquivalentRow(idx, prefix, withDelete, data = {}) {
+                return `
+        <div class="row gy-2 equivalent-item mb-3">
+            <div class="col-md-4">
+                <input type="text"
+                    name="${prefix}[${idx}][name]"
+                    class="form-control"
+                    placeholder="Nom du vaccin équivalent"
+                    value="${data.name ?? ''}">
+            </div>
+            <div class="col-md-5">
+                <input type="text"
+                    name="${prefix}[${idx}][description]"
+                    class="form-control"
+                    placeholder="Description"
+                    value="${data.description ?? ''}">
+            </div>
+            <div class="col-md-2">
+                <input type="number"
+                    name="${prefix}[${idx}][price]"
+                    class="form-control"
+                    placeholder="Prix"
+                    value="${data.price ?? ''}">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger removeEquivalent">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </div>
+        </div>`;
+            }
+
+            // ── Pré-remplir le modal Modifier ─────────────────────────────────────
+            $(document).on('click', '.btn-edit', function() {
+
+                let v, cats, s, restr, equivs;
+
+                try {
+                    v = JSON.parse($(this).attr('data-vaccine') || '{}');
+                } catch (e) {
+                    v = {};
+                }
+                try {
+                    cats = JSON.parse($(this).attr('data-categories') || '[]');
+                } catch (e) {
+                    cats = [];
+                }
+                try {
+                    s = JSON.parse($(this).attr('data-schedule') || 'null');
+                } catch (e) {
+                    s = null;
+                }
+                try {
+                    restr = JSON.parse($(this).attr('data-restrictions') || '[]');
+                } catch (e) {
+                    restr = [];
+                }
+                try {
+                    equivs = JSON.parse($(this).attr('data-equivalents') || '[]');
+                } catch (e) {
+                    equivs = [];
+                }
+
+                const rstReason = $(this).attr('data-restriction-reason') || '';
+
+                console.log('v:', v, 's:', s, 'cats:', cats, 'restr:', restr, 'equivs:', equivs);
+
+                // Action formulaire
                 document.getElementById('formEdit').action = `/vaccines/${v.id_vaccine}`;
 
-                // ── Vaccin ──
+                // ── Infos générales ──
                 setVal('editName', v.name);
                 setVal('editShortName', v.short_name);
                 setVal('editSlug', v.slug);
                 setVal('editDescription', v.description);
                 setVal('editImportantInfo', v.important_info);
-                setVal('editPublicPrice', v.public_price ?? 0);
-                setVal('editPriceMin', v.private_price_min);
-                setVal('editPriceMax', v.private_price_max);
                 setVal('editTargetedDisease', v.targeted_disease);
                 setVal('editAdminMode', v.administration_mode);
                 setVal('editScientificType', v.scientific_type);
@@ -1516,50 +1705,103 @@
                 const typeEl = document.getElementById('editType');
                 if (typeEl) {
                     typeEl.value = v.vaccine_type ?? 'human';
-                    typeEl.dispatchEvent(new Event('change')); // maj espèce
+                    typeEl.dispatchEvent(new Event('change'));
                 }
-
                 const vsEl = document.getElementById('editValidationStatus');
                 if (vsEl) vsEl.value = v.validation_status ?? 'pending';
 
+                // ── Tarification ──
+                setVal('editPublicPrice', v.public_price ?? 0);
+                setVal('editPriceMin', v.private_price_min);
+                setVal('editPriceMax', v.private_price_max);
+
+                // ── Équivalents ──
+                const wrapper = $('#equivalentsWrapperEdit');
+                wrapper.empty();
+                equivalentIndexEdit = 0;
+                (equivs || []).forEach(function(eq) {
+                    wrapper.append(buildEquivalentRow(equivalentIndexEdit, 'equivalents_edit', true,
+                        eq));
+                    equivalentIndexEdit++;
+                });
+
                 // ── Catégories ──
                 document.querySelectorAll('.edit-cat-checkbox').forEach(cb => {
-                    cb.checked = cats.includes(parseInt(cb.value));
+                    cb.checked = (cats || []).includes(parseInt(cb.value));
                 });
 
                 // ── Schedule ──
-                setVal('editPhaseName', s.phase_name);
-                setVal('editDoseNumber', s.dose_number);
-                setVal('editAgeLabel', s.age_label);
-                setVal('editMinAge', s.min_age_months ?? 0);
-                setVal('editMaxAge', s.max_age_months);
-                setVal('editGender', s.gender ?? 'all'); // select
-                const genderEl = document.getElementById('editGender');
-                if (genderEl) genderEl.value = s.gender ?? 'all';
-                setVal('editPriority', s.priority ?? 0);
-                setChecked('editIsBooster', s.is_booster);
-                setVal('editBoosterMonths', s.booster_every_months);
-                setVal('editTravelZone', s.travel_zone);
-                setVal('editImportantNote', s.important_note);
+                if (s) {
+                    setVal('editPhaseName', s.phase_name);
+                    setVal('editDoseNumber', s.dose_number);
+                    setVal('editAgeLabel', s.age_label);
+                    setVal('editMinAge', s.min_age_months ?? 0);
+                    setVal('editMaxAge', s.max_age_months);
+                    setVal('editPriority', s.priority ?? 0);
+                    setChecked('editIsBooster', s.is_booster);
+                    setVal('editBoosterMonths', s.booster_every_months);
+                    setVal('editTravelZone', s.travel_zone);
+                    setVal('editImportantNote', s.important_note);
 
-                // Contextes schedule (checkboxes booléens)
-                setChecked('e_pregnant', s.only_pregnant);
-                const travCb = document.getElementById('e_travelers');
-                if (travCb) {
-                    travCb.checked = !!s.for_travelers;
-                    travCb.dispatchEvent(new Event('change')); // maj zone voyage
+                    const genderEl = document.getElementById('editGender');
+                    if (genderEl) genderEl.value = s.gender ?? 'all';
+
+                    setChecked('e_pregnant', s.only_pregnant);
+                    setChecked('e_community', s.in_community);
+                    setChecked('e_health', s.for_health_workers);
+                    setChecked('e_immuno', s.for_immunocompromised);
+                    setChecked('e_seniors', s.for_seniors);
+                    setChecked('e_vectors', s.exposed_to_vectors);
+
+                    const travCb = document.getElementById('e_travelers');
+                    if (travCb) {
+                        travCb.checked = !!s.for_travelers;
+                        travCb.dispatchEvent(new Event('change'));
+                    }
                 }
-                setChecked('e_community', s.in_community);
-                setChecked('e_health', s.for_health_workers);
-                setChecked('e_immuno', s.for_immunocompromised);
-                setChecked('e_seniors', s.for_seniors);
-                setChecked('e_vectors', s.exposed_to_vectors);
 
                 // ── Restrictions ──
                 document.querySelectorAll('.edit-restriction-checkbox').forEach(cb => {
-                    cb.checked = restr.includes(cb.value);
+                    cb.checked = (restr || []).includes(cb.value);
                 });
                 setVal('editRestrictionReason', rstReason);
+            });
+
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            let equivalentIndex = 1;
+
+            // Délégation d'événement → fonctionne dans les modals
+            $(document).on('click', '#addEquivalent', function() {
+                $('#equivalentsWrapper').append(`
+            <div class="row gy-2 equivalent-item mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="equivalents[${equivalentIndex}][name]"
+                        class="form-control" placeholder="Nom du vaccin équivalent">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="equivalents[${equivalentIndex}][description]"
+                        class="form-control" placeholder="Description">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="equivalents[${equivalentIndex}][price]"
+                        class="form-control" placeholder="Prix">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger removeEquivalent">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </div>
+        `);
+                equivalentIndex++;
+            });
+
+            $(document).on('click', '.removeEquivalent', function() {
+                $(this).closest('.equivalent-item').remove();
             });
         });
     </script>
