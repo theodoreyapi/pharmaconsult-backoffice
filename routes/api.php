@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\ApiCategoryController;
 use App\Http\Controllers\Api\ApiCommuneController;
 use App\Http\Controllers\Api\ApiHealthProfileController;
 use App\Http\Controllers\Api\ApiMedicamentController;
+use App\Http\Controllers\Api\ApiMesureController;
+use App\Http\Controllers\Api\ApiNotificationController;
 use App\Http\Controllers\Api\ApiParametreGenerauxController;
 use App\Http\Controllers\Api\ApiPharmacyController;
 use App\Http\Controllers\Api\ApiPharmacyRequestController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Api\ApiPushNotifController;
 use App\Http\Controllers\Api\ApiReservationMedicamentController;
 use App\Http\Controllers\Api\ApiReviewController;
 use App\Http\Controllers\Api\ApiSubscriptionController;
+use App\Http\Controllers\Api\ApiTraitementController;
 use App\Http\Controllers\Api\ApiTransfertController;
 use App\Http\Controllers\Api\ApiUsersPharmaController;
 use App\Http\Controllers\Api\ApiVaccineController;
@@ -222,4 +225,15 @@ Route::prefix('internal/v1')->group(function () {
 
     // GET /api/subscriptions/summary → résumé tous les abonnements
     Route::get('subscriptions/summary', [ApiProfileSubscriptionController::class, 'summary']);
+
+    Route::prefix('patients/{patient}')->group(function () {
+        Route::get('/dashboard-mesures',    [ApiMesureController::class, 'dashboardMesures']);
+        Route::get('/bilan',    [ApiMesureController::class, 'generate']);
+        Route::get('/rappel',    [ApiMesureController::class, 'latest']);
+        Route::get('/traitements', [ApiTraitementController::class, 'index']);
+        Route::get('/pharmacy', [ApiTraitementController::class, 'show']);
+        Route::get('/notifications', [ApiNotificationController::class, 'notifications']);
+    });
+
+    Route::get('patients/cmu/{qrCode}', [ApiTraitementController::class, 'verify']);
 });

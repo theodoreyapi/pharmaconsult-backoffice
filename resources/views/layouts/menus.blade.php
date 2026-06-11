@@ -158,6 +158,8 @@
                         </li>
                     </ul>
                 </li>
+                @endif
+                @if (Auth::user()->role == 'SUPERADMIN' || Auth::user()->role == 'ADMIN')
                 <li class="dropdown {{ Route::is('categories') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
                         {{-- <iconify-icon icon="healthicons:vaccines-outline" class="menu-icon"></iconify-icon> --}}
