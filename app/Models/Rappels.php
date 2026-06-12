@@ -16,6 +16,7 @@ class Rappels extends Model
         'sent_at',
         'patient_id',
         'pharmacien_id',
+        'message_id',
     ];
 
     protected $primaryKey = 'id_rappel';

@@ -7,12 +7,14 @@ use App\Http\Controllers\AssuranceController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\CommuneController;
 use App\Http\Controllers\ConditionController;
+use App\Http\Controllers\ConseilController;
 use App\Http\Controllers\CustomAuthController;
 use App\Http\Controllers\GardeController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MentionController;
 use App\Http\Controllers\MoyenPaieController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PathologieController;
 use App\Http\Controllers\PaymentWaveController;
 use App\Http\Controllers\PharmacieController;
 use App\Http\Controllers\PharmacienController;
@@ -602,3 +604,8 @@ Route::get('add-admin', function () {
 Route::resource('categories', CategorieController::class);
 Route::resource('vaccins', VaccinsController::class);
 Route::patch('/vaccins/{id}/toggle', [VaccinsController::class, 'toggle'])->name('vaccins.toggle');
+
+
+// Suivi sante
+Route::resource('pathologies', PathologieController::class);
+Route::resource('conseils', ConseilController::class);

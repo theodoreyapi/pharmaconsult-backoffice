@@ -158,8 +158,8 @@
                         </li>
                     </ul>
                 </li>
-                @endif
-                @if (Auth::user()->role == 'SUPERADMIN' || Auth::user()->role == 'ADMIN')
+            @endif
+            @if (Auth::user()->role == 'SUPERADMIN' || Auth::user()->role == 'ADMIN')
                 <li class="dropdown {{ Route::is('categories') ? 'open' : '' }}">
                     <a href="javascript:void(0)">
                         {{-- <iconify-icon icon="healthicons:vaccines-outline" class="menu-icon"></iconify-icon> --}}
@@ -181,6 +181,34 @@
                                 <i class="ri-syringe-fill text-success-main"></i>
                                 Vaccins</a>
                         </li>
+                    </ul>
+                </li>
+                <li class="dropdown {{ Route::is('pathologies') || Route::is('conseils') ? 'open' : '' }}">
+                    <a href="javascript:void(0)">
+                        <i class="ri-heart-pulse-fill text-danger"></i>
+                        <span>Suivi santé</span>
+                    </a>
+
+                    <ul class="sidebar-submenu {{ Route::is('pathologies') || Route::is('conseils') ? 'show' : '' }}">
+
+                        <li class="{{ Route::is('pathologies') ? 'active-page' : '' }}">
+                            <a href="{{ url('pathologies') }}"
+                                class="{{ Route::is('pathologies') ? 'active-page' : '' }}">
+
+                                <i class="ri-stethoscope-fill text-primary"></i>
+                                Pathologies
+                            </a>
+                        </li>
+
+                        <li class="{{ Route::is('conseils') ? 'active-page' : '' }}">
+                            <a href="{{ url('conseils') }}"
+                                class="{{ Route::is('conseils') ? 'active-page' : '' }}">
+
+                                <i class="ri-lightbulb-flash-fill text-warning"></i>
+                                Conseils santé
+                            </a>
+                        </li>
+
                     </ul>
                 </li>
             @endif

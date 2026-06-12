@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ApiAppointmentController;
 use App\Http\Controllers\Api\ApiAssuranceController;
 use App\Http\Controllers\Api\ApiCategoryController;
 use App\Http\Controllers\Api\ApiCommuneController;
+use App\Http\Controllers\Api\ApiConseilsController;
 use App\Http\Controllers\Api\ApiHealthProfileController;
 use App\Http\Controllers\Api\ApiMedicamentController;
 use App\Http\Controllers\Api\ApiMesureController;
@@ -236,4 +237,6 @@ Route::prefix('internal/v1')->group(function () {
     });
 
     Route::get('patients/cmu/{qrCode}', [ApiTraitementController::class, 'verify']);
+    Route::get('conseils', [ApiConseilsController::class, 'conseils']);
+    Route::get('campagnes', [ApiConseilsController::class, 'campagnes']);
 });
