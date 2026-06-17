@@ -238,5 +238,5 @@ Route::prefix('internal/v1')->group(function () {
 
     Route::get('patients/cmu/{qrCode}', [ApiTraitementController::class, 'verify']);
     Route::get('conseils', [ApiConseilsController::class, 'conseils']);
-    Route::get('campagnes', [ApiConseilsController::class, 'campagnes']);
+    Route::get('campagnes/{pharmacie}', [ApiConseilsController::class, 'campagnes']);
 });

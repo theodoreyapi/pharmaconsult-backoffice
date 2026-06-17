@@ -62,13 +62,13 @@
                                     </div>
                                     <div class="col-6 mb-20">
                                         <label
-                                            class="form-label fw-semibold text-primary-light text-sm mb-8">Catégorie</label>
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">Pathologie</label>
                                         <select required name="categorie" class="form-control radius-8 form-select">
-                                            <option value="">Sélectionne une catégorie</option>
-                                            <option value="Hypertension">Hypertension</option>
-                                            <option value="Diabète">Diabète</option>
-                                            <option value="Bien-être">Bien-être</option>
-                                            <option value="Observance">Observance</option>
+                                            <option value="">Sélectionne une pathologie</option>
+                                            @foreach ($pathologie as $path)
+                                                <option value="{{ $path->id_pathologie }}">{{ $path->code }} -
+                                                    {{ $path->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div class="col-12 mb-20">
@@ -101,7 +101,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" style="font-size: 13px">Type</th>
-                                <th scope="col" style="font-size: 13px">Catégorie</th>
+                                <th scope="col" style="font-size: 13px">Pathologie</th>
                                 <th scope="col" style="font-size: 13px">Titre</th>
                                 <th scope="col" style="font-size: 13px">Description</th>
                                 <th scope="col" style="font-size: 13px">Date de création</th>
@@ -115,7 +115,8 @@
                                         <span
                                             class="bg-primary-focus text-primary-main px-16 py-4 rounded-pill fw-medium text-sm">{{ $item->type }}</span>
                                     </td>
-                                    <td style="font-size: 13px"><strong>{{ $item->categorie }}</strong></td>
+                                    <td style="font-size: 13px"><strong>{{ $item->code }} - {{ $item->name }}</strong>
+                                    </td>
                                     <td style="font-size: 13px">{{ $item->titre }}</td>
                                     <td style="font-size: 13px">{{ Str::limit($item->description, 50) }}</td>
                                     <td style="font-size: 13px">
@@ -163,10 +164,19 @@
                                                                 </div>
                                                                 <div class="col-6 mb-20">
                                                                     <label
-                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">Catégorie</label>
-                                                                    <input value="{{ $item->categorie }}" type="text"
-                                                                        name="categorie" required
-                                                                        class="form-control radius-8">
+                                                                        class="form-label fw-semibold text-primary-light text-sm mb-8">Pathologie</label>
+                                                                    <select required name="categorie"
+                                                                        class="form-control radius-8 form-select">
+                                                                        <option value="">Sélectionne une pathologie
+                                                                        </option>
+                                                                        @foreach ($pathologie as $path)
+                                                                            <option
+                                                                                @if ($item->pathologie_id == $path->id_pathologie) selected @endif
+                                                                                value="{{ $path->id_pathologie }}">
+                                                                                {{ $path->code }} - {{ $path->name }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
                                                                 </div>
                                                                 <div class="col-12 mb-20">
                                                                     <label

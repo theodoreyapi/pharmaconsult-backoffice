@@ -14,8 +14,6 @@ class Vaccine extends Model
         'short_name',
         'description',
         'public_price',
-        'private_price_min',
-        'private_price_max',
         'vaccine_type',
         'currency',
         'important_info',

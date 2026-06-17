@@ -18,11 +18,15 @@ return new class extends Migration
             $table->enum('billing_cycle', ['MENSUEL', 'ANNUEL'])->default('MENSUEL');
             $table->date('start_date');
             $table->date('renewal_date');
-            $table->enum('status', ['ACTIF', 'EXPIRE', 'SUSPENDU'])->default('ACTIF');
+            $table->enum('status', ['ACTIF', 'EXPIRE', 'SUSPENDU', 'ESSAI'])->default('ESSAI');
             $table->integer('max_patients')->default(500);
-            $table->integer('max_messages_per_month')->default(2000);
-            $table->integer('max_campaigns')->default(5);
+            $table->integer('max_messages_per_month')->default(3000);
+            $table->integer('max_campaigns')->default(20);
             $table->integer('max_team_members')->default(10);
+            $table->string('checkout_session_id')->nullable();
+            $table->string('transaction_id')->nullable();
+            $table->string('status_payment')->nullable();
+            $table->string('payment_method')->nullable();
 
             $table->unsignedBigInteger('pharmacy_id');
             $table->foreign('pharmacy_id')->references('id_pharmacy')->on('pharmacy')->onDelete('cascade');

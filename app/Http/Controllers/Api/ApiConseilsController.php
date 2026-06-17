@@ -12,11 +12,14 @@ class ApiConseilsController extends Controller
     public function conseils()
     {
 
-        $conseil = Conseils::orderBy('created_at', 'desc')->get();
+        $conseil = Conseils::join('pathologies', 'conseils.pathologie_id', '=', 'pathologies.id_pathologie')
+            ->select('conseils.*', 'pathologies.code', 'pathologies.name')
+            ->orderBy('conseils.created_at', 'desc')
+            ->get();
 
         return response()->json($conseil);
     }
-    public function campagnes()
+    public function campagnes($pharmacie)
     {
 
         $campagnes = DB::table('campagnes')
@@ -28,6 +31,7 @@ class ApiConseilsController extends Controller
                 'pathologies.name as pathologie_name',
                 'pharmacy.name as pharmacy_name',
             )
+            ->where('campagnes.pharmacy_id', $pharmacie)
             ->latest('campagnes.created_at')
             ->get();
 

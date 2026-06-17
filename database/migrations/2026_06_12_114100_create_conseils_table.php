@@ -14,7 +14,13 @@ return new class extends Migration
         Schema::create('conseils', function (Blueprint $table) {
             $table->id('id_conseil')->primary();
             $table->string('type', 100)->comment('Conseil, Article, Astuce, etc.');
-            $table->string('categorie',150)->comment('Hypertension, Diabète, Bien-être, Observance, etc.');
+
+            $table->unsignedBigInteger('pathologie_id');
+
+            $table->foreign('pathologie_id')
+                ->references('id_pathologie')
+                ->on('pathologies');
+
             $table->string('titre');
             $table->longText('description');
             $table->timestamps();
@@ -27,5 +33,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('conseils');
+        Schema::table('conseils', function (Blueprint $table) {
+            $table->dropForeign(['pathologie_id']);
+        });
     }
 };

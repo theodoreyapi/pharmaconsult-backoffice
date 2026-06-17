@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('traitements', function (Blueprint $table) {
             $table->id('id_traitement')->primary();
             $table->string('medication_name');
-            $table->string('dosage')->nullable()->comment('ex: 5 mg/j');
             $table->integer('frequency_per_day')->default(1);
             $table->integer('quantity_delivered')->default(30);
             $table->integer('duration_days')->default(30);
@@ -31,6 +30,11 @@ return new class extends Migration
             $table->unsignedBigInteger('pharmacien_id');
             $table->foreign('pharmacien_id')->references('id_pharmacien')->on('pharmacien');
 
+            $table->unsignedBigInteger('medicament_id')->nullable();
+            $table->foreign('medicament_id')->references('id_medicament')->on('medicaments')->onDelete('set null');
+
+            $table->integer('dose_per_take')->default(1)->comment('Quantité prise à chaque fois');
+
             $table->timestamps();
         });
     }
@@ -42,10 +46,11 @@ return new class extends Migration
     {
         Schema::dropIfExists('traitements');
         Schema::table('traitements', function (Blueprint $table) {
-            $table->dropForeign(['patient_id', 'pathologie_id', 'pharmacien_id']);
+            $table->dropForeign(['patient_id', 'pathologie_id', 'pharmacien_id', 'medicament_id']);
             $table->dropColumn('patient_id');
             $table->dropColumn('pathologie_id');
             $table->dropColumn('pharmacien_id');
+            $table->dropColumn('medicament_id');
         });
     }
 };

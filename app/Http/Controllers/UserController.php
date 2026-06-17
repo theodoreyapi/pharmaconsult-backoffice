@@ -12,12 +12,8 @@ use App\Models\Transfert;
 use App\Models\UsersPharma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
@@ -101,19 +97,23 @@ class UserController extends Controller
         $user = UsersPharma::where('id_user', $id)->firstOrFail();
 
         // ======================
-        // SUBSCRIPTIONS
+        // SUBSCRIPTIONS (Correction du point et sécurisation du type String)
         // ======================
-        $subscriptions = ProfileSubscription::where('user_id', $id)
+        $subscriptions = DB::table('subscriptions')
+            ->join('modules', 'subscriptions.module_id', '=', 'modules.id_module') // Correction ici -> un seul point !
+            ->select('subscriptions.*', 'modules.libelle as module_libelle')
+            ->where('subscriptions.username', '=', (string) $user->phone_number) // Cast en string pour la sécurité
             ->when($request->status_sub, function ($q) use ($request) {
-                $q->where('status', $request->status_sub);
+                $q->where('subscriptions.status', $request->status_sub);
             })
-            ->latest()
+            ->latest('subscriptions.created_at')
             ->paginate(5, ['*'], 'sub_page');
 
         // ======================
         // TRANSFERTS
         // ======================
-        $transferts = Transfert::where('sender_username', $user->phone_number)
+        $transferts = DB::table('transfert')
+            ->where('sender_username', $user->phone_number)
             ->orWhere('receiver_username', $user->phone_number)
             ->latest()
             ->paginate(5, ['*'], 'trans_page');
@@ -121,7 +121,8 @@ class UserController extends Controller
         // ======================
         // RECHARGEMENTS
         // ======================
-        $rechargements = Rechargements::where('username', $user->phone_number)
+        $rechargements = DB::table('rechargements')
+            ->where('username', $user->phone_number)
             ->when($request->status_pay, function ($q) use ($request) {
                 $q->where('status', $request->status_pay);
             })
@@ -129,34 +130,42 @@ class UserController extends Controller
             ->paginate(5, ['*'], 'pay_page');
 
         // ======================
-        // APPOINTMENTS
+        // APPOINTMENTS (Jointures pour obtenir le nom du vaccin et de la pharmacie)
         // ======================
-        $appointments = Appointment::where('user_id', $id)
+        $appointments = DB::table('appointments')
+            ->leftJoin('vaccines', 'appointments.vaccine_id', '=', 'vaccines.id_vaccine')
+            ->leftJoin('pharmacy', 'appointments.pharmacy_id', '=', 'pharmacy.id_pharmacy')
+            ->select('appointments.*', 'vaccines.name as vaccine_name', 'pharmacy.name as pharmacy_name')
+            ->where('appointments.user_id', $id)
             ->when($request->status_app, function ($q) use ($request) {
-                $q->where('status', $request->status_app);
+                $q->where('appointments.status', $request->status_app);
             })
-            ->latest()
+            ->latest('appointments.created_at')
             ->paginate(5, ['*'], 'app_page');
 
         // ======================
-        // HEALTH PROFILES
+        // HEALTH PROFILES & VACCINATIONS
         // ======================
-        $profiles = HealthProfile::where('user_id', $id)
+        $profiles = DB::table('health_profiles')
+            ->where('user_id', $id)
             ->latest()
             ->paginate(5, ['*'], 'profile_page');
 
-        // récupérer IDs des profils
-        $profileIds = $profiles->pluck('id_profile');
-
-        // vaccinations liées
-        $vaccinations = ProfileVaccination::whereIn('profile_id', $profileIds)
-            ->orderBy('vaccination_date', 'desc')
+        // Récupération des rendez-vous de vaccination validés/terminés pour ce patient
+        // On fait une jointure pour récupérer le nom du vaccin lié au rendez-vous
+        $vaccinations = DB::table('appointments')
+            ->join('vaccines', 'appointments.vaccine_id', '=', 'vaccines.id_vaccine')
+            ->select('appointments.*', 'vaccines.name as vaccine_name_free')
+            ->where('appointments.user_id', $id)
+            ->where('appointments.status', 'completed') // Uniquement les vaccins réellement administrés
+            ->orderBy('appointments.appointment_date', 'desc')
             ->get()
-            ->groupBy('profile_id');
+            ->groupBy('user_id'); // Groupé par l'utilisateur principal
 
-        // injecter dans chaque profil
         foreach ($profiles as $profile) {
-            $profile->vaccinations_list = $vaccinations[$profile->id_profile] ?? [];
+            // Comme les rendez-vous sont liés à l'user_id global dans votre schéma actuel,
+            // on associe la liste des vaccins de l'utilisateur au profil.
+            $profile->vaccinations_list = $vaccinations[$id] ?? collect([]);
         }
 
         return view('users.view-profile', compact(

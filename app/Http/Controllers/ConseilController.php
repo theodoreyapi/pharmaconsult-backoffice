@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Conseils;
+use App\Models\Pathologies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,9 +19,14 @@ class ConseilController extends Controller
         }
 
         // Récupérer tous les conseils par ordre de création récent
-        $conseil = Conseils::orderBy('created_at', 'desc')->get();
+        $conseil = Conseils::join('pathologies', 'conseils.pathologie_id', '=', 'pathologies.id_pathologie')
+            ->select('conseils.*', 'pathologies.code', 'pathologies.name')
+            ->orderBy('conseils.created_at', 'desc')
+            ->get();
 
-        return view('sante.conseils', compact('conseil'));
+        $pathologie = Pathologies::orderBy('created_at', 'desc')->get();
+
+        return view('sante.conseils', compact('conseil', 'pathologie'));
     }
 
     /**
@@ -38,14 +44,14 @@ class ConseilController extends Controller
     {
         $request->validate([
             'type' => 'required|string|max:100',
-            'categorie' => 'required|string|max:150',
+            'categorie' => 'required',
             'titre' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
 
         Conseils::create([
             'type' => $request->type,
-            'categorie' => $request->categorie,
+            'pathologie_id' => $request->categorie,
             'titre' => $request->titre,
             'description' => $request->description,
         ]);
@@ -76,7 +82,7 @@ class ConseilController extends Controller
     {
         $request->validate([
             'type' => 'required|string|max:100',
-            'categorie' => 'required|string|max:150',
+            'categorie' => 'required',
             'titre' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
@@ -86,7 +92,7 @@ class ConseilController extends Controller
 
         $conseil->update([
             'type' => $request->type,
-            'categorie' => $request->categorie,
+            'pathologie_id' => $request->categorie,
             'titre' => $request->titre,
             'description' => $request->description,
         ]);

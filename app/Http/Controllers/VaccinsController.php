@@ -185,8 +185,6 @@ class VaccinsController extends Controller
             'target_public'                 => 'nullable|string',
             'source_url'                 => 'nullable|string',
             'public_price'                => 'nullable|numeric|min:0',
-            'private_price_min'           => 'nullable|numeric|min:0',
-            'private_price_max'           => 'nullable|numeric|min:0',
             'vaccine_type'                => 'required|in:human,animal',
             'important_info'              => 'nullable|string',
             'categories'                  => 'nullable|array',
@@ -237,8 +235,6 @@ class VaccinsController extends Controller
                 'short_name'        => $validated['short_name'] ?? null,
                 'description'       => $validated['description'] ?? null,
                 'public_price'      => $validated['public_price'] ?? 0,
-                'private_price_min' => $validated['private_price_min'] ?? null,
-                'private_price_max' => $validated['private_price_max'] ?? null,
                 'vaccine_type'      => $validated['vaccine_type'],
                 'important_info'    => $validated['important_info'] ?? null,
                 'target_species'    => $validated['target_species'] ?? null,
@@ -347,8 +343,6 @@ class VaccinsController extends Controller
             'target_public'                 => 'nullable|string',
             'source_url'                 => 'nullable|string',
             'public_price'                => 'nullable|numeric|min:0',
-            'private_price_min'           => 'nullable|numeric|min:0',
-            'private_price_max'           => 'nullable|numeric|min:0',
             'vaccine_type'                => 'required|in:human,animal',
             'important_info'              => 'nullable|string',
             'categories'                  => 'nullable|array',
@@ -389,8 +383,6 @@ class VaccinsController extends Controller
             'short_name'        => $validated['short_name'] ?? null,
             'description'       => $validated['description'] ?? null,
             'public_price'      => $validated['public_price'] ?? 0,
-            'private_price_min' => $validated['private_price_min'] ?? null,
-            'private_price_max' => $validated['private_price_max'] ?? null,
             'vaccine_type'      => $validated['vaccine_type'],
             'important_info'    => $validated['important_info'] ?? null,
             'target_species'    => $validated['target_species'] ?? null,
@@ -418,25 +410,25 @@ class VaccinsController extends Controller
         // Sync schedule (upsert sur le premier schedule existant)
         $schedule = $request->input('schedule', []);
         $scheduleData = [
-            'min_age_months'       => $schedule['min_age_months'] ?? 0,
-            'max_age_months'       => $schedule['max_age_months'] ?? null,
-            'age_label'            => $schedule['age_label'] ?? null,
-            'gender'               => $schedule['gender'] ?? 'all',
-            'dose_number'          => $schedule['dose_number'] ?? null,
-            'priority'             => $schedule['priority'] ?? 0,
-            'is_booster'           => isset($schedule['is_booster']) ? 1 : 0,
-            'booster_every_months' => $schedule['booster_every_months'] ?? null,
-            'important_note'       => $schedule['important_note'] ?? null,
-            'phase_name'           => $schedule['phase_name'] ?? null,
-            'in_community'         => $schedule->boolean('in_community'),
-            'exposed_to_vectors'   => $schedule->boolean('exposed_to_vectors'),
-            'travel_zone'   => $schedule['travel_zone'] ?? null,
-            'only_pregnant'   => $schedule->boolean('only_pregnant'),
-            'for_health_workers'   => $schedule->boolean('for_health_workers'),
-            'for_travelers'   => $schedule->boolean('for_travelers'),
-            'for_immunocompromised'   => $schedule->boolean('for_immunocompromised'),
-            'for_seniors'   => $schedule->boolean('for_seniors'),
-            'updated_at'           => now(),
+            'min_age_months'        => $schedule['min_age_months'] ?? 0,
+            'max_age_months'        => $schedule['max_age_months'] ?? null,
+            'age_label'             => $schedule['age_label'] ?? null,
+            'gender'                => $schedule['gender'] ?? 'all',
+            'dose_number'           => $schedule['dose_number'] ?? null,
+            'priority'              => $schedule['priority'] ?? 0,
+            'is_booster'            => !empty($schedule['is_booster']) ? 1 : 0,
+            'booster_every_months'  => $schedule['booster_every_months'] ?? null,
+            'important_note'        => $schedule['important_note'] ?? null,
+            'phase_name'            => $schedule['phase_name'] ?? null,
+            'in_community'          => !empty($schedule['in_community']) ? 1 : 0,     // ✅
+            'exposed_to_vectors'    => !empty($schedule['exposed_to_vectors']) ? 1 : 0, // ✅
+            'travel_zone'           => $schedule['travel_zone'] ?? null,
+            'only_pregnant'         => !empty($schedule['only_pregnant']) ? 1 : 0,    // ✅
+            'for_health_workers'    => !empty($schedule['for_health_workers']) ? 1 : 0, // ✅
+            'for_travelers'         => !empty($schedule['for_travelers']) ? 1 : 0,    // ✅
+            'for_immunocompromised' => !empty($schedule['for_immunocompromised']) ? 1 : 0, // ✅
+            'for_seniors'           => !empty($schedule['for_seniors']) ? 1 : 0,      // ✅
+            'updated_at'            => now(),
         ];
         $existing = DB::table('vaccine_schedules')->where('vaccine_id', $vaccine->id_vaccine)->first();
         if ($existing) {

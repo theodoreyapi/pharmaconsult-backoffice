@@ -12,7 +12,7 @@ class Conseils extends Model
 
     protected $fillable = [
         'type',
-        'categorie',
+        'pathologie_id',
         'titre',
         'description'
     ];

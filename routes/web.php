@@ -603,6 +603,7 @@ Route::get('add-admin', function () {
 // Vaccins
 Route::resource('categories', CategorieController::class);
 Route::resource('vaccins', VaccinsController::class);
+Route::put('/vaccines/{id}', [VaccinsController::class, 'update'])->name('vaccines.update');
 Route::patch('/vaccins/{id}/toggle', [VaccinsController::class, 'toggle'])->name('vaccins.toggle');
 
 

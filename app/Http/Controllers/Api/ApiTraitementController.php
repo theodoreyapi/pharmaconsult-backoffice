@@ -198,6 +198,7 @@ class ApiTraitementController extends Controller
             'gender' => $patient->gender,
             'birth_date' => $patient->birth_date,
             'city' => $patient->city,
+            'pharmacieId' => $patient->pharmacy_id,
             'status' => $patient->status,
             'active' => (bool) $patient->active,
         ]);
