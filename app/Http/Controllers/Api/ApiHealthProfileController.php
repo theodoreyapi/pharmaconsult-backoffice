@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HealthProfile;
 use App\Models\ProfileSubscription;
 use App\Models\ProfileVaccination;
+use App\Models\VaccineSchedule;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -254,12 +255,7 @@ class ApiHealthProfileController extends Controller
             'animal_type' => $validated['animal_type'] ?? null,
             'gender' => $validated['gender'] ?? null,
 
-            'birth_date' => !empty($validated['birth_date'])
-                ? Carbon::createFromFormat(
-                    'd/m/Y',
-                    $validated['birth_date']
-                )->format('Y-m-d')
-                : null,
+            'birth_date' => $validated['birth_date'] ?? null,
 
             'is_frequent_traveler' => $validated['is_frequent_traveler'] ?? false,
 
@@ -358,15 +354,11 @@ class ApiHealthProfileController extends Controller
 
     /**
      * PUT /api/health-profiles/{id}
-     * Modifier un profil.
+     * Modifie un profil santé
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
-        $profile = HealthProfile::query()
-            ->where('user_id', $request->id_user)
-            ->where('is_active', true)
-            ->where('id_profile', $id)
-            ->first();
+        $profile = HealthProfile::find($id);
 
         if (!$profile) {
             return response()->json([
@@ -376,33 +368,46 @@ class ApiHealthProfileController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:150',
-            'relation' => 'nullable|string|max:100',
-            'animal_type' => 'nullable|string|max:100',
+            'name' => 'sometimes|required|string|max:150',
+            'profile_type' => 'sometimes|required|in:human,animal',
+            'relation' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_if:profile_type,human',
+            ],
+            'animal_type' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_if:profile_type,animal',
+            ],
             'gender' => 'nullable|in:masculin,feminin',
             'birth_date' => 'nullable|date|before:today',
             'is_frequent_traveler' => 'nullable|boolean',
+            'is_pregnant' => 'nullable|boolean',
+            'is_traveler' => 'nullable|boolean',
+            'travel_destination' => 'nullable|string|max:150',
+            'is_health_worker' => 'nullable|boolean',
+            'is_immunocompromised' => 'nullable|boolean',
         ]);
 
         $profile->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Profil mis à jour.',
-        ]);
+            'message' => 'Profil mis à jour avec succès.',
+            'data' => $profile,
+        ], 200);
     }
 
     /**
      * DELETE /api/health-profiles/{id}
-     * Désactiver un profil (soft delete logique).
+     * Supprime un profil santé
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
-        $profile = HealthProfile::query()
-            ->where('user_id', $request->id_user)
-            ->where('is_active', true)
-            ->where('id_profile', $id)
-            ->first();
+        $profile = HealthProfile::find($id);
 
         if (!$profile) {
             return response()->json([
@@ -411,82 +416,439 @@ class ApiHealthProfileController extends Controller
             ], 404);
         }
 
-        /**
-         * Suppression logique
-         */
-        $profile->update([
-            'is_active' => false,
-        ]);
+        $profile->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Profil supprimé.',
-        ]);
+            'message' => 'Profil supprimé avec succès.',
+        ], 200);
     }
 
     /**
-     * GET /api/health-profiles/reminders
-     * Rappels de vaccins dans les 30 prochains jours pour tous les profils.
+     * GET /api/health-profiles/reminders/{id}
+     * Liste les rappels de vaccination d'un profil avec statut (à venir / en retard)
      */
-    public function reminders(Request $request): JsonResponse
+    public function reminders(string $id): JsonResponse
     {
-        $profiles = HealthProfile::query()
-            ->where('user_id', $request->id_user)
-            ->where('is_active', true)
-            ->with([
-                'vaccinations' => function ($query) {
+        $profile = HealthProfile::find($id);
 
-                    $query->whereNotNull('next_reminder_date')
-                        ->whereDate('next_reminder_date', '>=', now())
-                        ->whereDate(
-                            'next_reminder_date',
-                            '<=',
-                            now()->addDays(30)
-                        )
-                        ->orderBy('next_reminder_date');
-                },
+        if (!$profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil introuvable.',
+            ], 404);
+        }
 
-                'vaccinations.vaccine',
-            ])
+        $vaccinations = ProfileVaccination::query()
+            ->where('profile_id', $id)
+            ->whereNotNull('next_reminder_date')
+            ->with('vaccine')
+            ->orderBy('next_reminder_date', 'asc')
             ->get();
 
-        $result = [];
+        $today = now()->startOfDay();
 
-        foreach ($profiles as $profile) {
+        $reminders = $vaccinations->map(function ($v) use ($today) {
+            $reminderDate = \Carbon\Carbon::parse($v->next_reminder_date)->startOfDay();
+            $status = $reminderDate->lt($today) ? 'en_retard' : 'a_venir';
 
-            if ($profile->vaccinations->isEmpty()) {
-                continue;
-            }
-
-            $reminders = [];
-
-            foreach ($profile->vaccinations as $vaccination) {
-
-                $reminders[] = [
-                    'id_vaccination' => $vaccination->id_vaccination,
-                    'vaccine_name' => $vaccination->vaccine?->name ?? $vaccination->vaccine_name_free,
-                    'vaccination_date' => $vaccination->vaccination_date,
-                    'next_reminder_date' => $vaccination->next_reminder_date,
-                    'days_until' => now()->diffInDays(
-                        $vaccination->next_reminder_date,
-                        false
-                    ),
-                    'center_name' => $vaccination->center_name,
-                    'center_type' => $vaccination->center_type,
-                ];
-            }
-
-            $result[] = [
-                'id_profile' => $profile->id_profile,
-                'profile_name' => $profile->name,
-                'profile_type' => $profile->profile_type,
-                'reminders' => $reminders,
+            return [
+                'id_vaccination' => $v->id_vaccination,
+                'vaccine_id' => $v->vaccine_id,
+                'vaccine_name' => $v->vaccine->name ?? $v->vaccine_name_free,
+                'vaccination_date' => $v->vaccination_date,
+                'next_reminder_date' => $v->next_reminder_date,
+                'status' => $status,
+                'days_diff' => $today->diffInDays($reminderDate, false),
             ];
-        }
+        });
 
         return response()->json([
             'success' => true,
+            'data' => $reminders,
+        ], 200);
+    }
+
+
+    /**
+     * GET /api/health-profiles/calendar/{id}
+     * Retourne le calendrier vaccinal applicable à un profil
+     * (filtré selon âge, genre, contextes, type humain/animal)
+     * et regroupé par tranche d'âge dynamique.
+     */
+    public function calendar(string $id): JsonResponse
+    {
+        $profile = HealthProfile::find($id);
+
+        if (!$profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil introuvable.',
+            ], 404);
+        }
+
+        // ── Âge réel ──────────────────────────────────────────────────
+        $ageInMonths = null;
+        $realAgeString = "Âge inconnu";
+
+        if ($profile->birth_date) {
+            $birthDate = Carbon::parse($profile->birth_date);
+            $ageInMonths = $birthDate->diffInMonths(now());
+            $years  = $birthDate->diffInYears(now());
+            $months = $birthDate->diffInMonths(now()) % 12;
+            $realAgeString = $years > 0
+                ? "{$years} ans {$months} mois"
+                : "{$months} mois";
+        }
+
+        // ── Requête principale ─────────────────────────────────────────
+        $query = VaccineSchedule::query()
+            ->with(['vaccine.categories', 'vaccine.restrictions', 'vaccine.equivalents'])
+            ->whereHas('vaccine', function ($q) use ($profile) {
+                $q->where('is_active', true)
+                    ->where('vaccine_type', $profile->profile_type);
+
+                if ($profile->profile_type === 'animal' && $profile->animal_type) {
+                    $q->where(function ($sub) use ($profile) {
+                        $sub->whereNull('target_species')
+                            ->orWhere('target_species', 'like', '%' . $profile->animal_type . '%');
+                    });
+                }
+            });
+
+        // ── Filtre genre ───────────────────────────────────────────────
+        if ($profile->gender) {
+            $query->where(function ($q) use ($profile) {
+                $q->where('gender', 'all')
+                    ->orWhere('gender', $profile->gender);
+            });
+        }
+
+        // ── Filtres contextuels ────────────────────────────────────────
+        // Principe : exclure les vaccins RÉSERVÉS à un contexte
+        // que le profil n'a pas (only_pregnant, for_travelers, etc.)
+        // Les vaccins généraux (tous ces flags à false) passent toujours.
+        if (!$profile->is_pregnant) {
+            $query->where('only_pregnant', false);
+        }
+
+        if (!($profile->is_traveler || $profile->is_frequent_traveler)) {
+            $query->where('for_travelers', false);
+        }
+
+        if (!$profile->is_health_worker) {
+            $query->where('for_health_workers', false);
+        }
+
+        if (!$profile->is_immunocompromised) {
+            $query->where('for_immunocompromised', false);
+        }
+
+        $schedules = $query
+            ->orderBy('min_age_months', 'asc')
+            ->orderBy('priority', 'desc')
+            ->get();
+
+        // ── Regroupement par tranche d'âge ─────────────────────────────
+        $grouped = $schedules->groupBy(function ($schedule) {
+            return $this->resolveAgeGroupLabel(
+                (float) $schedule->min_age_months,
+                $schedule->max_age_months ? (float) $schedule->max_age_months : null,
+                (bool) $schedule->is_booster
+            );
+        });
+
+        $result = $grouped->map(function ($items, $label) use ($ageInMonths) {
+            return [
+                'age_group' => $label,
+                'count'     => $items->count(),
+                'vaccines'  => $items->map(function ($schedule) use ($ageInMonths) {
+                    $vaccine = $schedule->vaccine;
+
+                    if ($ageInMonths === null) {
+                        $status = 'applicable';
+                    } elseif (
+                        $schedule->min_age_months <= $ageInMonths &&
+                        ($schedule->max_age_months === null || $schedule->max_age_months >= $ageInMonths)
+                    ) {
+                        $status = 'a_faire';
+                    } elseif ($schedule->min_age_months > $ageInMonths) {
+                        $status = 'a_venir';
+                    } else {
+                        $status = 'en_retard';
+                    }
+
+                    return [
+                        'id_vaccine'         => $vaccine->id_vaccine,
+                        'name'               => $vaccine->name,
+                        'short_name'         => $vaccine->short_name,
+                        'public_price'       => (float) $vaccine->public_price,
+                        'currency'           => $vaccine->currency,
+                        'targeted_disease'   => $vaccine->targeted_disease,
+                        'description'        => $vaccine->description,
+                        'protected_against'  => $vaccine->protected_against,
+                        'administration_mode' => $vaccine->administration_mode,
+                        'important_info'     => $vaccine->important_info,
+                        'status'             => $status,
+                        'categories'         => $vaccine->categories->pluck('name'),
+                        'restrictions'       => $vaccine->restrictions->pluck('restriction_type'),
+                        'equivalents'        => $vaccine->equivalents->map(fn($eq) => [
+                            'id_equivalent' => $eq->id_equivalent,
+                            'name'          => $eq->name,
+                            'description'   => $eq->description,
+                            'price'         => (float) $eq->price,
+                        ])->values(),
+                        'schedule' => [
+                            'phase_name'           => $schedule->phase_name,
+                            'dose_number'          => $schedule->dose_number,
+                            'age_label'            => $schedule->age_label,
+                            'min_age_months'       => (float) $schedule->min_age_months,
+                            'max_age_months'       => $schedule->max_age_months ? (float) $schedule->max_age_months : null,
+                            'is_booster'           => (bool) $schedule->is_booster,
+                            'booster_every_months' => $schedule->booster_every_months,
+                            'important_note'       => $schedule->important_note,
+                        ],
+                    ];
+                })->values(),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'profile' => [
+                'id_profile'   => $profile->id_profile,
+                'name'         => $profile->name,
+                'profile_type' => $profile->profile_type,
+                'age_in_months' => $ageInMonths ? round($ageInMonths, 1) : null,
+                'real_age'     => $realAgeString,
+            ],
             'data' => $result,
+        ], 200);
+    }
+
+    /**
+     * Détermine le libellé de tranche d'âge à afficher,
+     * basé sur min/max_age_months du schedule.
+     */
+    private function resolveAgeGroupLabel(?float $min, ?float $max, bool $isBooster): string
+    {
+        // Rappel périodique sans tranche d'âge précise (ex: tétanos tous les 10 ans)
+        if ($isBooster && $min >= 216) { // 18 ans = 216 mois
+            return "Tous les 10 ans";
+        }
+
+        if ($min >= 780) { // 65 ans = 780 mois
+            return "65 ans et plus";
+        }
+
+        if ($min < 12) {
+            return "0 - 11 mois";
+        }
+
+        if ($min < 24) {
+            return "1 - 2 ans";
+        }
+
+        if ($min < 72) {
+            return "2 - 6 ans";
+        }
+
+        if ($min < 144) {
+            return "6 - 12 ans";
+        }
+
+        if ($min < 216) {
+            return "12 - 18 ans";
+        }
+
+        return "Adulte (18 ans et plus)";
+    }
+
+
+    /**
+     * GET /api/health-profiles/reminders-category/{user_id}?category=all|children|adults|animals
+     * Retourne tous les rappels (profile_vaccinations à venir) pour tous les profils
+     * d'un utilisateur, filtrés par catégorie, avec statut Urgent/Proche/Futur.
+     */
+    public function remindersByCategory(Request $request, string $userId): JsonResponse
+    {
+        // Seuil enfant/adulte en mois — à ajuster si besoin
+        $childAdultThresholdMonths = 216; // 18 ans
+
+        $category = $request->query('category', 'all'); // all | children | adults | animals
+
+        $profilesQuery = HealthProfile::query()->where('user_id', $userId);
+
+        if ($category === 'animals') {
+            $profilesQuery->where('profile_type', 'animal');
+        } elseif ($category === 'children') {
+            $profilesQuery->where('profile_type', 'human')
+                ->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(MONTH, birth_date, NOW()) < ?', [$childAdultThresholdMonths]);
+        } elseif ($category === 'adults') {
+            $profilesQuery->where('profile_type', 'human')
+                ->where(function ($q) use ($childAdultThresholdMonths) {
+                    $q->whereNull('birth_date')
+                        ->orWhereRaw('TIMESTAMPDIFF(MONTH, birth_date, NOW()) >= ?', [$childAdultThresholdMonths]);
+                });
+        }
+        // 'all' → aucun filtre supplémentaire
+
+        $profileIds = $profilesQuery->pluck('id_profile');
+
+        if ($profileIds->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'counts' => ['urgent' => 0, 'proche' => 0, 'futur' => 0],
+                'next_dose' => null,
+                'data' => [],
+            ], 200);
+        }
+
+        $today = now()->startOfDay();
+
+        $vaccinations = ProfileVaccination::query()
+            ->whereIn('profile_id', $profileIds)
+            ->whereNotNull('next_reminder_date')
+            ->whereDate('next_reminder_date', '>=', $today)
+            ->with(['vaccine', 'profile'])
+            ->orderBy('next_reminder_date', 'asc')
+            ->get();
+
+        $reminders = $vaccinations->map(function ($v) use ($today) {
+            $reminderDate = \Carbon\Carbon::parse($v->next_reminder_date)->startOfDay();
+            $daysLeft = $today->diffInDays($reminderDate, false);
+
+            if ($daysLeft <= 5) {
+                $urgency = 'urgent';
+            } elseif ($daysLeft <= 30) {
+                $urgency = 'proche';
+            } else {
+                $urgency = 'futur';
+            }
+
+            return [
+                'id_vaccination' => $v->id_vaccination,
+                'vaccine_name' => $v->vaccine->name ?? $v->vaccine_name_free,
+                'profile' => [
+                    'id_profile' => $v->profile->id_profile,
+                    'name' => $v->profile->name,
+                    'profile_type' => $v->profile->profile_type,
+                    'relation' => $v->profile->relation,
+                    'animal_type' => $v->profile->animal_type,
+                ],
+                'next_reminder_date' => $v->next_reminder_date,
+                'next_reminder_date_label' => $reminderDate->translatedFormat('l d F Y'),
+                'days_left' => $daysLeft,
+                'urgency' => $urgency,
+                'center_name' => $v->center_name,
+                'center_type' => $v->center_type,
+            ];
+        });
+
+        $counts = [
+            'urgent' => $reminders->where('urgency', 'urgent')->count(),
+            'proche' => $reminders->where('urgency', 'proche')->count(),
+            'futur' => $reminders->where('urgency', 'futur')->count(),
+        ];
+
+        $nextDose = $reminders->first(); // déjà trié par date croissante
+
+        return response()->json([
+            'success' => true,
+            'category' => $category,
+            'counts' => $counts,
+            'next_dose' => $nextDose,
+            'data' => $reminders->values(),
+        ], 200);
+    }
+
+    /**
+     * POST /api/health-profiles/reminders/store
+     * Enregistre un rappel de vaccination dans profile_vaccinations
+     */
+    public function storeReminder(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'profile_id'          => 'required|exists:health_profiles,id_profile',
+            'next_reminder_date'  => 'required|date|after:today',
+
+            // Vaccin catalogue OU vaccin libre (au moins l'un des deux)
+            'vaccine_id'          => 'nullable|exists:vaccines,id_vaccine',
+            'vaccine_name_free'   => 'nullable|string|max:150',
+
+            // Infos optionnelles
+            'vaccination_date'    => 'nullable|date|before_or_equal:today',
+            'center_type'         => 'nullable|in:public,private',
+            'center_name'         => 'nullable|string|max:200',
+            'notes'               => 'nullable|string',
         ]);
+
+        // Au moins vaccine_id ou vaccine_name_free doit être fourni
+        if (empty($validated['vaccine_id']) && empty($validated['vaccine_name_free'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Veuillez fournir un vaccin du catalogue (vaccine_id) ou un nom libre (vaccine_name_free).',
+            ], 422);
+        }
+
+        // Vérifier que le profil appartient bien à l'utilisateur connecté
+        $profile = HealthProfile::find($validated['profile_id']);
+        if ((string) $profile->user_id !== (string) $request->id_user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce profil ne vous appartient pas.',
+            ], 403);
+        }
+
+        // Vérifier qu'un rappel n'existe pas déjà pour ce vaccin + profil
+        $alreadyExists = ProfileVaccination::query()
+            ->where('profile_id', $validated['profile_id'])
+            ->where(function ($q) use ($validated) {
+                if (!empty($validated['vaccine_id'])) {
+                    $q->where('vaccine_id', $validated['vaccine_id']);
+                } else {
+                    $q->where('vaccine_name_free', $validated['vaccine_name_free']);
+                }
+            })
+            ->whereNotNull('next_reminder_date')
+            ->exists();
+
+        if ($alreadyExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Un rappel existe déjà pour ce vaccin sur ce profil.',
+            ], 409);
+        }
+
+        $vaccination = ProfileVaccination::create([
+            'profile_id'         => $validated['profile_id'],
+            'vaccine_id'         => $validated['vaccine_id'] ?? null,
+            'vaccine_name_free'  => $validated['vaccine_name_free'] ?? null,
+            'vaccination_date'   => $validated['vaccination_date'] ?? now()->toDateString(),
+            'next_reminder_date' => $validated['next_reminder_date'],
+            'center_type'        => $validated['center_type'] ?? 'public',
+            'center_name'        => $validated['center_name'] ?? null,
+            'notes'              => $validated['notes'] ?? null,
+        ]);
+
+        // Charger le vaccin associé pour la réponse
+        $vaccination->load('vaccine');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Rappel enregistré avec succès.',
+            'data' => [
+                'id_vaccination'     => $vaccination->id_vaccination,
+                'profile_id'         => $vaccination->profile_id,
+                'vaccine_id'         => $vaccination->vaccine_id,
+                'vaccine_name'       => $vaccination->vaccine->name ?? $vaccination->vaccine_name_free,
+                'vaccination_date'   => $vaccination->vaccination_date,
+                'next_reminder_date' => $vaccination->next_reminder_date,
+                'center_type'        => $vaccination->center_type,
+                'center_name'        => $vaccination->center_name,
+                'notes'              => $vaccination->notes,
+            ],
+        ], 201);
     }
 }

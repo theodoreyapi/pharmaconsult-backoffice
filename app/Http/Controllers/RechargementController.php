@@ -22,7 +22,9 @@ class RechargementController extends Controller
         }
 
         $query = Rechargements::query()
-            ->where('status', 'pending');
+            ->join('users_pharma', 'rechargements.username', '=', 'users_pharma.username')
+            ->select('rechargements.*', 'users_pharma.first_name', 'users_pharma.last_name')
+            ->where('rechargements.status', 'pending');
 
         // Recherche username ou transaction
         if ($request->filled('search')) {
@@ -31,8 +33,8 @@ class RechargementController extends Controller
 
             $query->where(function ($q) use ($search) {
 
-                $q->where('username', 'like', "%{$search}%")
-                    ->orWhere('transaction_id', 'like', "%{$search}%");
+                $q->where('rechargements.username', 'like', "%{$search}%")
+                    ->orWhere('rechargements.transaction_id', 'like', "%{$search}%");
             });
         }
 
@@ -40,7 +42,7 @@ class RechargementController extends Controller
         if ($request->filled('payment_method')) {
 
             $query->where(
-                'payment_method',
+                'rechargements.payment_method',
                 $request->payment_method
             );
         }
@@ -49,7 +51,7 @@ class RechargementController extends Controller
         if ($request->filled('min')) {
 
             $query->where(
-                'montant',
+                'rechargements.montant',
                 '>=',
                 $request->min
             );
@@ -59,7 +61,7 @@ class RechargementController extends Controller
         if ($request->filled('max')) {
 
             $query->where(
-                'montant',
+                'rechargements.montant',
                 '<=',
                 $request->max
             );

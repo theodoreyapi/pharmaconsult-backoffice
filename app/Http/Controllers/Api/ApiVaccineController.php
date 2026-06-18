@@ -8,6 +8,7 @@ use App\Models\Vaccine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ApiVaccineController extends Controller
@@ -36,8 +37,6 @@ class ApiVaccineController extends Controller
                 'vaccines.short_name',
                 'vaccines.description',
                 'vaccines.public_price',
-                'vaccines.private_price_min',
-                'vaccines.private_price_max',
                 'vaccines.currency',
                 'vaccines.important_info',
 
@@ -68,8 +67,17 @@ class ApiVaccineController extends Controller
             ->orderBy('vaccines.name', 'ASC')
             ->get();
 
+        // Charger les équivalents pour tous les vaccins concernés (une seule requête)
+        $vaccineIds = $vaccines->pluck('id_vaccine')->unique();
+
+        $equivalents = DB::table('vaccine_equivalents')
+            ->whereIn('vaccine_id', $vaccineIds)
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('vaccine_id');
+
         // Grouper les catégories par vaccin
-        $groupedVaccines = $vaccines->groupBy('id_vaccine')->map(function ($items) {
+        $groupedVaccines = $vaccines->groupBy('id_vaccine')->map(function ($items) use ($equivalents) {
 
             $first = $items->first();
 
@@ -80,8 +88,6 @@ class ApiVaccineController extends Controller
                 'short_name' => $first->short_name,
                 'description' => $first->description,
                 'public_price' => $first->public_price,
-                'private_price_min' => $first->private_price_min,
-                'private_price_max' => $first->private_price_max,
                 'currency' => $first->currency,
                 'important_info' => $first->important_info,
 
@@ -92,6 +98,15 @@ class ApiVaccineController extends Controller
                         'slug' => $item->category_slug,
                     ];
                 })->unique('id_categorie')->values(),
+
+                'equivalents' => $equivalents->get($first->id_vaccine, collect())->map(function ($eq) {
+                    return [
+                        'id_equivalent' => $eq->id_equivalent,
+                        'name' => $eq->name,
+                        'description' => $eq->description,
+                        'price' => $eq->price,
+                    ];
+                })->values(),
             ];
         })->values();
 

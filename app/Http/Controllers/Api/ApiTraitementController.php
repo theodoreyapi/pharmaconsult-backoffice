@@ -76,7 +76,7 @@ class ApiTraitementController extends Controller
                     return [
                         'id' => $t->id_traitement,
                         'name' => $t->medication_name,
-                        'dosage' => $t->dosage,
+                        'dosage' => $t->dose_per_take,
                         'frequency_per_day' => $t->frequency_per_day,
                         'quantity_delivered' => $t->quantity_delivered,
 

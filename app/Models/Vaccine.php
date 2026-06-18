@@ -29,4 +29,33 @@ class Vaccine extends Model
     ];
 
     protected $primaryKey = 'id_vaccine';
+
+    // app/Models/Vaccine.php
+
+    public function categories()
+    {
+        return $this->belongsToMany(
+            Categorie::class,
+            'vaccine_category',  // table pivot
+            'vaccine_id',        // FK vers vaccines
+            'category_id',       // FK vers categories
+            'id_vaccine',        // PK locale
+            'id_categorie'       // PK distante
+        );
+    }
+
+    public function restrictions()
+    {
+        return $this->hasMany(VaccineRestriction::class, 'vaccine_id', 'id_vaccine');
+    }
+
+    public function equivalents()
+    {
+        return $this->hasMany(VaccineEquivalent::class, 'vaccine_id', 'id_vaccine');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(VaccineSchedule::class, 'vaccine_id', 'id_vaccine');
+    }
 }

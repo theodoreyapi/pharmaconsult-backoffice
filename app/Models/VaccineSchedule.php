@@ -31,4 +31,9 @@ class VaccineSchedule extends Model
     ];
 
     protected $table = 'vaccine_schedules';
+
+    public function vaccine()
+    {
+        return $this->belongsTo(Vaccine::class, 'vaccine_id', 'id_vaccine');
+    }
 }

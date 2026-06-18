@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApiAppointmentController extends Controller
 {
@@ -36,13 +37,12 @@ class ApiAppointmentController extends Controller
                 'appointments.created_at',
                 'appointments.confirmed_at',
                 'appointments.cancelled_at',
+                'appointments.vaccine_id',
 
                 'vaccines.id_vaccine',
                 'vaccines.name as vaccine_name',
                 'vaccines.short_name',
                 'vaccines.public_price',
-                'vaccines.private_price_min',
-                'vaccines.private_price_max',
                 'vaccines.description',
                 'vaccines.important_info',
                 'vaccines.currency',
@@ -56,15 +56,25 @@ class ApiAppointmentController extends Controller
                 'pharmacy.closing_hours'
             )
 
-            // Réservations de l'utilisateur connecté
             ->where('appointments.user_id', $id)
-
             ->orderBy('appointments.created_at', 'DESC')
             ->get();
 
-        return response()->json(
-            $appointments
-        );
+        // Charger les équivalents pour chaque vaccin concerné
+        $vaccineIds = $appointments->pluck('vaccine_id')->filter()->unique();
+
+        $equivalents = DB::table('vaccine_equivalents')
+            ->whereIn('vaccine_id', $vaccineIds)
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('vaccine_id');
+
+        $appointments->transform(function ($appointment) use ($equivalents) {
+            $appointment->equivalents = $equivalents->get($appointment->vaccine_id, collect())->values();
+            return $appointment;
+        });
+
+        return response()->json($appointments);
     }
 
     /**

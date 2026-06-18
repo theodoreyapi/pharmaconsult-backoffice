@@ -183,19 +183,20 @@ Route::prefix('internal/v1')->group(function () {
     // ── Profils santé ─────────────────────────────────────────────────────
     Route::prefix('health-profiles')->group(function () {
 
-        // GET    /api/health-profiles              → liste des profils
-        // POST   /api/health-profiles              → créer un profil + abonnement pending
-        // GET    /api/health-profiles/{id}         → détail d'un profil
-        // PUT    /api/health-profiles/{id}         → modifier un profil
-        // DELETE /api/health-profiles/{id}         → désactiver un profil
-        Route::get('/{id}', [ApiHealthProfileController::class, 'index']);
+        // GET    /api/health-profiles/{id}         → liste des profils de l'utilisateur OK
+        // POST   /api/health-profiles              → créer un profil + abonnement pending OK
+        // GET    /api/health-profiles/show/{id}         → détail d'un profil OK
+        // PUT    /api/health-profiles/{id}         → modifier un profil NOK
+        // DELETE /api/health-profiles/{id}         → supprimer un profil NOK
         Route::post('/', [ApiHealthProfileController::class, 'store']);
-        Route::get('show/{id}', [ApiHealthProfileController::class, 'show']);
+        Route::get('/show/{id}', [ApiHealthProfileController::class, 'show']);
+        Route::get('/reminders/{id}', [ApiHealthProfileController::class, 'reminders']);
         Route::put('/{id}', [ApiHealthProfileController::class, 'update']);
         Route::delete('/{id}', [ApiHealthProfileController::class, 'destroy']);
-
-        // GET /api/health-profiles/reminders       → rappels dans les 30 jours
-        Route::get('/reminders', [ApiHealthProfileController::class, 'reminders']);
+        Route::get('/{id}', [ApiHealthProfileController::class, 'index']);
+        Route::get('/calendar/{id}', [ApiHealthProfileController::class, 'calendar']);
+        Route::get('/reminders-category/{user_id}', [ApiHealthProfileController::class, 'remindersByCategory']);
+        Route::post('/reminders/store', [ApiHealthProfileController::class, 'storeReminder']);
     });
     // ── Vaccinations (imbriquées dans un profil) ──────────────────────────
 

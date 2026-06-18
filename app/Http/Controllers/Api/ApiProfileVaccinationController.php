@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\HealthProfile;
 use App\Models\ProfileVaccination;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -211,19 +212,21 @@ class ApiProfileVaccinationController extends Controller
          */
         $imagePath = null;
 
+        $timestamp = Carbon::now()->format('Ymd_His');
+
         if ($request->hasFile('certificate_image')) {
 
-            $imagePath = $request->file('certificate_image')
-                ->store(
-                    'certificates/' . date('Y'),
-                    'public'
-                );
+            $file = $request->file('certificate_image');
+            $name = 'vaccins_' . $timestamp . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('certificates'), $name);
+
+            $imagePath = url('admin/public/certificates/' . $name);
         }
 
         /**
          * Création vaccination
          */
-        $vaccination = ProfileVaccination::create([
+        ProfileVaccination::create([
             'profile_id' => $profileId,
             'vaccine_id' => $validated['vaccine_id'] ?? null,
             'vaccine_name_free' => $validated['vaccine_name_free'] ?? null,

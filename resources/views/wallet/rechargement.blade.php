@@ -113,6 +113,8 @@
                                     </td>
 
                                     <td>
+                                        <strong>{{ $item->first_name }} {{ $item->last_name }}</strong>
+                                        <br>
                                         {{ $item->username }}
                                     </td>
 
