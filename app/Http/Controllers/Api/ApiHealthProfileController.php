@@ -212,6 +212,64 @@ class ApiHealthProfileController extends Controller
     }
 
     /**
+     * POST /api/health-profiles/abonnement
+     * profil santé + abonnement pending.
+     */
+    public function abonnement($idProfile, $idUser): JsonResponse
+    {
+        /**
+         * Profils suivants payants
+         */
+        $subscription = ProfileSubscription::create([
+            'profile_id' => $idProfile,
+            'user_id' => $idUser,
+            'amount' => 1000,
+            'payment_method' => 'wave',
+            'currency' => 'FCFA',
+            'status' => 'pending',
+            'start_date' => now(),
+            'end_date' => now()->addYear(),
+        ]);
+
+        $payload = [
+            'amount' => (string) 1000,
+            'currency' => 'XOF',
+            'success_url' => 'https://admin.pharma-consults.com/payment/wave/success/profile' . $subscription->id_subscription,
+            'error_url'   => 'https://admin.pharma-consults.com/payment/wave/error/profile' . $subscription->id_subscription,
+            'client_reference' => (string) $idUser,
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer wave_ci_prod_tIc5B0OlAxjucp29W83a2YLvua7Z7FOTmAFYtQlONucpqcNHU0TklALECuBP-nf5HL8HkGgopw0UzPFz2aXld43qhMcAwXINng',
+            'Content-Type'  => 'application/json',
+        ])->post('https://api.wave.com/v1/checkout/sessions', $payload);
+
+        if (!$response->successful()) {
+            Log::error('Wave error', $response->json());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur Wave',
+                'details' => $response->json(),
+            ], 500);
+        }
+
+        $data = $response->json();
+
+        $subscription->update([
+            'checkout_session_id' => $data['id'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'rechargement_url' => $data['wave_launch_url'],
+            'rechargement_id' => $subscription->id_subscription,
+            'message' => 'Profil créé. Paiement requis pour activation.',
+        ]);
+    }
+
+
+    /**
      * POST /api/health-profiles
      * Créer un nouveau profil santé + abonnement pending.
      */

@@ -189,6 +189,7 @@ Route::prefix('internal/v1')->group(function () {
         // PUT    /api/health-profiles/{id}         → modifier un profil NOK
         // DELETE /api/health-profiles/{id}         → supprimer un profil NOK
         Route::post('/', [ApiHealthProfileController::class, 'store']);
+        Route::get('/abonnement/{idProfile}/{idUser}', [ApiHealthProfileController::class, 'abonnement']);
         Route::get('/show/{id}', [ApiHealthProfileController::class, 'show']);
         Route::get('/reminders/{id}', [ApiHealthProfileController::class, 'reminders']);
         Route::put('/{id}', [ApiHealthProfileController::class, 'update']);
@@ -240,4 +241,5 @@ Route::prefix('internal/v1')->group(function () {
     Route::get('patients/cmu/{qrCode}', [ApiTraitementController::class, 'verify']);
     Route::get('conseils', [ApiConseilsController::class, 'conseils']);
     Route::get('campagnes/{pharmacie}', [ApiConseilsController::class, 'campagnes']);
+    Route::delete('notifications/{id}', [ApiNotificationController::class, 'deleteNotification']);
 });

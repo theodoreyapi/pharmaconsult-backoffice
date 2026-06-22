@@ -302,7 +302,7 @@
                                 Notice
                                 <span class="text-danger-600"></span>
                                 <br>
-                                <input name="notice" type='file' accept=".png, .jpg, .jpeg">
+                                <input name="notice" type='file' accept=".pdf" >
                             </label>
                             <br>
                             {{-- ── Substituts ──────────────────────────────────────────────── --}}

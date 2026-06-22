@@ -244,7 +244,7 @@
                                                     class="form-label fw-semibold text-primary-light text-sm mb-8">
                                                     Notice
                                                     <span class="text-danger-600"></span></label>
-                                                <input name="notice" type="file" class="form-control radius-8"
+                                                <input name="notice" type="file" class="form-control radius-8" accept=".pdf"
                                                     id="name" placeholder="">
                                             </div>
                                         </div>

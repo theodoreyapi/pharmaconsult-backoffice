@@ -255,289 +255,283 @@
             margin-bottom: 1px;
         }
 
-        /* ─── RIGHT PANEL ────────────────────────────────── */
-        .auth-right {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 24px;
-            background: var(--off-white);
-            position: relative;
-        }
+       /* ─── RIGHT PANEL — REDESIGN ─────────────────────── */
+    .auth-right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 24px;
+        background:
+            radial-gradient(circle at 85% 15%, rgba(65, 186, 62, 0.06), transparent 45%),
+            var(--off-white);
+        position: relative;
+    }
 
-        /* subtle grid bg */
-        .auth-right::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(65, 186, 62, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(65, 186, 62, 0.04) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-        }
+    .auth-right::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(65, 186, 62, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(65, 186, 62, 0.035) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 75%);
+        pointer-events: none;
+    }
 
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--white);
+        border-radius: 28px;
+        padding: 48px 44px;
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.6) inset,
+            0 24px 70px rgba(13, 27, 14, 0.10),
+            0 2px 6px rgba(13, 27, 14, 0.05);
+        border: 1px solid rgba(65, 186, 62, 0.12);
+        position: relative;
+        animation: cardIn .6s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(18px) scale(.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Logo ──────────────────────────────────────── */
+    .logo-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 36px;
+    }
+
+    .logo-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #f3faf2, #e6f5e4);
+        border: 1px solid rgba(65, 186, 62, 0.18);
+        flex-shrink: 0;
+    }
+
+    .logo-icon img {
+        width: 26px;
+        height: auto;
+    }
+
+    .logo-name {
+        font-family: 'Sora', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-dark);
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    .logo-tag {
+        font-size: 11px;
+        color: var(--text-light);
+        letter-spacing: 0.04em;
+    }
+
+    /* ── Heading ───────────────────────────────────── */
+    .card-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--green-dark);
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .card-title {
+        font-family: 'Sora', sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+        letter-spacing: -0.035em;
+        line-height: 1.15;
+        margin-bottom: 8px;
+    }
+
+    .card-sub {
+        font-size: 14px;
+        color: var(--text-mid);
+        margin-bottom: 34px;
+        line-height: 1.5;
+    }
+
+    /* ── Fields — underline style, more refined ───── */
+    .field {
+        position: relative;
+        margin-bottom: 22px;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-mid);
+        margin-bottom: 8px;
+        letter-spacing: 0.01em;
+    }
+
+    .field-input-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1.5px solid #e2eae4;
+        padding-bottom: 11px;
+        transition: border-color .25s ease;
+    }
+
+    .field-input-row:focus-within {
+        border-color: var(--green);
+    }
+
+    .field-icon {
+        font-size: 17px;
+        color: var(--text-light);
+        flex-shrink: 0;
+        transition: color .25s ease;
+    }
+
+    .field-input-row:focus-within .field-icon {
+        color: var(--green);
+    }
+
+    .field input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 15px;
+        font-family: 'Inter', sans-serif;
+        color: var(--text-dark);
+        outline: none;
+        padding: 2px 0;
+    }
+
+    .field input::placeholder {
+        color: #c2ccc4;
+    }
+
+    .field-input-row.is-invalid {
+        border-color: #e24b4a;
+    }
+
+    .eye-toggle {
+        cursor: pointer;
+        font-size: 17px;
+        color: var(--text-light);
+        transition: color .2s;
+        flex-shrink: 0;
+    }
+
+    .eye-toggle:hover {
+        color: var(--green);
+    }
+
+    /* ── Submit ────────────────────────────────────── */
+    .btn-submit {
+        width: 100%;
+        height: 52px;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(135deg, var(--green), var(--green-dark));
+        color: white;
+        font-family: 'Sora', sans-serif;
+        font-size: 14.5px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 8px;
+        box-shadow: 0 10px 28px rgba(65, 186, 62, 0.30);
+        transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 34px rgba(65, 186, 62, 0.38);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(65, 186, 62, 0.22);
+    }
+
+    .btn-submit i {
+        font-size: 17px;
+    }
+
+    /* ── Trust row ─────────────────────────────────── */
+    .trust-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 28px;
+    }
+
+    .trust-badge {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-light);
+        background: var(--off-white);
+        border: 1px solid #e6ede8;
+        border-radius: 20px;
+        padding: 6px 13px;
+    }
+
+    .trust-badge i {
+        font-size: 13px;
+        color: var(--green);
+    }
+
+    .card-footer-text {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 11.5px;
+        color: #c4ccc6;
+        letter-spacing: 0.01em;
+    }
+
+    /* ── Focus visibility (accessibility) ─────────── */
+    .btn-submit:focus-visible,
+    .field input:focus-visible {
+        outline: 2px solid var(--green-dark);
+        outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .login-card { animation: none; }
+        .btn-submit:hover { transform: none; }
+    }
+
+    @media (max-width: 768px) {
         .login-card {
-            width: 100%;
-            max-width: 440px;
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 44px 40px;
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--border);
-            position: relative;
-            animation: cardIn .5s ease both;
+            padding: 38px 30px;
+            border-radius: 22px;
         }
+    }
 
-        @keyframes cardIn {
-            from {
-                opacity: 0;
-                transform: translateY(14px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* logo */
-        .logo-wrap {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        .logo-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
-            /* background: linear-gradient(135deg, white, grey); */
-            font-size: 28px;
-            color: white;
-            box-shadow: 0 8px 24px rgba(65, 186, 62, 0.30);
-        }
-
-        .card-title {
-            font-family: 'Sora', sans-serif;
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--text-dark);
-            text-align: center;
-            letter-spacing: -0.03em;
-            margin-bottom: 6px;
-        }
-
-        .card-sub {
-            font-size: 14px;
-            color: var(--text-light);
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        /* fields */
-        .field {
-            position: relative;
-            margin-bottom: 16px;
-        }
-
-        .field-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 19px;
-            color: var(--text-light);
-            pointer-events: none;
-            transition: color .2s;
-        }
-
-        .field:focus-within .field-icon {
-            color: var(--green);
-        }
-
-        .field input {
-            width: 100%;
-            height: 54px;
-            border-radius: var(--radius-sm);
-            border: 1.5px solid #e2eae4;
-            background: var(--off-white);
-            padding: 0 48px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-dark);
-            transition: border-color .2s, background .2s, box-shadow .2s;
-            outline: none;
-        }
-
-        .field input::placeholder {
-            color: #b0bdb4;
-        }
-
-        .field input:focus {
-            border-color: var(--green);
-            background: var(--white);
-            box-shadow: 0 0 0 4px rgba(65, 186, 62, 0.10);
-        }
-
-        .field input.is-invalid {
-            border-color: #e24b4a;
-        }
-
-        .eye-toggle {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 19px;
-            color: var(--text-light);
-            transition: color .2s;
-        }
-
-        .eye-toggle:hover {
-            color: var(--green);
-        }
-
-        /* options row */
-        .opts {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-
-        .check-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-mid);
-            cursor: pointer;
-        }
-
-        .check-label input[type=checkbox] {
-            accent-color: var(--green);
-            width: 15px;
-            height: 15px;
-            cursor: pointer;
-        }
-
-        .forgot-link {
-            font-size: 13px;
-            color: var(--green);
-            text-decoration: none;
-            font-weight: 500;
-            transition: opacity .2s;
-        }
-
-        .forgot-link:hover {
-            opacity: .7;
-        }
-
-        /* submit */
-        .btn-submit {
-            width: 100%;
-            height: 54px;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: linear-gradient(135deg, var(--green), var(--green-dark));
-            color: white;
-            font-family: 'Sora', sans-serif;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-            box-shadow: 0 8px 24px rgba(65, 186, 62, 0.28);
-            transition: transform .2s, box-shadow .2s, opacity .2s;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(65, 186, 62, 0.35);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 12px rgba(65, 186, 62, 0.20);
-        }
-
-        /* trust badges */
-        .trust-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 22px;
-        }
-
-        .trust-badge {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11.5px;
-            color: var(--text-light);
-            background: var(--off-white);
-            border: 1px solid #e2eae4;
-            border-radius: 20px;
-            padding: 5px 12px;
-        }
-
-        .trust-badge i {
-            font-size: 13px;
-            color: var(--green);
-        }
-
-        .card-footer-text {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            color: #c4ccc6;
-        }
-
-        /* ─── RESPONSIVE ─────────────────────────────────── */
-        @media (max-width: 1024px) {
-            .auth-left {
-                width: 42%;
-                padding: 40px 36px;
-            }
-
-            .left-hero h1 {
-                font-size: 30px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .auth-left {
-                display: none;
-            }
-
-            .auth-right {
-                padding: 24px 16px;
-            }
-
-            .login-card {
-                padding: 36px 28px;
-                border-radius: var(--radius-md);
-            }
-        }
-
-        @media (max-width: 400px) {
-            .login-card {
-                padding: 28px 20px;
-            }
-
-            .card-title {
-                font-size: 22px;
-            }
-        }
+    @media (max-width: 400px) {
+        .login-card { padding: 30px 22px; }
+        .card-title { font-size: 24px; }
+    }
     </style>
 </head>
 
@@ -600,63 +594,66 @@
 
         {{-- ─── RIGHT ─────────────────────────────────────────── --}}
         <div class="auth-right">
-            <div class="login-card">
+    <div class="login-card">
 
-                <div class="logo-wrap">
-                    <div class="logo-icon">
-                        <img src="{{ URL::asset('assets/images/couleur.png') }}" style="width: 60px; height: 70px;" alt="">
-                    </div>
-                </div>
-
-                <h3 class="card-title">Bon retour 👋</h3>
-                <p class="card-sub">Connectez-vous à votre espace administration</p>
-
-                @include('layouts.statuts')
-
-                <form action="{{ url('custom-login') }}" method="POST" autocomplete="on">
-                    @csrf
-
-                    {{-- EMAIL --}}
-                    <div class="field">
-                        <span class="field-icon ri-mail-line"></span>
-                        <input type="email" name="email" required placeholder="Adresse e-mail" autocomplete="email"
-                            value="{{ old('email') }}" class="{{ $errors->has('email') ? 'is-invalid' : '' }}">
-                    </div>
-
-                    {{-- PASSWORD --}}
-                    <div class="field">
-                        <span class="field-icon ri-lock-password-line"></span>
-                        <input type="password" name="password" id="pw-field" required placeholder="Mot de passe"
-                            autocomplete="current-password" class="{{ $errors->has('password') ? 'is-invalid' : '' }}">
-                        <span class="eye-toggle ri-eye-line" id="eye-btn" data-toggle="#pw-field"></span>
-                    </div>
-
-                    {{-- OPTIONS --}}
-                    <div class="opts">
-                        {{-- <label class="check-label">
-                            <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                            Se souvenir de moi
-                        </label> --}}
-                        {{-- <a href="{{ url('forgot') }}" class="forgot-link">Mot de passe oublié ?</a> --}}
-                    </div>
-
-                    {{-- SUBMIT --}}
-                    <button type="submit" class="btn-submit">
-                        <i class="ri-login-circle-line"></i>
-                        Se connecter
-                    </button>
-
-                    {{-- TRUST --}}
-                    <div class="trust-row">
-                        <div class="trust-badge"><i class="ri-shield-keyhole-line"></i> SSL chiffré</div>
-                        <div class="trust-badge"><i class="ri-lock-2-line"></i> Données protégées</div>
-                    </div>
-
-                    <p class="card-footer-text">© {{ date('Y') }} Pharmaconsults</p>
-                </form>
-
+        <div class="logo-wrap">
+            <div class="logo-icon">
+                <img src="{{ URL::asset('assets/images/couleur.png') }}" alt="PharmaConsults">
+            </div>
+            <div>
+                <div class="logo-name">PharmaConsults</div>
+                <div class="logo-tag">Espace administration</div>
             </div>
         </div>
+
+        <span class="card-eyebrow">Accès sécurisé</span>
+        <h3 class="card-title">Bon retour</h3>
+        <p class="card-sub">Connectez-vous pour piloter vos officines</p>
+
+        @include('layouts.statuts')
+
+        <form action="{{ url('custom-login') }}" method="POST" autocomplete="on">
+            @csrf
+
+            {{-- EMAIL --}}
+            <div class="field">
+                <label class="field-label" for="email-field">Adresse e-mail</label>
+                <div class="field-input-row {{ $errors->has('email') ? 'is-invalid' : '' }}">
+                    <span class="field-icon ri-mail-line"></span>
+                    <input type="email" name="email" id="email-field" required
+                        placeholder="vous@pharmacie.com" autocomplete="email"
+                        value="{{ old('email') }}">
+                </div>
+            </div>
+
+            {{-- PASSWORD --}}
+            <div class="field">
+                <label class="field-label" for="pw-field">Mot de passe</label>
+                <div class="field-input-row {{ $errors->has('password') ? 'is-invalid' : '' }}">
+                    <span class="field-icon ri-lock-password-line"></span>
+                    <input type="password" name="password" id="pw-field" required
+                        placeholder="••••••••" autocomplete="current-password">
+                    <span class="eye-toggle ri-eye-line" id="eye-btn" data-toggle="#pw-field"></span>
+                </div>
+            </div>
+
+            {{-- SUBMIT --}}
+            <button type="submit" class="btn-submit">
+                <i class="ri-login-circle-line"></i>
+                Se connecter
+            </button>
+
+            {{-- TRUST --}}
+            <div class="trust-row">
+                <div class="trust-badge"><i class="ri-shield-keyhole-line"></i> SSL chiffré</div>
+                <div class="trust-badge"><i class="ri-lock-2-line"></i> Données protégées</div>
+            </div>
+
+            <p class="card-footer-text">© {{ date('Y') }} Pharmaconsults</p>
+        </form>
+
+    </div>
+</div>
 
     </div>
 
