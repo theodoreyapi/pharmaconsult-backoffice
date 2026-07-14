@@ -73,4 +73,15 @@ class Patient extends Model
     {
         return $this->hasMany(Rappels::class, 'patient_id', 'id_patient');
     }
+
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'patient_id', 'id_patient');
+    }
+
+    public function plannings()
+    {
+        return $this->hasMany(Planning::class, 'patient_id', 'id_patient');
+    }
 }

@@ -230,7 +230,7 @@ class ApiTransfertController extends Controller
      */
     private function sendNewAccountWhatsApp(string $phoneNumber, int $tempPassword, float $amount, string $senderName): void
     {
-        $baseUrl    = "https://graph.facebook.com/v22.0/";
+        $baseUrl    = "https://graph.facebook.com/v25.0/";
         $token      = env('WHATSAPP_TOKEN');
         $expediteur = env('WHATSAPP_EXPEDITEUR');
 

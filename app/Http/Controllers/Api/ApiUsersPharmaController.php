@@ -227,7 +227,7 @@ class ApiUsersPharmaController extends Controller
     private function sendWhatsApp(string $phoneNumber, int $otpCode, string $firstName): void
     {
         $baseUrl    = "https://graph.facebook.com/v25.0/";
-        $token      = "EAAUTxrzGDCYBRRLeZB61ZBanwJOu8bEHXQXQhSR8V1h9vFsU7ZBonIxPnAl4hEOS9tSFVVtpe78v3LJhEBuoWEzNDBw80AyZBLet4o0VL22QobhAa1MGdMs0TEjNXIaYrxtexGvAyxHCdJkWQLknh0JVxlTGLuoKQyMnmr7j9v2gAmoZAZBax0ptRzVENgkdp4aAZDZD";
+        $token      = "EAAUTxrzGDCYBR9xfkYkPPqBZBHZAVpqpcZANZBCRTiYtusjbBug0qd5CTWZCgry9mVTajn5PwYGo4ZCZA7oHCgBZCX7Ph09jYJepGpS6xJmp14uZAuqXjS5a83XE6TZC2XBNLJPhsAb8BBibKVWpDR7MlmVtkQzANRG5rD8WvzLoynwzHz5dwWCgr57s7GgXBf9IkvlwZDZD";
         $expediteur = "666101623244809";
 
         // ==========================================

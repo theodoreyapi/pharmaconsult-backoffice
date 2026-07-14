@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ApiMedicamentController;
 use App\Http\Controllers\Api\ApiMesureController;
 use App\Http\Controllers\Api\ApiNotificationController;
 use App\Http\Controllers\Api\ApiParametreGenerauxController;
+use App\Http\Controllers\Api\ApiPatientRendezVousController;
 use App\Http\Controllers\Api\ApiPharmacyController;
 use App\Http\Controllers\Api\ApiPharmacyRequestController;
 use App\Http\Controllers\Api\ApiProfileSubscriptionController;
@@ -232,6 +233,8 @@ Route::prefix('internal/v1')->group(function () {
     Route::prefix('patients/{patient}')->group(function () {
         Route::get('/dashboard-mesures',    [ApiMesureController::class, 'dashboardMesures']);
         Route::get('/bilan',    [ApiMesureController::class, 'generate']);
+        Route::get('/rendez-vous', [ApiPatientRendezVousController::class, 'index']);
+        Route::get('/plannings', [ApiPatientRendezVousController::class, 'plannings']);
         Route::get('/rappel',    [ApiMesureController::class, 'latest']);
         Route::get('/traitements', [ApiTraitementController::class, 'index']);
         Route::get('/pharmacy', [ApiTraitementController::class, 'show']);
