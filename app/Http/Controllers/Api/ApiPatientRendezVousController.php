@@ -62,12 +62,12 @@ class ApiPatientRendezVousController extends Controller
 
     private function formatRdv(RendezVous $rdv): array
     {
-        $date = Carbon::parse($rdv->date);
+        $date = Carbon::parse($rdv->date)->locale('fr');
 
         return [
             'id'            => $rdv->id_rendez_vous,
             'date'          => $date->format('Y-m-d'),
-            'date_label'    => $date->translatedFormat('l j F Y'),
+            'date_label'    => ucfirst($date->translatedFormat('l j F Y')),
             'heure'         => Carbon::parse($rdv->heure)->format('H:i'),
             'status'        => $rdv->status,
             'status_label'  => $this->statusLabels[$rdv->status] ?? $rdv->status,
