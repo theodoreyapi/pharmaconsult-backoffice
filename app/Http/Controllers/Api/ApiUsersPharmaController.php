@@ -12,6 +12,7 @@ use App\Models\Review;
 use App\Models\Subscriptions;
 use App\Models\Transfert;
 use App\Models\UsersPharma;
+use App\Services\ReminderDispatchService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class ApiUsersPharmaController extends Controller
      * Body JSON : { "username", "email", "phoneNumber", "firstName", "lastName", "typeUser", "password" }
      * Crée le compte avec active = INACTIVE, envoie un OTP par WhatsApp
      */
-    public function store(Request $request)
+    public function store(Request $request, ReminderDispatchService $dispatcher)
     {
         $request->validate([
             'username'    => 'required|string',
@@ -77,8 +78,25 @@ class ApiUsersPharmaController extends Controller
             'updated_at'    => now(),
         ]);
 
-        // Envoyer OTP par WhatsApp
-        $this->sendWhatsApp($phoneNumber, $otpCode, $request->input('firstName'));
+        // Envoyer OTP par SMS ou Email selon le choix de l'utilisateur
+        // $this->sendWhatsApp($phoneNumber, $otpCode, $request->input('firstName'));
+        $email = $request->input('email');
+
+        if (!empty($email)) {
+            // Envoi par email
+            $this->sendEmail(
+                $email,
+                $otpCode,
+                $request->input('firstName')
+            );
+        } else {
+            // Envoi par SMS
+            $dispatcher->send(
+                $phoneNumber,
+                (string) $otpCode,
+                $request->input('firstName')
+            );
+        }
 
         return response()->json([
             'message'  => 'Compte créé avec succès. Veuillez valider votre numéro via le code OTP envoyé.',
@@ -134,7 +152,7 @@ class ApiUsersPharmaController extends Controller
      * Body JSON : { "username": "002250585831647", "channel": "whatsapp" | "email" }
      * Génère un OTP à 4 chiffres valable 2 minutes
      */
-    public function generateOtp(Request $request)
+    public function generateOtp(Request $request, ReminderDispatchService $dispatcher)
     {
         $request->validate([
             'username' => 'required|string',
@@ -164,7 +182,8 @@ class ApiUsersPharmaController extends Controller
             ]);
 
         if ($channel === 'whatsapp') {
-            $this->sendWhatsApp($user->phone_number, $otpCode, $user->first_name);
+            $dispatcher->send($user->phone_number, $otpCode, $user->first_name);
+            // $this->sendWhatsApp($user->phone_number, $otpCode, $user->first_name);
         } else {
             $this->sendEmail($user->email, $otpCode, $user->first_name);
         }

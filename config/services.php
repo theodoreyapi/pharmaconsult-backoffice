@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'orange_sms' => [
+        'client_id'       => env('ORANGE_SMS_CLIENT_ID'),
+        'client_secret'   => env('ORANGE_SMS_CLIENT_SECRET'),
+        'country_sender'  => env('ORANGE_SMS_COUNTRY_SENDER', 'tel:+2250000'),
+        'sender_name'     => env('ORANGE_SMS_SENDER_NAME'),
+        'token_url'       => 'https://api.orange.com/oauth/v3/token',
+        'base_url'        => 'https://api.orange.com/smsmessaging/v1',
+    ],
+
+    'whatsapp' => [
+        'token'           => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'api_version'     => env('WHATSAPP_API_VERSION', 'v25.0'),
+    ],
+
 ];
