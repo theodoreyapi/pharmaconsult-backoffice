@@ -199,6 +199,12 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (!Auth::check()) {
+            return redirect()->intended('logout');
+        }
+
+        UsersPharma::findOrFail($id)->delete();
+
+        return back()->with('succes',  'Utilisateur supprimé avec succès.');
     }
 }

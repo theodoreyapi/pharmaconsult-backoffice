@@ -19,6 +19,8 @@
             </ul>
         </div>
 
+        @include('layouts.statuts')
+
         {{-- CARD --}}
         <div class="card h-100 radius-12">
 
@@ -90,6 +92,7 @@
                                 <th>Solde</th>
                                 <th>Ancien solde</th>
                                 <th>Statut</th>
+                                <th>Création</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -144,6 +147,11 @@
                                         @else
                                             <span class="badge bg-warning text-dark">Inactive</span>
                                         @endif
+                                    </td>
+
+                                    {{-- DATE DE CRÉATION --}}
+                                    <td>
+                                        {{ $item->created_at->translatedFormat('d F Y') }}
                                     </td>
 
                                     {{-- ACTIONS --}}
