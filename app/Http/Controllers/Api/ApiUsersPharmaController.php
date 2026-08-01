@@ -79,7 +79,7 @@ class ApiUsersPharmaController extends Controller
         ]);
 
         // Envoyer OTP par SMS ou Email selon le choix de l'utilisateur
-        // $this->sendWhatsApp($phoneNumber, $otpCode, $request->input('firstName'));
+        $this->sendWhatsApp($phoneNumber, $otpCode, $request->input('firstName'));
         $email = $request->input('email');
 
         if (!empty($email)) {
@@ -182,8 +182,8 @@ class ApiUsersPharmaController extends Controller
             ]);
 
         if ($channel === 'whatsapp') {
-            $dispatcher->send($user->phone_number, $otpCode, $user->first_name);
-            // $this->sendWhatsApp($user->phone_number, $otpCode, $user->first_name);
+            // $dispatcher->send($user->phone_number, $otpCode, $user->first_name);
+            $this->sendWhatsApp($user->phone_number, $otpCode, $user->first_name);
         } else {
             $this->sendEmail($user->email, $otpCode, $user->first_name);
         }
@@ -246,7 +246,7 @@ class ApiUsersPharmaController extends Controller
     private function sendWhatsApp(string $phoneNumber, int $otpCode, string $firstName): void
     {
         $baseUrl    = "https://graph.facebook.com/v25.0/";
-        $token      = "EAAUTxrzGDCYBR9xfkYkPPqBZBHZAVpqpcZANZBCRTiYtusjbBug0qd5CTWZCgry9mVTajn5PwYGo4ZCZA7oHCgBZCX7Ph09jYJepGpS6xJmp14uZAuqXjS5a83XE6TZC2XBNLJPhsAb8BBibKVWpDR7MlmVtkQzANRG5rD8WvzLoynwzHz5dwWCgr57s7GgXBf9IkvlwZDZD";
+        $token      = "EAAWIok1GHZAsBSD2gC8k1qz1rJuJe3KVausIU6UGIzekmMl2ksVirnUHAKFi6cZA1sjZAXXD73Q8smJe9MDBPz52W7ku1xioc5rBuan2QJYZCTDPOhm9XMcmfHDKwDZCZCBaz81sGQxZCc39eXYdKZAyTt2hqnam2zKCNakvjV8yqRRhZAIN8kaqcOkxJdxT9ZAIdZCWwZDZD";
         $expediteur = "666101623244809";
 
         // ==========================================
@@ -264,11 +264,11 @@ class ApiUsersPharmaController extends Controller
             $localPart = substr($phone, 3);
             // Si après 225 il y a un '0', on le retire (ex: 22505... -> 2255...)
             if (str_starts_with($localPart, '0')) {
-                $phone = '225' . substr($localPart, 1);
+                $phone = '225' . $localPart;
             }
         } elseif (str_starts_with($phone, '0')) {
             // Si c'est un numéro local (ex: 05...), on ajoute 225 et on retire le 0
-            $phone = '225' . substr($phone, 1);
+            $phone = '225' . $phone;
         }
 
         // ==========================================
@@ -276,24 +276,37 @@ class ApiUsersPharmaController extends Controller
         // ==========================================
         $payload = [
             "messaging_product" => "whatsapp",
+            "recipient_type" => "individual",
             "to" => $phone,
             "type" => "template",
+
             "template" => [
-                "name" => "message_validation_otp",
-                "language" => ["code" => "fr"],
+                "name" => "pharmaconsults_otp",
+
+                "language" => [
+                    "code" => "fr_CI"
+                ],
+
                 "components" => [
                     [
                         "type" => "body",
                         "parameters" => [
-                            ["type" => "text", "text" => (string)$otpCode]
+                            [
+                                "type" => "text",
+                                "text" => (string) $otpCode
+                            ]
                         ]
                     ],
+
                     [
                         "type" => "button",
                         "sub_type" => "url",
-                        "index" => 0,
+                        "index" => "0",
                         "parameters" => [
-                            ["type" => "text", "text" => (string)$otpCode]
+                            [
+                                "type" => "text",
+                                "text" => (string) $otpCode
+                            ]
                         ]
                     ]
                 ]
@@ -315,7 +328,7 @@ class ApiUsersPharmaController extends Controller
             ]);
 
             // En développement, on affiche l'erreur
-            dd($response->json());
+            // dd($response->json());
         }
 
         Log::info('WhatsApp success', [
@@ -323,10 +336,10 @@ class ApiUsersPharmaController extends Controller
             'response' => $response->json()
         ]);
 
-        dd('WhatsApp success', [
-            'target' => $phone,
-            'response' => $response->json()
-        ]);
+        // dd('WhatsApp success', [
+        //     'target' => $phone,
+        //     'response' => $response->json()
+        // ]);
     }
 
     /**
