@@ -79,7 +79,7 @@ class ApiUsersPharmaController extends Controller
         ]);
 
         // Envoyer OTP par SMS ou Email selon le choix de l'utilisateur
-        $this->sendWhatsApp($phoneNumber, $otpCode, $request->input('firstName'));
+       // $this->sendWhatsApp($phoneNumber, $otpCode, $request->input('firstName'));
         $email = $request->input('email');
 
         if (!empty($email)) {
@@ -663,7 +663,7 @@ class ApiUsersPharmaController extends Controller
             'user' => [
                 'id'          => $user->id_user,
                 'username'    => $user->username,
-                'email'       => $user->email,
+                'email'       => $user->email ?? '',
                 'firstName'   => $user->first_name,
                 'lastName'    => $user->last_name,
                 'phoneNumber' => $user->phone_number,
